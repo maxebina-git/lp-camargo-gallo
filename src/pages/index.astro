@@ -13,6 +13,7 @@ import {
   Grid,
   Header,
   Footer,
+  Reveal,
 } from 'ds-grupo-rkb'
 
 const nav = [
@@ -40,18 +41,20 @@ const servicos = [
   <Section tone="surface">
     <div class="hero">
       <Container size="md">
-        <span class="eyebrow"><Tag>Camargo Gallo Engenharia</Tag></span>
-        <Heading as="1" size="display" class="hero-title">
-          Do projeto à execução, com engenharia de verdade
-        </Heading>
-        <Text size="lg" tone="secondary" class="hero-sub">
-          Projetamos e executamos com precisão. Solicite uma proposta sem compromisso e
-          receba o contato de um especialista.
-        </Text>
-        <div class="cta-row">
-          <Button as="a" href="#contato" size="lg">Solicitar proposta</Button>
-          <Button variant="secondary">Falar no WhatsApp</Button>
-        </div>
+        <Reveal direction="up" client:load>
+          <span class="eyebrow"><Tag>Camargo Gallo Engenharia</Tag></span>
+          <Heading as="1" size="display" class="hero-title">
+            Do projeto à execução, com engenharia de verdade
+          </Heading>
+          <Text size="lg" tone="secondary" class="hero-sub">
+            Projetamos e executamos com precisão. Solicite uma proposta sem compromisso e
+            receba o contato de um especialista.
+          </Text>
+          <div class="cta-row">
+            <Button as="a" href="#contato" size="lg">Solicitar proposta</Button>
+            <Button variant="secondary">Falar no WhatsApp</Button>
+          </div>
+        </Reveal>
       </Container>
     </div>
   </Section>
@@ -61,10 +64,12 @@ const servicos = [
       <Heading as="2" size="3xl" class="section-title">Nossos serviços</Heading>
       <Grid cols={3} gap="lg" class="mt-8">
         {servicos.map((s) => (
-          <div class="card">
-            <h3 class="text-xl font-semibold text-ink">{s.titulo}</h3>
-            <Text tone="secondary">{s.texto}</Text>
-          </div>
+          <Reveal direction="up" client:visible>
+            <div class="card">
+              <h3 class="text-xl font-semibold text-ink">{s.titulo}</h3>
+              <Text tone="secondary">{s.texto}</Text>
+            </div>
+          </Reveal>
         ))}
       </Grid>
     </Container>
@@ -74,19 +79,29 @@ const servicos = [
     <Container size="md">
       <Heading as="2" size="3xl" class="section-title">Peça seu orçamento</Heading>
       <form class="form" method="post" action="#contato">
-        <FormField label="Nome">
-          <Input name="nome" type="text" required />
-        </FormField>
-        <FormField label="E-mail">
-          <Input name="email" type="email" required />
-        </FormField>
-        <FormField label="Telefone">
-          <Input name="fone" type="tel" />
-        </FormField>
-        <FormField label="Como podemos ajudar?">
-          <Textarea name="mensagem" rows="4" />
-        </FormField>
-        <Button type="submit" size="lg" fullWidth>Enviar solicitação</Button>
+        <Reveal direction="up" client:visible>
+          <FormField label="Nome">
+            <Input name="nome" type="text" required />
+          </FormField>
+        </Reveal>
+        <Reveal direction="up" client:visible delay={80}>
+          <FormField label="E-mail">
+            <Input name="email" type="email" required />
+          </FormField>
+        </Reveal>
+        <Reveal direction="up" client:visible delay={160}>
+          <FormField label="Telefone">
+            <Input name="fone" type="tel" />
+          </FormField>
+        </Reveal>
+        <Reveal direction="up" client:visible delay={240}>
+          <FormField label="Como podemos ajudar?">
+            <Textarea name="mensagem" rows="4" />
+          </FormField>
+        </Reveal>
+        <Reveal direction="up" client:visible delay={320}>
+          <Button type="submit" size="lg" fullWidth>Enviar solicitação</Button>
+        </Reveal>
       </form>
     </Container>
   </Section>
