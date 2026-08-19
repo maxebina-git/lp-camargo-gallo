@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {
+  Button,
+  Tag,
+  Container,
+  FormField,
+  Input,
+  Textarea,
+  Heading,
+  Text,
+  Section,
+  Grid,
+  Header,
+  Footer,
+} from 'ds-grupo-rkb'
+
+const nav = [
+  { label: 'Início', href: '#', active: true },
+  { label: 'Serviços', href: '#servicos' },
+  { label: 'Contato', href: '#contato' },
+]
+
+const servicos = [
+  { titulo: 'Projetos', texto: 'Estudo e detalhamento técnico completo de engenharia.' },
+  { titulo: 'Execução', texto: 'Obra executada com controle de qualidade e segurança.' },
+  { titulo: 'Gestão', texto: 'Acompanhamento de escopo, custo e prazo em todo o ciclo.' },
+]
+---
+
+<BaseLayout
+  title="Camargo Gallo Engenharia | Projetos e Execução"
+  description="Líder em projetos e execução de engenharia. Solicite uma proposta sem compromisso."
+>
+  <Header nav={nav}>
+    <span slot="logo" class="text-lg font-bold text-ink">Camargo Gallo</span>
+    <Button slot="cta" as="a" href="#contato" size="sm">Solicitar proposta</Button>
+  </Header>
+
+  <Section tone="surface">
+    <div class="hero">
+      <Container size="md">
+        <span class="eyebrow"><Tag>Camargo Gallo Engenharia</Tag></span>
+        <Heading as="1" size="display" class="hero-title">
+          Do projeto à execução, com engenharia de verdade
+        </Heading>
+        <Text size="lg" tone="secondary" class="hero-sub">
+          Projetamos e executamos com precisão. Solicite uma proposta sem compromisso e
+          receba o contato de um especialista.
+        </Text>
+        <div class="cta-row">
+          <Button as="a" href="#contato" size="lg">Solicitar proposta</Button>
+          <Button variant="secondary">Falar no WhatsApp</Button>
+        </div>
+      </Container>
+    </div>
+  </Section>
+
+  <Section tone="surface-alt" size="lg" class="services" id="servicos">
+    <Container size="md">
+      <Heading as="2" size="3xl" class="section-title">Nossos serviços</Heading>
+      <Grid cols={3} gap="lg" class="mt-8">
+        {servicos.map((s) => (
+          <div class="card">
+            <h3 class="text-xl font-semibold text-ink">{s.titulo}</h3>
+            <Text tone="secondary">{s.texto}</Text>
+          </div>
+        ))}
+      </Grid>
+    </Container>
+  </Section>
+
+  <Section tone="surface" size="lg" id="contato">
+    <Container size="md">
+      <Heading as="2" size="3xl" class="section-title">Peça seu orçamento</Heading>
+      <form class="form" method="post" action="#contato">
+        <FormField label="Nome">
+          <Input name="nome" type="text" required />
+        </FormField>
+        <FormField label="E-mail">
+          <Input name="email" type="email" required />
+        </FormField>
+        <FormField label="Telefone">
+          <Input name="fone" type="tel" />
+        </FormField>
+        <FormField label="Como podemos ajudar?">
+          <Textarea name="mensagem" rows="4" />
+        </FormField>
+        <Button type="submit" size="lg" fullWidth>Enviar solicitação</Button>
+      </form>
+    </Container>
+  </Section>
+
+  <Footer
+    columns={[
+      {
+        title: 'Serviços',
+        links: [
+          { label: 'Projetos', href: '#servicos' },
+          { label: 'Execução', href: '#servicos' },
+          { label: 'Gestão', href: '#servicos' },
+        ],
+      },
+      {
+        title: 'Contato',
+        links: [{ label: 'Solicitar orçamento', href: '#contato' }],
+      },
+    ]}
+    copyright="© Camargo Gallo Engenharia"
+  />
+</BaseLayout>
