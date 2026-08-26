@@ -139,11 +139,11 @@ const servicos = [
     const queueStagger = 0.08;
     const freezePoint = (totalCards - queueStart) * queueStagger;
     const phases = [
-      { from: { x: 90, y: 85 }, to: { x: 10, y: 85 } },
-      { from: { x: 10, y: 85 }, to: { x: 10, y: 10 } },
-      { from: { x: 10, y: 10 }, to: { x: 90, y: 10 } },
-      { from: { x: 90, y: 10 }, to: { x: 90, y: 85 } },
-      { from: { x: 90, y: 85 }, to: { x: 90, y: 110 } },
+      { from: { x: 20, y: 20 }, to: { x: 20, y: 20 } },
+      { from: { x: 20, y: 20 }, to: { x: 50, y: 20 } },
+      { from: { x: 50, y: 20 }, to: { x: 80, y: 50 } },
+      { from: { x: 80, y: 50 }, to: { x: 50, y: 80 } },
+      { from: { x: 50, y: 80 }, to: { x: 20, y: 50 } },
     ];
     const totalPhases = phases.length;
     function interpolatePath(p) {
