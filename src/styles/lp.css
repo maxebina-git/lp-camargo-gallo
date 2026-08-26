@@ -54,7 +54,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 16px;
+  gap: 16px !important;
   box-shadow: 0 4px 16px color-mix(in srgb, var(--color-ink) 10%, transparent);
 }
 
@@ -82,6 +82,11 @@ body {
   color: var(--color-text-secondary);
   white-space: normal;
   overflow-wrap: break-word;
+}
+
+.orbit-card div[role="separator"] {
+  margin-top: 16px !important;
+  margin-bottom: 16px !important;
 }
 
 #fixed-cta {
