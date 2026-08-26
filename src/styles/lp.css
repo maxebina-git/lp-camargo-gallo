@@ -49,8 +49,8 @@ body {
   border-radius: var(--radius-lg);
   padding: calc(var(--spacing) * 8);
   pointer-events: auto;
-  width: calc(var(--spacing) * 75);
-  min-height: calc(var(--spacing) * 30);
+  width: calc(var(--spacing) * 90);
+  min-height: calc(var(--spacing) * 44);
   height: auto;
   display: flex;
   flex-direction: column;
@@ -61,8 +61,8 @@ body {
 
 @media (max-width: 640px) {
   .orbit-card {
-    width: calc(var(--spacing) * 60);
-    min-height: calc(var(--spacing) * 26);
+    width: calc(var(--spacing) * 72);
+    min-height: calc(var(--spacing) * 40);
   }
 }
 
@@ -70,7 +70,7 @@ body {
   margin: 0;
   font-family: var(--font-display);
   font-weight: var(--weight-bold);
-  font-size: var(--text-base);
+  font-size: var(--text-3xl);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   color: var(--color-ink);
