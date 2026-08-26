@@ -38,19 +38,19 @@ body {
   height: 100%;
   z-index: 10;
   pointer-events: none;
-  padding: 48px;
+  padding: 48px 48px 48px 48px;
 }
 
 .orbit-card {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 48px;
+  left: 48px;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 48px 48px 32px 48px !important;
   pointer-events: auto;
-  width: 320px;
+  width: 300px;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -61,7 +61,7 @@ body {
 
 @media (max-width: 640px) {
   .orbit-card {
-    width: 256px;
+    width: 240px;
     height: auto;
   }
 }
