@@ -47,7 +47,7 @@ body {
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 48px 48px 32px 48px;
   pointer-events: auto;
   width: 360px;
   height: auto;
