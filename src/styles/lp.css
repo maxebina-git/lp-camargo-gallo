@@ -90,6 +90,12 @@ body {
   margin-bottom: 16px !important;
 }
 
+@media (min-width: 768px) {
+  #servicos {
+    display: none !important;
+  }
+}
+
 #fixed-cta {
   position: fixed;
   bottom: 24px;
