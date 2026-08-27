@@ -96,6 +96,20 @@ body {
   }
 }
 
+.orbit-white-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  z-index: 5;
+  pointer-events: none;
+}
+
 #fixed-cta {
   position: fixed;
   bottom: 24px;
