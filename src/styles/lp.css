@@ -110,6 +110,12 @@ body {
   pointer-events: none;
 }
 
+@media (max-width: 767px) {
+  #orbit-container {
+    display: none !important;
+  }
+}
+
 #fixed-cta {
   position: fixed;
   bottom: 24px;
