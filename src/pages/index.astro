@@ -79,7 +79,7 @@ const servicos = [
   <Section tone="surface" size="lg" id="servicos">
     <Container>
       <Reveal client:visible>
-        <div class="mb-8 flex flex-col gap-3">
+        <div class="flex flex-col items-center text-center mb-6">
           <Tag>14 etapas</Tag>
           <Heading as="2" size="2xl">Serviços completos de ponta a ponta</Heading>
           <Text tone="secondary">Do diagnóstico à pintura premium — 14 etapas com acompanhamento online e conformidade NR-35.</Text>
@@ -87,8 +87,8 @@ const servicos = [
       </Reveal>
       <div class="trust-card-container flex flex-col items-center gap-6">
         {servicos.map((s) => (
-          <Reveal client:visible>
-            <Card class="trust-card" tone="surface">
+          <Reveal client:visible class="w-full">
+            <Card class="trust-card w-full" tone="surface">
               <div class="trust-card-inner text-center">
                 <h2 class="orbit-card-title">{s.titulo}</h2>
                 <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
