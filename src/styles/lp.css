@@ -150,4 +150,4 @@ body {
 #trust-cards-desktop .trust-card-container { flex-wrap: nowrap; overflow: hidden; }
 #trust-cards-desktop [role=separator] { margin-left: auto; margin-right: auto; }
 #trust-cards-desktop .trust-icon { color: var(--color-primary, #d97706) !important; display: flex; justify-content: center; }
-#trust-cards-desktop .trust-card-container { border: 3px solid red !important; background: rgba(255,0,0,0.05) !important; }
+#trust-wrapper { border: 3px solid red !important; background: rgba(255,0,0,0.05) !important; }
