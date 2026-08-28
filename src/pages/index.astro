@@ -155,15 +155,14 @@ const servicos = [
     var container = section.querySelector('.trust-card-container');
     var cards = section.querySelectorAll('.trust-card');
     var initialRots = [15, 5, -5, -15];
-    var startVal = Math.round(window.innerHeight / 2 - section.offsetHeight / 2);
-    window.gsap.to(container, {
-        x: '-20vw',
-        ease: 'none',
-      scrollTrigger: { trigger: section, start: 'top ' + startVal + 'px', end: 'bottom top', scrub: 1 }
-    });
+    window.gsap.fromTo(container,
+      { x: '20vw' },
+      { x: '-20vw', ease: 'none',
+        scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1 } }
+    );
     window.ScrollTrigger.create({
       trigger: section,
-      start: 'top ' + startVal + 'px',
+      start: 'top bottom',
       end: 'bottom top',
       scrub: 1,
       onUpdate: function(self) {
