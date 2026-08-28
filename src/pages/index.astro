@@ -10,10 +10,8 @@ import {
   Heading,
   Text,
   Section,
-  Grid,
   Reveal,
   Card,
-  FeatureCard,
   IconSet,
   BackToTop,
 } from 'ds-grupo-rkb'
@@ -83,20 +81,23 @@ const servicos = [
       <Reveal client:visible>
         <div class="mb-8 flex flex-col gap-3">
           <Tag>14 etapas</Tag>
-          <Heading as="2" size="3xl">Serviços completos de ponta a ponta</Heading>
-          <Text tone="secondary">Mesmo conteúdo da animação, agora em grade acessível com componentes DS (Card + Grid + tokens semânticos).</Text>
+          <Heading as="2" size="2xl">Serviços completos de ponta a ponta</Heading>
+          <Text tone="secondary">Do diagnóstico à pintura premium — 14 etapas com acompanhamento online e conformidade NR-35.</Text>
         </div>
       </Reveal>
-      <Grid cols={3} gap="md">
+      <div class="trust-card-container flex flex-col items-center gap-6">
         {servicos.map((s) => (
           <Reveal client:visible>
-            <FeatureCard divider="3/4" tone="surface-alt">
-              <Heading as="2" size="3xl" slot="title">{s.titulo}</Heading>
-              <Text size="sm" tone="secondary" slot="description">{s.texto}</Text>
-            </FeatureCard>
+            <Card class="trust-card" tone="surface">
+              <div class="trust-card-inner text-center">
+                <h2 class="orbit-card-title">{s.titulo}</h2>
+                <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
+                <div class="orbit-card-desc">{s.texto}</div>
+              </div>
+            </Card>
           </Reveal>
         ))}
-      </Grid>
+      </div>
     </Container>
   </Section>
   </div>
