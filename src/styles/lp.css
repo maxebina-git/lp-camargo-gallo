@@ -154,4 +154,4 @@ body {
 
 #trust-wrapper .trust-bar-left, #trust-wrapper .trust-bar-right { position: absolute !important; top: 0 !important; width: 100px !important; height: 100% !important; border-left: 3px solid blue !important; border-right: 3px solid blue !important; pointer-events: none !important; }
 #trust-wrapper .trust-bar-left { left: 0 !important; border-right: none !important; z-index: 50 !important; background: var(--color-surface) !important; }
-#trust-wrapper .trust-bar-right { right: 0 !important; border-left: none !important; z-index: 50 !important; background: var(--color-surface) !important; }
+#trust-wrapper .trust-bar-right { right: 0 !important; border-left: none !important; z-index: 50 !important; background: linear-gradient(to left, var(--color-surface) 0%, rgba(255,255,255,0.3) 100%) !important; }
