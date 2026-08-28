@@ -150,4 +150,8 @@ body {
 #trust-cards-desktop .trust-card-container { flex-wrap: nowrap; overflow: hidden; border: 3px solid lime !important; background: rgba(0,255,0,0.05) !important; padding: 3rem !important; }
 #trust-cards-desktop [role=separator] { margin-left: auto; margin-right: auto; }
 #trust-cards-desktop .trust-icon { color: var(--color-primary, #d97706) !important; display: flex; justify-content: center; }
-#trust-wrapper { border: 3px solid red !important; background: rgba(255,0,0,0.05) !important; padding: 3rem !important; }
+#trust-wrapper { position: relative !important; border: 3px solid red !important; background: rgba(255,0,0,0.05) !important; padding: 3rem !important; }
+
+#trust-wrapper .trust-bar-left, #trust-wrapper .trust-bar-right { position: absolute !important; top: 0 !important; width: 100px !important; height: 100% !important; border-left: 3px solid blue !important; border-right: 3px solid blue !important; pointer-events: none !important; }
+#trust-wrapper .trust-bar-left { left: 0 !important; border-right: none !important; }
+#trust-wrapper .trust-bar-right { right: 0 !important; border-left: none !important; }
