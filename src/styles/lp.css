@@ -146,7 +146,7 @@ body {
 
 
 #trust-cards-desktop .orbit-card.trust-card { position: relative !important; }
-#trust-cards-desktop .trust-card { flex: 1 1 220px; max-width: 240px; }
+#trust-cards-desktop .trust-card { flex: 1 1 280px; max-width: 280px; }
 #trust-cards-desktop .trust-card-container { flex-wrap: nowrap; overflow: hidden; background: rgba(0,255,0,0.05) !important; padding: 3rem !important; }
 #trust-cards-desktop [role=separator] { margin-left: auto; margin-right: auto; }
 #trust-cards-desktop .trust-icon { color: var(--color-primary, #d97706) !important; display: flex; justify-content: center; }
