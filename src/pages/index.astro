@@ -101,7 +101,7 @@ const servicos = [
   </Section>
   </div>
 
-  <Section id="trust-cards-desktop" size="lg">
+  <Section id="trust-cards-desktop" size="lg" class="hidden md:block">
     <Container id="trust-wrapper" size="lg">
       <div class="trust-bar-left"></div>
       <div class="trust-bar-right"></div>
@@ -112,7 +112,7 @@ const servicos = [
       <div class="trust-card-container flex justify-center gap-6">
         <Card class="trust-card" tone="surface">
           <div class="trust-card-inner text-center">
-            <div class="trust-icon text-primary"><Shield size="40" /></div>
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><Shield size="40" /></div>
             <h2 class="orbit-card-title">Seguro de R$ 10 Milhões</h2>
             <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
             <div class="orbit-card-desc">Responsabilidade Civil para total proteção da obra.</div>
@@ -120,7 +120,7 @@ const servicos = [
         </Card>
         <Card class="trust-card" tone="surface">
           <div class="trust-card-inner text-center">
-            <div class="trust-icon text-primary"><HardHat size="40" /></div>
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><HardHat size="40" /></div>
             <h2 class="orbit-card-title">+200 Colaboradores</h2>
             <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
             <div class="orbit-card-desc">Equipe técnica com 10 engenheiros especialistas.</div>
@@ -128,7 +128,7 @@ const servicos = [
         </Card>
         <Card class="trust-card" tone="surface">
           <div class="trust-card-inner text-center">
-            <div class="trust-icon text-primary"><ScanLine size="40" /></div>
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><ScanLine size="40" /></div>
             <h2 class="orbit-card-title">Drones e Termografia</h2>
             <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
             <div class="orbit-card-desc">Inspeção avançada para identificar anomalias.</div>
@@ -136,7 +136,7 @@ const servicos = [
         </Card>
         <Card class="trust-card" tone="surface">
           <div class="trust-card-inner text-center">
-            <div class="trust-icon text-primary"><Smartphone size="40" /></div>
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><Smartphone size="40" /></div>
             <h2 class="orbit-card-title">Gestão em Tempo Real</h2>
             <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
             <div class="orbit-card-desc">Plataforma com reconhecimento facial e RDOs.</div>
@@ -181,6 +181,49 @@ const servicos = [
     });
   });
   </script>
+
+  <Section id="trust-cards-static" size="lg" class="md:hidden">
+    <Container id="trust-wrapper-static" size="lg">
+      <div class="flex flex-col items-center text-center mb-6">
+        <Heading as="h2" size="2xl">Engenharia. Estrutura. Tecnologia.</Heading>
+        <Text tone="secondary">Gatilhos de autoridade que respaldam cada obra.</Text>
+      </div>
+      <div class="trust-card-container flex flex-col items-center gap-6">
+        <Card class="trust-card" tone="surface">
+          <div class="trust-card-inner text-center">
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><Shield size="40" /></div>
+            <h2 class="orbit-card-title">Seguro de R$ 10 Milhões</h2>
+            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
+            <div class="orbit-card-desc">Responsabilidade Civil para total proteção da obra.</div>
+          </div>
+        </Card>
+        <Card class="trust-card" tone="surface">
+          <div class="trust-card-inner text-center">
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><HardHat size="40" /></div>
+            <h2 class="orbit-card-title">+200 Colaboradores</h2>
+            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
+            <div class="orbit-card-desc">Equipe técnica com 10 engenheiros especialistas.</div>
+          </div>
+        </Card>
+        <Card class="trust-card" tone="surface">
+          <div class="trust-card-inner text-center">
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><ScanLine size="40" /></div>
+            <h2 class="orbit-card-title">Drones e Termografia</h2>
+            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
+            <div class="orbit-card-desc">Inspeção avançada para identificar anomalias.</div>
+          </div>
+        </Card>
+        <Card class="trust-card" tone="surface">
+          <div class="trust-card-inner text-center">
+            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><Smartphone size="40" /></div>
+            <h2 class="orbit-card-title">Gestão em Tempo Real</h2>
+            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4"></div>
+            <div class="orbit-card-desc">Plataforma com reconhecimento facial e RDOs.</div>
+          </div>
+        </Card>
+      </div>
+    </Container>
+  </Section>
 
   <Section tone="surface-alt" size="lg" id="contato">
     <Container>
