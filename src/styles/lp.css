@@ -74,6 +74,7 @@ body {
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   color: var(--color-ink);
+  text-align: center;
 }
 
 .orbit-card-desc {
@@ -83,6 +84,7 @@ body {
   color: var(--color-text-secondary);
   white-space: normal;
   overflow-wrap: break-word;
+  text-align: center;
 }
 
 .orbit-card div[role="separator"] {
