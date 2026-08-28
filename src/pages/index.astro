@@ -14,7 +14,11 @@ import {
   Reveal,
   Card,
   FeatureCard,
+  IconSet,
+  BackToTop,
 } from 'ds-grupo-rkb'
+import lucide from '@lucide/vue'
+const { ArrowRight, LucideMail, ChevronUp } = lucide
 
 const servicos = [
   { titulo: 'Ensaio de Percussão', texto: 'Diagnóstico não destrutivo da aderência de revestimentos.' },
@@ -44,9 +48,9 @@ const servicos = [
           <Tag>Engenharia de Fachadas</Tag>
           <Heading as="1" size="display">Fachadas recuperadas com segurança e garantia</Heading>
           <Text size="lg" tone="secondary">Do ensaio de percussão à pintura super premium — 14 etapas com acompanhamento online e conformidade NR-35.</Text>
-          <div class="flex gap-3 pt-2 justify-center">
-            <Button as="a" href="#contato">Entrar em contato</Button>
-            <Button as="a" href="#contato" variant="secondary">Escrever mensagem</Button>
+          <div class="hero-btns">
+            <Button as="a" href="#contato" class="w-full md:w-1/2 font-body" variant="primary" size="md">Entrar em contato</Button>
+            <Button variant="secondary" onclick="animarScroll()" class="w-full md:w-1/2 font-body" size="md">Escrever mensagem</Button>
           </div>
         </div>
       </Reveal>
@@ -58,10 +62,10 @@ const servicos = [
       <div id="central-stage">
         <img id="sequence-img" src="/assets/frames/002.png" alt="Animação de recuperação de fachada" />
       </div>
-      <div class="orbit-white-box" aria-label="Destaque">
+      <div class="logo-white-box" aria-label="Destaque">
         <img src="/assets/logo-camargo-gallo.png" alt="Camargo Gallo" style="max-width:100%; height:auto; display:block;" />
       </div>
-      <div id="orbit-container" class="md:hidden">
+        <div id="orbit-container" class>
         {servicos.map((s) => (
           <div class="orbit-card">
             <h2 class="orbit-card-title">{s.titulo}</h2>
@@ -99,26 +103,32 @@ const servicos = [
 
   <Section tone="surface-alt" size="lg" id="contato">
     <Container>
-      <Grid cols={2} gap="lg">
-        <div class="flex flex-col gap-4">
-          <Heading as="2" size="2xl">Solicite seu orçamento</Heading>
-          <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
-        </div>
-        <Card>
-          <form class="flex flex-col gap-4" onsubmit="event.preventDefault(); alert('Lead enviado — integrar backend');">
+      <div class="flex flex-col gap-4 items-center text-center mb-12">
+        <Heading as="3" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
+        <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
+      </div>
+      <Card>
+        <form class="flex flex-col gap-4" onsubmit="validarFormulario(event)" novalidate>
             <FormField label="Nome" id="nome">
-              <Input id="nome" placeholder="Seu nome" required />
+              <Input id="nome" placeholder="Seu nome" />
             </FormField>
+            <p id="erro-nome" class="text-error-500 text-sm hidden">Campo obrigatório.</p>
             <FormField label="WhatsApp" id="whatsapp">
-              <Input id="whatsapp" type="tel" placeholder="(11) 99999-9999" required />
+              <Input id="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this)" />
             </FormField>
+            <p id="erro-whatsapp" class="text-error-500 text-sm hidden">Formato inválido. Use DDD + celular (11 dígitos).</p>
+            <FormField label="Email" id="email">
+              <Input id="email" type="text" placeholder="seu@email.com" oninput="formatarEmail(this)" />
+            </FormField>
+            <p id="erro-email" class="text-error-500 text-sm hidden">Email inválido. Apenas letras, números, @ e . no domínio.</p>
             <FormField label="Mensagem" id="mensagem">
               <Textarea id="mensagem" placeholder="Conte sobre sua fachada" rows={4} />
             </FormField>
-            <Button type="submit" fullWidth>Enviar mensagem</Button>
+<p id="erro-mensagem" 
+class="text-error-500 text-sm hidden">Campo obrigatório.</p>
+            <Button type="submit" variant="primary" size="md" class="w-full md:w-1/2 md:ml-auto font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
           </form>
         </Card>
-      </Grid>
     </Container>
   </Section>
 
@@ -224,4 +234,49 @@ const servicos = [
       }
     });
   </script>
+  <script is:inline>
+    function animarScroll() {
+      const el = document.getElementById('titulo-orcamento');
+      if (!el) return;
+      const target = el.getBoundingClientRect().top + window.scrollY - 20;
+      gsap.to({ y: window.scrollY }, {
+        y: target,
+        duration: 4,
+        ease: "power5.out",
+        onUpdate: function () {
+          window.scrollTo(0, this.targets()[0].y);
+        }
+      });
+    }
+    function formatarTelefone(inp) {
+      let v = inp.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length > 7) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d+)/, '($1) $2');
+      inp.value = v;
+    }
+    function formatarEmail(inp) {
+      inp.value = inp.value.replace(/[^a-zA-Z0-9.@]/g, '');
+    }
+    function validarFormulario(e) {
+      e.preventDefault();
+      document.getElementById('erro-nome').classList.add('hidden');
+      document.getElementById('erro-whatsapp').classList.add('hidden');
+      document.getElementById('erro-email').classList.add('hidden');
+      document.getElementById('erro-mensagem').classList.add('hidden');
+      const wh = document.getElementById('whatsapp').value.replace(/\D/g, '');
+      const em = document.getElementById('email').value.trim();
+      let ok = true;
+      if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
+      if (!/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/.test(em)) { document.getElementById('erro-email').classList.remove('hidden'); ok = false; }
+      const nome = document.getElementById('nome').value.trim();
+      if (nome.length === 0) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
+      const msg = document.getElementById('mensagem').value.trim();
+      if (msg.length === 0) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
+      if (ok) alert('Lead enviado — integrar backend');
+    }
+  </script>
+
+  <BackToTop client:load>
+    <IconSet size="24"><ChevronUp /></IconSet>
+  </BackToTop>
 </BaseLayout>

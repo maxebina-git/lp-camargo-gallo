@@ -96,13 +96,11 @@ body {
   }
 }
 
-.orbit-white-box {
+.logo-white-box {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 250px;
-  height: auto;
   background: rgba(255, 255, 255, 0.75);
   border: none;
   border-radius: var(--radius-lg);
@@ -123,3 +121,26 @@ body {
   right: 24px;
   z-index: 9999;
 }
+
+.hero-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+.hero-btns button,
+.hero-btns a {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .hero-btns {
+    flex-direction: row;
+  }
+  .hero-btns button,
+  .hero-btns a {
+    width: 50%;
+  }
+}
+
