@@ -156,8 +156,8 @@ const servicos = [
     var cards = section.querySelectorAll('.trust-card');
     var initialRots = [15, 5, -5, -15];
     window.gsap.to(container, {
-      x: '20vw',
-      ease: 'none',
+        x: '-20vw',
+        ease: 'none',
       scrollTrigger: { trigger: section, start: 'top 80%', end: 'bottom 20%', scrub: 1 }
     });
     window.ScrollTrigger.create({
