@@ -102,7 +102,7 @@ const servicos = [
   </Section>
   </div>
 
-  <Section id="trust-cards-desktop" size="lg" class="hidden md:block">
+  <Section id="trust-cards-desktop" size="none" class="hidden md:block">
     <Container id="trust-wrapper" size="lg">
       <div class="trust-bar-left"></div>
       <div class="trust-bar-right"></div>
@@ -183,6 +183,88 @@ const servicos = [
   });
   </script>
 
+  <script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') return;
+    window.gsap.registerPlugin(window.ScrollTrigger);
+    var antesImg = document.getElementById('img-antes');
+    var depoisImg = document.getElementById('img-depois');
+    var fill = document.getElementById('before-after-fill');
+    var thumb = document.getElementById('before-after-thumb');
+    if (!antesImg || !depoisImg || !fill || !thumb) return;
+    var primary = getComputedStyle(document.body).getPropertyValue('--color-primary-600').trim();
+    var tl = window.gsap.timeline({
+      scrollTrigger: {
+        trigger: '#antes-e-depois',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 1
+      }
+    });
+    tl.to({}, { duration: 0.4 }, 0)
+      .to(antesImg, { opacity: 0, duration: 1.2, ease: 'none' }, 0.4)
+      .to(depoisImg, { opacity: 1, duration: 1.2, ease: 'none' }, 0.4)
+      .to(fill, { width: '100%', duration: 1.2, ease: 'none' }, 0.4)
+      .to(thumb, { backgroundColor: primary, duration: 1.2, ease: 'none' }, 0.4)
+      .to({}, { duration: 0.4 }, 1.6);
+    var track = document.getElementById('before-after-track');
+    var st = tl.scrollTrigger;
+    function thumbXForProgress(p) {
+      var maxX = track.clientWidth - thumb.offsetWidth;
+      if (p <= 0.2) return 0;
+      if (p >= 0.8) return maxX;
+      return (p - 0.2) / 0.6 * maxX;
+    }
+    if (track && st) {
+      var dragging = false;
+      function clampX(x) {
+        return Math.max(0, Math.min(track.clientWidth - thumb.offsetWidth, x));
+      }
+      function xToProgress(x) {
+        var maxX = track.clientWidth - thumb.offsetWidth;
+        if (maxX <= 0) return 0;
+        return Math.max(0, Math.min(1, x / maxX));
+      }
+      function syncThumb() {
+        thumb.style.left = thumbXForProgress(tl.progress()) + 'px';
+      }
+      tl.eventCallback('onUpdate', function() {
+        if (!dragging) syncThumb();
+      });
+      function seekTo(x) {
+        var p = xToProgress(clampX(x));
+        thumb.style.left = clampX(x) + 'px';
+        tl.progress(p, true);
+        window.scrollTo(0, st.start + p * (st.end - st.start));
+      }
+      thumb.addEventListener('pointerdown', function(e) {
+        dragging = true;
+        thumb.setPointerCapture(e.pointerId);
+      });
+      thumb.addEventListener('pointermove', function(e) {
+        if (!dragging) return;
+        var rect = track.getBoundingClientRect();
+        var x = clampX(e.clientX - rect.left - thumb.offsetWidth / 2);
+        thumb.style.left = x + 'px';
+        tl.progress(xToProgress(x), true);
+      });
+      function onDragEnd() {
+        if (!dragging) return;
+        dragging = false;
+        seekTo(parseFloat(thumb.style.left) || 0);
+      }
+      thumb.addEventListener('pointerup', onDragEnd);
+      thumb.addEventListener('pointercancel', onDragEnd);
+      track.addEventListener('click', function(e) {
+        if (dragging || e.target === thumb) return;
+        var rect = track.getBoundingClientRect();
+        seekTo(e.clientX - rect.left - thumb.offsetWidth / 2);
+      });
+    }
+  });
+  </script>
+
   <Section id="trust-cards-static" size="lg" class="md:hidden">
     <Container id="trust-wrapper-static" size="lg">
       <div class="flex flex-col items-center text-center mb-6">
@@ -226,24 +308,35 @@ const servicos = [
     </Container>
   </Section>
 
-  <Section tone="surface" size="none" id="antes-e-depois" class="py-32">
+  <Section tone="surface-alt" size="none" id="antes-e-depois" class="py-16">
     <Container size="lg">
-      <div class="flex flex-col gap-16 md:grid md:grid-cols-5 md:items-center">
-        <div class="flex flex-col gap-4 md:col-span-2">
+      <div class="flex flex-col gap-8 md:gap-16 md:grid md:grid-cols-5 md:items-center">
+        <div class="flex flex-col items-center text-center md:items-start md:text-left gap-4 md:col-span-2">
           <Heading as="2" size="2xl">Resultados que falam por si</Heading>
           <Heading as="3" size="xl">Condomínio Royal Gate, Morumbi</Heading>
           <Text tone="secondary">Recuperação completa de fachada de torre residencial com 25 pavimentos. Intervenção incluiu ensaio de percussão, remoção de revestimentos soltos, tratamento de armaduras, recomposição de concreto e pintura com tinta acrílica Super Premium Sherwin Williams. O resultado: fachada renovada, segura e valorizada.</Text>
         </div>
-        <div class="md:col-span-3">
-          <div class="w-full aspect-[4/3] rounded-lg" style="background-color: red;">
-            <!-- TODO: Inserir animação GSAP de frames aqui -->
+        <div class="md:col-span-3 flex flex-col">
+          <div class="relative w-full aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="/assets/foto-lp-antes.png" id="img-antes" alt="Fachada antes da recuperação" class="absolute inset-0 w-full h-full object-cover opacity-100 will-change-opacity" />
+            <img src="/assets/foto-lp-depois.png" id="img-depois" alt="Fachada depois da recuperação" class="absolute inset-0 w-full h-full object-cover opacity-0 will-change-opacity" />
+          </div>
+          <div class="w-full order-first md:order-last mb-6 md:mb-0 md:mt-6 select-none" id="before-after-bar">
+            <div class="flex justify-between">
+              <span class="text-slate-500 text-sm">Antes</span>
+              <span class="text-slate-500 text-sm">Depois</span>
+            </div>
+            <div class="relative w-full h-1.5 bg-gray-200 rounded-full mt-3" id="before-after-track">
+              <div class="absolute left-0 top-0 h-full w-0 bg-primary-500 rounded-full" id="before-after-fill"></div>
+              <div class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-deep shadow-md cursor-grab active:cursor-grabbing touch-none" id="before-after-thumb"></div>
+            </div>
           </div>
         </div>
       </div>
     </Container>
   </Section>
 
-  <Section tone="surface-alt" size="lg" id="contato">
+  <Section tone="surface" size="none" id="contato" class="py-16">
     <Container>
       <div class="flex flex-col gap-4 items-center text-center mb-12">
         <Heading as="3" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
