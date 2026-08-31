@@ -14,7 +14,9 @@ import {
   Card,
   IconSet,
   BackToTop,
+  Footer,
 } from 'ds-grupo-rkb'
+import LegalDrawer from '../components/legal/LegalDrawer.vue'
 import lucide from '@lucide/vue'
 const { ArrowRight, LucideMail, ChevronUp, Shield, HardHat, ScanLine, Smartphone } = lucide
 
@@ -34,6 +36,16 @@ const servicos = [
   { titulo: 'Tratamento de Muros e Estruturas Metálicas', texto: 'Proteção anticorrosiva em elementos de aço.' },
   { titulo: 'Acompanhamento Online e Segurança NR-35', texto: 'Monitoramento remoto com conformidade trabalhista.' },
 ]
+
+const footerCompany = {
+  companyName: 'CAMARGO GALLO ENGENHARIA LTDA',
+  cnpj: '23.741.090/0001-77',
+  address: 'Rua Maria Jose Rangel, 159 - Vila São Paulo, São Paulo/SP - CEP 04650-180',
+  legalLinks: [
+    { label: 'Política de Privacidade', href: '#privacy' },
+    { label: 'Termos de Uso', href: '#terms' },
+  ],
+}
 
 ---
 
@@ -366,6 +378,30 @@ class="text-error-500 text-sm hidden">Campo obrigatório.</p>
         </Card>
     </Container>
   </Section>
+
+  <Footer
+    client:visible
+    company-info={footerCompany}
+    copyright="© 2026 Camargo Gallo Engenharia. Todos os direitos reservados."
+  />
+
+  <LegalDrawer client:load />
+
+  <script is:inline>
+    document.addEventListener('click', function (event) {
+      var anchor = event.target.closest('a[href="#privacy"], a[href="#terms"]');
+      if (!anchor) return;
+      event.preventDefault();
+      var target = anchor.getAttribute('href');
+      if (target === '#privacy' || target === '#terms') {
+        if (location.hash === target) {
+          history.replaceState(null, '', location.pathname + location.search);
+        } else {
+          location.hash = target;
+        }
+      }
+    });
+  </script>
 
   <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
