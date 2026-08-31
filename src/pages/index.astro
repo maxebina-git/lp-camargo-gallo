@@ -17,6 +17,7 @@ import {
   Footer,
 } from 'ds-grupo-rkb'
 import LegalDrawer from '../components/legal/LegalDrawer.vue'
+import FaqSection from '../components/faq/FaqSection.vue'
 import lucide from '@lucide/vue'
 const { ArrowRight, LucideMail, ChevronUp, Shield, HardHat, ScanLine, Smartphone } = lucide
 
@@ -348,13 +349,16 @@ const footerCompany = {
     </Container>
   </Section>
 
-  <Section tone="surface" size="none" id="contato" class="py-16">
+  <FaqSection client:load />
+
+  <Section tone="surface-alt" size="none" id="contato" class="py-16">
     <Container>
-      <div class="flex flex-col gap-4 items-center text-center mb-12">
-        <Heading as="3" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
-        <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
-      </div>
-      <Card>
+      <div class="max-w-3xl mx-auto">
+        <div class="flex flex-col gap-4 items-center text-center mb-12">
+          <Heading as="3" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
+          <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
+        </div>
+        <Card>
         <form class="flex flex-col gap-4" onsubmit="validarFormulario(event)" novalidate>
             <FormField label="Nome" id="nome">
               <Input id="nome" placeholder="Seu nome" />
@@ -376,6 +380,7 @@ class="text-error-500 text-sm hidden">Campo obrigatório.</p>
             <Button type="submit" variant="primary" size="md" class="w-full md:w-1/2 md:ml-auto font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
           </form>
         </Card>
+      </div>
     </Container>
   </Section>
 
