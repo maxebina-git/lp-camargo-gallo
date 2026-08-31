@@ -18,6 +18,7 @@ import {
 } from 'ds-grupo-rkb'
 import LegalDrawer from '../components/legal/LegalDrawer.vue'
 import FaqSection from '../components/faq/FaqSection.vue'
+import WhatsappButton from '../components/WhatsappButton.vue'
 import lucide from '@lucide/vue'
 const { ArrowRight, LucideMail, ChevronUp, Shield, HardHat, ScanLine, Smartphone } = lucide
 
@@ -555,4 +556,6 @@ class="text-error-500 text-sm hidden">Campo obrigatório.</p>
   <BackToTop client:load>
     <IconSet size="24"><ChevronUp /></IconSet>
   </BackToTop>
+
+  <WhatsappButton client:load />
 </BaseLayout>
