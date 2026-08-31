@@ -142,7 +142,7 @@ body {
   }
   .hero-btns button,
   .hero-btns a {
-    width: 50%;
+    width: auto;
   }
 }
 
