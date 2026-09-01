@@ -72,10 +72,10 @@ const footerCompany = {
   <div id="scroll-wrapper">
     <div id="sticky-viewport">
       <div id="central-stage">
-        <img id="sequence-img" src="/assets/frames/002.png" alt="Animação de recuperação de fachada" />
+        <img id="sequence-img" src="/lp-camargo-gallo/lp-camargo-gallo/assets/frames/002.png" alt="Animação de recuperação de fachada" />
       </div>
       <div class="logo-white-box" aria-label="Destaque">
-        <img src="/assets/logo-camargo-gallo.png" alt="Camargo Gallo" style="max-width:100%; height:auto; display:block;" />
+        <img src="/lp-camargo-gallo/assets/logo-camargo-gallo.png" alt="Camargo Gallo" style="max-width:100%; height:auto; display:block;" />
       </div>
         <div id="orbit-container" class>
         {servicos.map((s) => (
@@ -332,8 +332,8 @@ const footerCompany = {
         </div>
         <div class="md:col-span-3 flex flex-col">
           <div class="relative w-full aspect-[4/3] overflow-hidden rounded-lg">
-            <img src="/assets/foto-lp-antes.png" id="img-antes" alt="Fachada antes da recuperação" class="absolute inset-0 w-full h-full object-cover opacity-100 will-change-opacity" />
-            <img src="/assets/foto-lp-depois.png" id="img-depois" alt="Fachada depois da recuperação" class="absolute inset-0 w-full h-full object-cover opacity-0 will-change-opacity" />
+            <img src="/lp-camargo-gallo/assets/foto-lp-antes.png" id="img-antes" alt="Fachada antes da recuperação" class="absolute inset-0 w-full h-full object-cover opacity-100 will-change-opacity" />
+            <img src="/lp-camargo-gallo/assets/foto-lp-depois.png" id="img-depois" alt="Fachada depois da recuperação" class="absolute inset-0 w-full h-full object-cover opacity-0 will-change-opacity" />
           </div>
           <div class="w-full order-first md:order-last mb-6 md:mb-0 md:mt-6 select-none" id="before-after-bar">
             <div class="flex justify-between">
@@ -419,7 +419,7 @@ class="text-error-500 text-sm hidden">Campo obrigatório.</p>
     let currentFrame = 2;
     const proxy = { progress: 0 };
     function frameSrc(n) {
-      return '/assets/frames/' + String(n).padStart(3, '0') + '.png';
+      return '/lp-camargo-gallo/assets/frames/' + String(n).padStart(3, '0') + '.png';
     }
     for (let i = minFrame; i <= maxFrame; i++) {
       const preload = new Image();

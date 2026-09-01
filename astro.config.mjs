@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  base: '/',
+  base: process.env.ASTRO_DEPLOY ? '/lp-camargo-gallo/' : '/',
   integrations: [vue()],
 
   vite: {
