@@ -1,0 +1,9 @@
+configuration.php
+/administrator/
+/components/
+/modules/
+/plugins/
+/templates/
+/images/
+/media/
+/libraries/
