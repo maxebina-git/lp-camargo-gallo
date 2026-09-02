@@ -17,7 +17,7 @@ if ($nome === '' || $whats === '' || $email === '' || $mensagem === '') {
 $to      = 'maxebina@gmail.com';
 $subject = 'Novo contato da landing page';
 $body    = "Nome: $nome\nWhatsApp: $whats\nEmail: $email\nMensagem:\n$mensagem\n";
-$headers = "From: no-reply@camargogallo.com.br\r\nReply-To: $email\r\nContent-Type: text/plain; charset=UTF-8\r\n";
+$headers = "From: maxebina@gmail.com\r\nReply-To: $email\r\nContent-Type: text/plain; charset=UTF-8\r\n";
 
 if (mail($to, $subject, $body, $headers)) {
     header('Location: /#contato');
