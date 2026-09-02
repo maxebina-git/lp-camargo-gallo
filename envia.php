@@ -1,8 +1,10 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /');
+    header('Location: /lp-camargo-gallo/');
     exit;
 }
+
+require_once('class.phpmailer.php');
 
 $nome     = isset($_POST['nome']) ? trim($_POST['nome']) : '';
 $whats    = isset($_POST['whatsapp']) ? trim($_POST['whatsapp']) : '';
@@ -14,14 +16,25 @@ if ($nome === '' || $whats === '' || $email === '' || $mensagem === '') {
     exit;
 }
 
-$to      = 'maxebina@gmail.com';
-$subject = 'Novo contato da landing page';
-$body    = "Nome: $nome\nWhatsApp: $whats\nEmail: $email\nMensagem:\n$mensagem\n";
-$headers = "From: maxebina@gmail.com\r\nReply-To: $email\r\nContent-Type: text/plain; charset=UTF-8\r\n";
+$mailer = new PHPMailer();
+$mailer->IsSMTP();
+$mailer->SMTPDebug = 1; // teste
+$mailer->Port = 587;
+$mailer->Host = 'smtplw.com.br'; // Locaweb SMTP — trocar se usar outro
+$mailer->SMTPAuth = true;
+$mailer->Username = 'atendimento@camargogallo.com.br'; // preencher credencial real
+$mailer->Password = 'COLOQUE_AQUI'; // preencher senha do SMTP
+$mailer->FromName = 'Camargo Gallo';
+$mailer->From = 'atendimento@camargogallo.com.br';
+$mailer->AddAddress('maxebina@gmail.com', 'Max');
+$mailer->Subject = 'Novo contato da landing page';
+$mailer->Body = "Nome: $nome\nWhatsApp: $whats\nEmail: $email\nMensagem:\n$mensagem\n";
+$mailer->IsHTML(false);
 
-if (mail($to, $subject, $body, $headers)) {
-    header('Location: /#contato');
+if (!$mailer->Send()) {
+    echo "Erro: " . $mailer->ErrorInfo;
     exit;
-} else {
-    echo 'Erro ao enviar. Tente novamente.';
 }
+
+header('Location: /lp-camargo-gallo/#contato');
+exit;
