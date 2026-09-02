@@ -20,7 +20,7 @@ import LegalDrawer from '../components/legal/LegalDrawer.vue'
 import FaqSection from '../components/faq/FaqSection.vue'
 import WhatsappButton from '../components/WhatsappButton.vue'
 import lucide from '@lucide/vue'
-const { ArrowRight, LucideMail, ChevronUp, Shield, HardHat, ScanLine, Smartphone } = lucide
+const { ArrowRight, LucideMail, ChevronUp, Shield, HardHat, ScanLine, Smartphone, RotateCcw } = lucide
 
 const servicos = [
   { titulo: 'Recuperação de Fachadas com Pintura ou Textura Acrílica', texto: 'Tratamento de fissuras, trincas e falhas de aderência com fundos preparadores, membranas de proteção e acabamento em pintura ou textura acrílica de alto desempenho.' },
@@ -376,7 +376,7 @@ const footerCompany = {
             </FormField>
             <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
             <div class="flex items-center gap-4">
-              <Button type="submit" variant="primary" size="md" class="font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
+              <Button id="submit-btn" type="submit" variant="primary" size="md" class="font-body"><LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
             </div>
           </form>
         </Card>
@@ -546,6 +546,9 @@ const footerCompany = {
       const msg = document.getElementById('mensagem').value.trim();
       if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
       if (!ok) return;
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="inline w-4 h-4 mr-2 animate-spin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>Enviando...';
       document.getElementById('form-feedback').classList.add('hidden');
       document.getElementById('form-feedback').classList.remove('text-error-500');
       document.getElementById('form-feedback').classList.remove('text-green-600');
@@ -561,6 +564,9 @@ const footerCompany = {
             document.getElementById('erro-whatsapp').classList.add('hidden');
             document.getElementById('erro-email').classList.add('hidden');
             document.getElementById('erro-mensagem').classList.add('hidden');
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>Enviar mensagem';
           }
         })
         .catch(() => {
