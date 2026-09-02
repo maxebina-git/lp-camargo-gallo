@@ -532,6 +532,20 @@ const footerCompany = {
     }
     function submeterForm(e) {
       e.preventDefault();
+      document.getElementById('erro-nome').classList.add('hidden');
+      document.getElementById('erro-whatsapp').classList.add('hidden');
+      document.getElementById('erro-email').classList.add('hidden');
+      document.getElementById('erro-mensagem').classList.add('hidden');
+      const wh = document.getElementById('whatsapp').value.replace(/\D/g, '');
+      const em = document.getElementById('email').value.trim();
+      let ok = true;
+      if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
+      if (!/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/.test(em)) { document.getElementById('erro-email').classList.remove('hidden'); ok = false; }
+      const nome = document.getElementById('nome').value.trim();
+      if (nome.length === 0 || nome.length < 3) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
+      const msg = document.getElementById('mensagem').value.trim();
+      if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
+      if (!ok) return;
       document.getElementById('form-feedback').classList.add('hidden');
       document.getElementById('form-feedback').classList.remove('text-error-500');
       document.getElementById('form-feedback').classList.remove('text-green-600');
