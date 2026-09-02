@@ -362,19 +362,19 @@ const footerCompany = {
         <Card>
         <form class="flex flex-col gap-4" onsubmit="validarFormulario(event)" novalidate>
             <FormField label="Nome" id="nome">
-              <Input id="nome" placeholder="Seu nome" />
+              <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>0) document.getElementById('erro-nome').classList.add('hidden')" />
             </FormField>
             <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             <FormField label="WhatsApp" id="whatsapp">
-              <Input id="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this)" />
+              <Input id="whatsapp" name="telefone" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this); if(this.value.trim().length>0) document.getElementById('erro-whatsapp').classList.add('hidden')" />
             </FormField>
             <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
             <FormField label="Email" id="email">
-              <Input id="email" type="text" placeholder="seu@email.com" oninput="formatarEmail(this)" />
+              <Input id="email" name="email" type="text" placeholder="seu@email.com" oninput="formatarEmail(this); if(this.value.trim().length>0) document.getElementById('erro-email').classList.add('hidden')" />
             </FormField>
             <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Email inválido. Apenas letras, números, @ e . no domínio.</p>
             <FormField label="Mensagem" id="mensagem">
-              <Textarea id="mensagem" placeholder="Conte sobre sua fachada" rows={4} />
+              <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>0) document.getElementById('erro-mensagem').classList.add('hidden')" />
             </FormField>
 <p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             <Button type="submit" variant="primary" size="md" class="w-full md:w-1/2 md:ml-auto font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
