@@ -367,8 +367,8 @@ const footerCompany = {
               <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
             </FormField>
             <FormField label="Email" id="email">
-              <Input id="email" name="email" type="text" placeholder="seu@email.com.br" />
-              <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Email inválido. Apenas letras, números, @ e . no domínio.</p>
+              <Input id="email" name="email" type="text" placeholder="seu@email.com.br" oninput="if(this.value.trim()){ if(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden'); else document.getElementById('erro-email').classList.remove('hidden'); } else { document.getElementById('erro-email').classList.remove('hidden'); }" />
+              <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Informe um email válido.</p>
             </FormField>
             <FormField label="Mensagem" id="mensagem">
               <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>=10) document.getElementById('erro-mensagem').classList.add('hidden')" />
@@ -540,6 +540,7 @@ const footerCompany = {
       const em = document.getElementById('email').value.trim();
       let ok = true;
       if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
+      if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(em)) { document.getElementById('erro-email').classList.remove('hidden'); ok = false; }
       const nome = document.getElementById('nome').value.trim();
       if (nome.length === 0 || nome.length < 3) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
       const msg = document.getElementById('mensagem').value.trim();
