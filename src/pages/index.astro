@@ -367,7 +367,7 @@ const footerCompany = {
               <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
             </FormField>
             <FormField label="Email" id="email">
-              <Input id="email" name="email" type="text" placeholder="seu@email.com" oninput="formatarEmail(this); if(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden')" />
+              <Input id="email" name="email" type="text" placeholder="seu@email.com" oninput="if(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden')" />
               <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Email inválido. Apenas letras, números, @ e . no domínio.</p>
             </FormField>
             <FormField label="Mensagem" id="mensagem">
