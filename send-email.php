@@ -60,7 +60,7 @@ $mail->addReplyTo($emailPost, $nome);
 $mail->isHTML(true);
 
 $mail->Subject = mb_encode_mimeheader(
-    'Novo contato do portfólio',
+    'Novo contato da Landing Page',
     'UTF-8'
 );
 
@@ -70,8 +70,7 @@ $mail->Body = '
 
     <!-- Header -->
     <div style="background:#111827;padding:20px 30px;color:#ffffff;">
-      <h2 style="margin:0;font-size:18px;">Novo contato do portfólio</h2>
-      <p style="margin:5px 0 0;font-size:12px;opacity:0.8;">Formulário do site maxebina.com.br</p>
+      <h2 style="margin:0;font-size:18px;">Novo contato da Landing Page</h2>
     </div>
 
     <!-- Body -->
@@ -108,7 +107,7 @@ $mail->Body = '
 
     <!-- Footer -->
     <div style="padding:15px 30px;background:#f9fafb;font-size:11px;color:#6b7280;">
-      Enviado automaticamente pelo formulário de contato.
+      Enviado automaticamente pelo formulário da Landing Page Camargo Gallo.
     </div>
 
   </div>
