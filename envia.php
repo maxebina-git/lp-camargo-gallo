@@ -18,8 +18,8 @@ $to      = 'maxebina@gmail.com';
 $subject = 'Novo contato da landing page';
 $body    = "Nome: $nome\nWhatsApp: $whats\nEmail: $email\nMensagem:\n$mensagem\n";
 $headers = "From: atendimento@camargogallo.com.br\r\nReply-To: $email\r\nContent-Type: text/plain; charset=UTF-8\r\n";
-
-if (mail($to, $subject, $body, $headers)) {
+ini_set('sendmail_from', 'atendimento@camargogallo.com.br');
+if (mail($to, $subject, $body, $headers, '-f atendimento@camargogallo.com.br')) {
     header('Location: /lp-camargo-gallo/#contato');
     exit;
 } else {
