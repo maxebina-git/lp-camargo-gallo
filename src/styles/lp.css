@@ -5,7 +5,8 @@ body {
 .accordion-item [data-accordion-trigger],
 .accordion-item button,
 .accordion-item .accordion-trigger,
-.accordion-item h3 {
+.accordion-item h3,
+#faq button[type="button"] {
   cursor: pointer !important;
 }
 
