@@ -53,8 +53,8 @@ const footerCompany = {
 
 <BaseLayout title="Camargo Gallo Engenharia — Recuperação de Fachadas" description="Diagnóstico, reparo estrutural e pintura premium com acompanhamento NR-35.">
 
-  <Section tone="surface-alt" size="lg">
-    <Container>
+  <Section tone="surface-alt" size="none" class="h-[100dvh] min-h-screen py-0 flex flex-col justify-center">
+    <Container class="py-0">
       <Reveal client:visible class="w-full block">
         <div class="flex flex-col gap-4 w-full items-center text-center">
           <Tag>Engenharia de Fachadas</Tag>
@@ -360,23 +360,23 @@ const footerCompany = {
           <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
         </div>
         <Card>
-        <form class="flex flex-col gap-4" onsubmit="validarFormulario(event)" novalidate>
+        <form class="flex flex-col gap-4" action="/envia.php" method="post" onsubmit="validarFormulario(event)" novalidate>
             <FormField label="Nome" id="nome">
               <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>=3) document.getElementById('erro-nome').classList.add('hidden')" />
+              <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             </FormField>
-            <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             <FormField label="WhatsApp" id="whatsapp">
-              <Input id="whatsapp" name="telefone" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this); if(/^\d{11}$/.test(this.value.trim())) document.getElementById('erro-whatsapp').classList.add('hidden')" />
+              <Input id="whatsapp" name="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this); if(/^\d{11}$/.test(this.value.replace(/\D/g,''))) document.getElementById('erro-whatsapp').classList.add('hidden')" />
+              <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
             </FormField>
-            <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
             <FormField label="Email" id="email">
               <Input id="email" name="email" type="text" placeholder="seu@email.com" oninput="formatarEmail(this); if(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden')" />
+              <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Email inválido. Apenas letras, números, @ e . no domínio.</p>
             </FormField>
-            <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Email inválido. Apenas letras, números, @ e . no domínio.</p>
             <FormField label="Mensagem" id="mensagem">
               <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>=10) document.getElementById('erro-mensagem').classList.add('hidden')" />
+              <p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             </FormField>
-<p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             <Button type="submit" variant="primary" size="md" class="w-full md:w-1/2 md:ml-auto font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
           </form>
         </Card>
@@ -534,7 +534,6 @@ const footerCompany = {
       inp.value = inp.value.replace(/[^a-zA-Z0-9.@]/g, '');
     }
     function validarFormulario(e) {
-      e.preventDefault();
       document.getElementById('erro-nome').classList.add('hidden');
       document.getElementById('erro-whatsapp').classList.add('hidden');
       document.getElementById('erro-email').classList.add('hidden');
@@ -545,10 +544,10 @@ const footerCompany = {
       if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
       if (!/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/.test(em)) { document.getElementById('erro-email').classList.remove('hidden'); ok = false; }
       const nome = document.getElementById('nome').value.trim();
-      if (nome.length === 0) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
+      if (nome.length === 0 || nome.length < 3) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
       const msg = document.getElementById('mensagem').value.trim();
-      if (msg.length === 0) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
-      if (ok) alert('Lead enviado — integrar backend');
+      if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
+      if (!ok) { e.preventDefault(); }
     }
   </script>
 
