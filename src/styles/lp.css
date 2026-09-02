@@ -2,6 +2,13 @@ body {
   overflow-x: hidden;
 }
 
+.accordion-item [data-accordion-trigger],
+.accordion-item button,
+.accordion-item .accordion-trigger,
+.accordion-item h3 {
+  cursor: pointer !important;
+}
+
 #scroll-wrapper {
   height: 500vh;
 }
