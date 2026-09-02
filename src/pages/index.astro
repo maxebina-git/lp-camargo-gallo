@@ -364,20 +364,19 @@ const footerCompany = {
             <FormField label="Nome" id="nome">
               <Input id="nome" placeholder="Seu nome" />
             </FormField>
-            <p id="erro-nome" class="text-error-500 text-sm hidden">Campo obrigatório.</p>
+            <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             <FormField label="WhatsApp" id="whatsapp">
               <Input id="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this)" />
             </FormField>
-            <p id="erro-whatsapp" class="text-error-500 text-sm hidden">Formato inválido. Use DDD + celular (11 dígitos).</p>
+            <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
             <FormField label="Email" id="email">
               <Input id="email" type="text" placeholder="seu@email.com" oninput="formatarEmail(this)" />
             </FormField>
-            <p id="erro-email" class="text-error-500 text-sm hidden">Email inválido. Apenas letras, números, @ e . no domínio.</p>
+            <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Email inválido. Apenas letras, números, @ e . no domínio.</p>
             <FormField label="Mensagem" id="mensagem">
               <Textarea id="mensagem" placeholder="Conte sobre sua fachada" rows={4} />
             </FormField>
-<p id="erro-mensagem" 
-class="text-error-500 text-sm hidden">Campo obrigatório.</p>
+<p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             <Button type="submit" variant="primary" size="md" class="w-full md:w-1/2 md:ml-auto font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
           </form>
         </Card>
