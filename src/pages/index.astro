@@ -534,8 +534,7 @@ const footerCompany = {
       e.preventDefault();
       document.getElementById('form-feedback').classList.add('hidden');
       document.getElementById('form-feedback').classList.remove('text-error-500');
-      document.getElementById('form-feedback').classList.add('text-green-600');
-      document.getElementById('form-feedback').textContent = 'Mensagem enviada com sucesso!';
+      document.getElementById('form-feedback').classList.remove('text-green-600');
       const form = document.getElementById('contato-form');
       const formData = new FormData(form);
       fetch('/lp-camargo-gallo/send-email.php', { method: 'POST', body: formData })
@@ -548,18 +547,10 @@ const footerCompany = {
             document.getElementById('erro-whatsapp').classList.add('hidden');
             document.getElementById('erro-email').classList.add('hidden');
             document.getElementById('erro-mensagem').classList.add('hidden');
-          } else {
-            document.getElementById('form-feedback').classList.remove('hidden');
-            document.getElementById('form-feedback').classList.remove('text-green-600');
-            document.getElementById('form-feedback').classList.add('text-error-500');
-            document.getElementById('form-feedback').textContent = 'Erro ao enviar. Tente novamente.';
           }
         })
         .catch(() => {
-          document.getElementById('form-feedback').classList.remove('hidden');
-          document.getElementById('form-feedback').classList.remove('text-green-600');
-          document.getElementById('form-feedback').classList.add('text-error-500');
-          document.getElementById('form-feedback').textContent = 'Erro ao enviar. Tente novamente.';
+          // erro silencioso; validações individuais já mostram problemas nos inputs
         });
     }
     function validarFormulario(e) {
