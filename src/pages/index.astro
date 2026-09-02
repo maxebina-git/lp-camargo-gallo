@@ -486,10 +486,7 @@ const footerCompany = {
             const offset = (i / queueStart) * 0.8;
             const cardP = offset + orbitProgress;
             const pos = interpolatePath(cardP);
-            const fadeStart = freezePoint - 0.05;
-            const isFadingCard5 = i === 3;
             let opacity = 1;
-            if (isFadingCard5 && orbitProgress >= fadeStart) opacity = Math.max(0, 1 - (orbitProgress - fadeStart) / 0.05);
             if (pos && isOnScreen(pos.x, pos.y) && pos.y <= 87) {
               card.style.display = 'block';
               gsap.set(card, { xPercent: -50, yPercent: -50, left: pos.x + '%', top: pos.y + '%', zIndex: getCardZIndex(pos.x), opacity: opacity });
