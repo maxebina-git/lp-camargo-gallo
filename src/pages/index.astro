@@ -360,7 +360,7 @@ const footerCompany = {
           <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
         </div>
         <Card>
-        <form class="flex flex-col gap-4" action="/envia.php" method="post" onsubmit="validarFormulario(event)" novalidate>
+        <form class="flex flex-col gap-4" action="/lp-camargo-gallo/envia.php" method="post" onsubmit="validarFormulario(event)" novalidate>
             <FormField label="Nome" id="nome">
               <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>=3) document.getElementById('erro-nome').classList.add('hidden')" />
               <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
