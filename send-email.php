@@ -119,17 +119,11 @@ $mail->Body = '
 ========================= */
 
 try {
-
     $mail->send();
-
     echo 'OK';
     exit;
-
 } catch (\Throwable $e) {
-
     http_response_code(500);
-
     echo 'ERRO';
     exit;
-
 }

@@ -360,7 +360,7 @@ const footerCompany = {
           <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
         </div>
         <Card>
-        <form class="flex flex-col gap-4" action="/lp-camargo-gallo/send-email.php" method="post" onsubmit="validarFormulario(event)" novalidate>
+        <form id="contato-form" class="flex flex-col gap-4" action="/lp-camargo-gallo/send-email.php" method="post" onsubmit="submeterForm(event)" novalidate>
             <FormField label="Nome" id="nome">
               <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>=3) document.getElementById('erro-nome').classList.add('hidden')" />
               <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
@@ -377,7 +377,10 @@ const footerCompany = {
               <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>=10) document.getElementById('erro-mensagem').classList.add('hidden')" />
               <p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
             </FormField>
-            <Button type="submit" variant="primary" size="md" class="w-full md:w-1/2 md:ml-auto font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
+            <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
+            <div class="flex items-center gap-4">
+              <Button type="submit" variant="primary" size="md" class="font-body"><LucideMail class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
+            </div>
           </form>
         </Card>
       </div>
@@ -532,6 +535,38 @@ const footerCompany = {
     }
     function formatarEmail(inp) {
       inp.value = inp.value.replace(/[^a-zA-Z0-9.@]/g, '');
+    }
+    function submeterForm(e) {
+      e.preventDefault();
+      document.getElementById('form-feedback').classList.add('hidden');
+      document.getElementById('form-feedback').classList.remove('text-error-500');
+      document.getElementById('form-feedback').classList.add('text-green-600');
+      document.getElementById('form-feedback').textContent = 'Mensagem enviada com sucesso!';
+      const form = document.getElementById('contato-form');
+      const formData = new FormData(form);
+      fetch('/lp-camargo-gallo/send-email.php', { method: 'POST', body: formData })
+        .then(r => r.text())
+        .then(text => {
+          if (text.trim() === 'OK') {
+            document.getElementById('form-feedback').classList.remove('hidden');
+            form.reset();
+            document.getElementById('erro-nome').classList.add('hidden');
+            document.getElementById('erro-whatsapp').classList.add('hidden');
+            document.getElementById('erro-email').classList.add('hidden');
+            document.getElementById('erro-mensagem').classList.add('hidden');
+          } else {
+            document.getElementById('form-feedback').classList.remove('hidden');
+            document.getElementById('form-feedback').classList.remove('text-green-600');
+            document.getElementById('form-feedback').classList.add('text-error-500');
+            document.getElementById('form-feedback').textContent = 'Erro ao enviar. Tente novamente.';
+          }
+        })
+        .catch(() => {
+          document.getElementById('form-feedback').classList.remove('hidden');
+          document.getElementById('form-feedback').classList.remove('text-green-600');
+          document.getElementById('form-feedback').classList.add('text-error-500');
+          document.getElementById('form-feedback').textContent = 'Erro ao enviar. Tente novamente.';
+        });
     }
     function validarFormulario(e) {
       document.getElementById('erro-nome').classList.add('hidden');
