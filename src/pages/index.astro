@@ -54,9 +54,9 @@ const footerCompany = {
   <Section tone="surface-alt" size="none" class="h-[100dvh] min-h-screen py-0 flex flex-col justify-center">
     <Container class="py-0">
       <Reveal client:visible class="w-full block">
-        <div class="flex flex-col gap-4 w-full items-center text-center">
-          <Tag>Engenharia de Fachadas</Tag>
-          <Heading as="1" size="display">Engenharia, Estrutura e Tecnologia para Grandes Intervenções em Fachadas.</Heading>
+        <div class="flex flex-col gap-12 w-full items-center text-center">
+          <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-[var(--color-material-amber-500)] mx-auto"></div>
+          <Heading as="1" size="display">Engenharia, Estrutura e Tecnologia para <span class="underline decoration-[var(--color-accent-500)] underline-offset-4">Grandes Intervenções em Fachadas</span>.</Heading>
           <Text size="lg" tone="secondary">Especialistas em grandes intervenções em condomínios habitados. Unimos eficiência, segurança e mínimo impacto na rotina dos moradores para entregar soluções tecnicamente precisas e duráveis.</Text>
           <div class="hero-btns">
             <Button as="a" href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" class="w-full md:w-1/2 font-body" variant="primary" size="lg">Solicitar Vistoria Técnica</Button>
@@ -76,18 +76,17 @@ const footerCompany = {
         <img src="/lp-camargo-gallo/assets/logo-camargo-gallo.png" alt="Camargo Gallo" style="max-width:100%; height:auto; display:block;" />
       </div>
         <div id="orbit-container" class>
-        {servicos.map((s, i) => (
+        {servicos.slice(0, 11).map((s, i) => (
           i === 0 ? (
             <FeatureCard tone="deep" class="orbit-card bg-deep text-on-deep border-on-deep/20 rounded-lg border p-8" style="width:360px;">
               <h3 slot="title" class="font-display text-xl font-bold text-center">Engenharia de Fachadas</h3>
               <div slot="description" class="font-body text-sm leading-normal text-on-deep/80 text-center">Especialistas em grandes intervenções em condomínios habitados.</div>
             </FeatureCard>
           ) : (
-            <div class="orbit-card bg-deep text-on-deep border-on-deep/20 rounded-lg border p-8">
-              <h2 class="orbit-card-title">{s.titulo}</h2>
-              <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-              <div class="orbit-card-desc">{s.texto}</div>
-            </div>
+            <FeatureCard tone="deep" class="orbit-card bg-deep text-on-deep border-on-deep/20 rounded-lg border p-8" style="width:360px;">
+              <h3 slot="title" class="font-display text-xl font-bold text-center">{s.titulo}</h3>
+              <div slot="description" class="font-body text-sm leading-normal text-on-deep/80 text-center">{s.texto}</div>
+            </FeatureCard>
           )
         ))}
       </div>
@@ -121,23 +120,6 @@ const footerCompany = {
   </Section>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto px-4">
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Recuperação de Fachadas com Pintura ou Textura Acrílica</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Tratamento de fissuras, trincas e falhas de aderência com fundos preparadores, membranas de proteção e acabamento em pintura ou textura acrílica de alto desempenho.</p></FeatureCard>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Recuperação Total de Fachadas com Revestimento Cerâmico</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Remoção integral do revestimento existente, recuperação da base e execução de novo sistema cerâmico com juntas de movimentação e detalhes técnicos completos.</p></FeatureCard>
-    <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Conversão de Fachadas Cerâmicas para Texturizadas</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Remoção completa da cerâmica, tratamento da base e execução de novo sistema com textura acrílica, proporcionando renovação estética e redução de cargas.</p></FeatureCard>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Restauração Localizada de Fachadas Cerâmicas</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Recuperação de trechos com desprendimentos ou perda de aderência, buscando compatibilidade técnica e estética com o revestimento existente.</p></FeatureCard>
-    <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Sobreposição de Fachadas Cerâmicas com Textura Acrílica</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Preparação do revestimento existente e execução de novo sistema argamassado com acabamento texturizado, quando as condições técnicas permitem a sobreposição.</p></FeatureCard>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Recuperação de Fachadas em Concreto Aparente</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Tratamento de fissuras, corrosão de armaduras e recomposição do concreto com sistemas de proteção que preservam as características arquitetônicas originais.</p></FeatureCard>
-    <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Recuperação de Fachadas em Tijolos Aparentes</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Tratamento de fissuras, juntas e falhas de assentamento com limpeza e recuperação localizada. Proteção final com hidrofugantes ou resinas acrílicas.</p></FeatureCard>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Recuperação de Revestimentos Minerais e Monocapa</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Recuperação de fissuras e falhas com revestimentos compatíveis com o sistema original. Aplicação de hidrofugante para reduzir absorção de água sem pintura.</p></FeatureCard>
-    <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Tratamento de Áreas com Som Cavo por Injeção</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Recuperação de regiões com perda de aderência através de injeção de materiais específicos, restabelecendo a aderência sem remoção integral do revestimento.</p></FeatureCard>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Recuperação Estrutural de Concreto Armado</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Tratamento de armaduras corroídas, recomposição de seções de concreto e aplicação de argamassas estruturais, grout e sistemas de reparo e reforço.</p></FeatureCard>
-    <FeatureCard tone="deep" class="w-full card-360"><h3 slot="title" class="font-display text-xl font-bold text-center">Impermeabilização de Lajes e Reservatórios</h3><p slot="description" class="text-on-deep/80 text-center text-sm">Remoção de sistemas existentes, preparação da base, correção de caimentos e execução de novos sistemas de impermeabilização com testes de estanqueidade.</p></FeatureCard>
-  </div>
   <Section id="trust-cards-desktop" size="none" class="hidden md:block">
     <Container id="trust-wrapper" size="lg">
       <div class="trust-bar-left"></div>

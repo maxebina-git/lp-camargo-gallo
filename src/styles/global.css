@@ -1,2 +1,3 @@
+@import 'ds-grupo-rkb/style.css';
 @import "tailwindcss";
 .card-360 { width: 360px !important; }
