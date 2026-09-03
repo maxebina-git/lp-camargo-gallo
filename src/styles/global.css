@@ -1,1 +1,2 @@
 @import "tailwindcss";
+.card-360 { width: 360px !important; }
