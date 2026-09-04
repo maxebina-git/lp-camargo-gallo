@@ -49,6 +49,10 @@ const footerCompany = {
 
 ---
 
+<style>
+  .tag-amber { color: var(--color-material-amber-500); background-color: var(--color-material-amber-500); }
+</style>
+
 <BaseLayout title="Camargo Gallo Engenharia — Recuperação de Fachadas" description="Diagnóstico, reparo estrutural e pintura premium com acompanhamento NR-35.">
 
   <Section tone="surface-alt" size="none" class="h-[100dvh] min-h-screen py-0 flex flex-col justify-center">
@@ -58,9 +62,9 @@ const footerCompany = {
           <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-[var(--color-material-amber-500)] mx-auto"></div>
           <Heading as="1" size="display">Engenharia, Estrutura e Tecnologia para <span class="underline decoration-[var(--color-accent-500)] underline-offset-4">Grandes Intervenções em Fachadas</span>.</Heading>
           <Text size="lg" tone="secondary">Especialistas em grandes intervenções em condomínios habitados. Unimos eficiência, segurança e mínimo impacto na rotina dos moradores para entregar soluções tecnicamente precisas e duráveis.</Text>
-          <div class="hero-btns">
+          <div class="hero-btns flex flex-col w-full gap-3">
             <Button as="a" href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" class="w-full md:w-1/2 font-body" variant="primary" size="lg">Solicitar Vistoria Técnica</Button>
-            <Button variant="secondary" onclick="animarScroll()" class="w-full md:w-1/2 font-body" size="lg">Escrever mensagem</Button>
+            <Button variant="secondary" onclick="animarScroll()" class="!w-full md:!w-1/2 font-body" size="lg">Escrever mensagem</Button>
           </div>
         </div>
       </Reveal>
@@ -94,11 +98,11 @@ const footerCompany = {
   </div>
 
   <div class="md:hidden">
-  <Section tone="deep" size="lg" id="servicos">
+  <Section size="lg" id="servicos">
     <Container>
       <Reveal client:visible>
-        <div class="flex flex-col items-center text-center mb-6">
-          <Tag>14 etapas</Tag>
+        <div class="flex flex-col items-center text-center mb-6 gap-3">
+          <Tag class="tag-amber">11 Serviços</Tag>
           <Heading as="2" size="2xl">Serviços completos de ponta a ponta</Heading>
           <Text tone="secondary">Do diagnóstico à pintura premium — 14 etapas com acompanhamento online e conformidade NR-35.</Text>
         </div>
@@ -106,13 +110,10 @@ const footerCompany = {
       <div class="trust-card-container flex flex-col items-center gap-6">
         {servicos.map((s) => (
           <Reveal client:visible class="w-full">
-            <Card class="trust-card w-full" tone="deep">
-              <div class="trust-card-inner text-center">
-            <h2 class="orbit-card-title text-on-deep">{s.titulo}</h2>
-                <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-            <div class="orbit-card-desc text-on-deep/80">{s.texto}</div>
-              </div>
-            </Card>
+            <FeatureCard tone="deep" class="trust-card w-full">
+              <h2 slot="title" class="font-display text-xl font-bold text-center">{s.titulo}</h2>
+              <div slot="description" class="font-body text-sm leading-normal text-center">{s.texto}</div>
+            </FeatureCard>
           </Reveal>
         ))}
       </div>
@@ -231,45 +232,29 @@ const footerCompany = {
   });
   </script>
 
-  <Section id="trust-cards-static" size="lg" class="md:hidden">
+  <Section id="trust-cards-static" size="lg" class="md:hidden overflow-x-hidden">
     <Container id="trust-wrapper-static" size="lg">
       <div class="flex flex-col items-center text-center mb-6">
         <Heading as="h2" size="2xl">Engenharia. Estrutura. Tecnologia.</Heading>
         <Text tone="secondary">Os pilares que garantem a execução da sua obra com segurança, precisão e controle total.</Text>
       </div>
       <div class="trust-card-container flex flex-col items-center gap-6">
-        <Card class="trust-card w-full" tone="deep">
-          <div class="trust-card-inner text-center">
-            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><Shield size="40" /></div>
-            <h2 class="orbit-card-title">Seguro de R$ 10 Milhões</h2>
-            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-            <div class="orbit-card-desc">Responsabilidade Civil para total proteção da obra.</div>
-          </div>
-        </Card>
-        <Card class="trust-card w-full" tone="deep">
-          <div class="trust-card-inner text-center">
-            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><HardHat size="40" /></div>
-            <h2 class="orbit-card-title">+200 Colaboradores</h2>
-            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-            <div class="orbit-card-desc">Equipe técnica com 10 engenheiros especialistas.</div>
-          </div>
-        </Card>
-        <Card class="trust-card w-full" tone="deep">
-          <div class="trust-card-inner text-center">
-            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><ScanLine size="40" /></div>
-            <h2 class="orbit-card-title">Drones e Termografia</h2>
-            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-            <div class="orbit-card-desc">Inspeção avançada para identificar anomalias.</div>
-          </div>
-        </Card>
-        <Card class="trust-card w-full" tone="deep">
-          <div class="trust-card-inner text-center">
-            <div class="trust-icon text-[var(--color-accent-500)] mb-4"><Smartphone size="40" /></div>
-            <h2 class="orbit-card-title">Gestão em Tempo Real</h2>
-            <div role="separator" aria-hidden="true" class="h-2 w-3/4 rounded-full bg-primary-500 my-4 mx-auto"></div>
-            <div class="orbit-card-desc">Plataforma com reconhecimento facial e RDOs.</div>
-          </div>
-        </Card>
+        <FeatureCard tone="deep" class="trust-card w-full">
+          <h3 slot="title" class="font-display text-xl font-bold text-center"><span class="text-[var(--color-accent-500)] block mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield inline-block"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></span>Seguro de R$ 10 Milhões</h3>
+          <div slot="description" class="font-body text-base leading-normal text-on-deep/80 text-center">Responsabilidade Civil para total proteção da obra.</div>
+        </FeatureCard>
+        <FeatureCard tone="deep" class="trust-card w-full">
+          <h3 slot="title" class="font-display text-xl font-bold text-center"><span class="text-[var(--color-accent-500)] block mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hard-hat inline-block"><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><rect x="2" y="15" width="20" height="4" rx="1"></rect></svg></span>+200 Colaboradores</h3>
+          <div slot="description" class="font-body text-base leading-normal text-on-deep/80 text-center">Equipe técnica com 10 engenheiros especialistas.</div>
+        </FeatureCard>
+        <FeatureCard tone="deep" class="trust-card w-full">
+          <h3 slot="title" class="font-display text-xl font-bold text-center"><span class="text-[var(--color-accent-500)] block mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-line inline-block"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg></span>Drones e Termografia</h3>
+          <div slot="description" class="font-body text-base leading-normal text-on-deep/80 text-center">Inspeção avançada para identificar anomalias.</div>
+        </FeatureCard>
+        <FeatureCard tone="deep" class="trust-card w-full">
+          <h3 slot="title" class="font-display text-xl font-bold text-center"><span class="text-[var(--color-accent-500)] block mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone inline-block"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span>Gestão em Tempo Real</h3>
+          <div slot="description" class="font-body text-base leading-normal text-on-deep/80 text-center">Plataforma com reconhecimento facial e RDOs.</div>
+        </FeatureCard>
       </div>
     </Container>
   </Section>
@@ -357,15 +342,60 @@ const footerCompany = {
         scrollTrigger: { trigger: section, start: 'top top', end: '+=250%', scrub: 1, pin: true } }
     );
   });
+</script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window === 'undefined' || !window.gsap || !window.ScrollTrigger) return;
+    window.gsap.registerPlugin(window.ScrollTrigger);
+    var mobileSection = document.getElementById('obras-em-execucao-mobile');
+    if (!mobileSection) return;
+    var mobileContainer = mobileSection.querySelector('#obras-slide-mobile');
+    if (!mobileContainer) return;
+    var cards = mobileContainer.querySelectorAll('.obra-wrapper').length;
+    var slideWidth = cards * 100;
+    window.gsap.fromTo(mobileContainer,
+      { x: '0vw' },
+      { x: '-' + slideWidth + 'vw', ease: 'none',
+        scrollTrigger: { trigger: mobileSection, start: 'top top', end: '+=' + (cards * 30) + '%', scrub: 1, pin: true } }
+    );
+  });
   </script>
 
-  <Section size="lg" id="obras-em-execucao" class="flex flex-col justify-center">
+  <Section size="lg" id="obras-em-execucao" class="flex flex-col justify-center overflow-x-hidden hidden md:block">
     <div class="flex flex-col items-center text-center mb-6">
       <Heading as="h2" size="2xl">Nossas Obras em Execução</Heading>
       <Text tone="secondary">Equipes especializadas em campo, excelência em cada detalhe</Text>
     </div>
     <div class="obras-em-execucao-container overflow-hidden w-full flex items-center justify-center min-h-[100dvh] -mt-28" id="obras-container">
-      <div id="obras-slide" class="flex justify-start gap-16 w-max">
+      <div id="obras-slide" class="flex justify-start gap-16 w-full md:w-max">
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-01.jpg" alt="Obra 01" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-02.png" alt="Obra 02" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-03.png" alt="Obra 03" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-04.png" alt="Obra 04" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-05.png" alt="Obra 05" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-06.png" alt="Obra 06" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-07.png" alt="Obra 07" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-08.png" alt="Obra 08" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-09.png" alt="Obra 09" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-10.png" alt="Obra 10" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-11.png" alt="Obra 11" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-01.jpg" alt="Obra 01" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-02.png" alt="Obra 02" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-03.png" alt="Obra 03" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-04.png" alt="Obra 04" class="w-full h-auto rounded-lg" /></div>
+        <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-05.png" alt="Obra 05" class="w-full h-auto rounded-lg" /></div>
+      </div>
+    </div>
+  </Section>
+
+  <Section size="lg" id="obras-em-execucao-mobile" class="flex flex-col justify-center overflow-x-hidden md:hidden">
+    <div class="flex flex-col items-center text-center mb-6">
+      <Heading as="h2" size="2xl">Nossas Obras em Execução</Heading>
+      <Text tone="secondary">Equipes especializadas em campo, excelência em cada detalhe</Text>
+    </div>
+    <div class="obras-em-execucao-container overflow-hidden w-full flex items-center justify-center min-h-[100dvh] -mt-28" id="obras-container-mobile">
+      <div id="obras-slide-mobile" class="flex justify-start gap-16 w-full">
         <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-01.jpg" alt="Obra 01" class="w-full h-auto rounded-lg" /></div>
         <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-02.png" alt="Obra 02" class="w-full h-auto rounded-lg" /></div>
         <div class="obra-wrapper flex-shrink-0 relative"><img src="/lp-camargo-gallo/assets/obras/obra-03.png" alt="Obra 03" class="w-full h-auto rounded-lg" /></div>
@@ -417,7 +447,7 @@ const footerCompany = {
             </FormField>
             <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
             <div class="flex items-center gap-4">
-              <Button id="submit-btn" type="submit" variant="primary" size="md" class="font-body flex items-center"><LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
+              <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center"><LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
             </div>
           </form>
         </Card>
