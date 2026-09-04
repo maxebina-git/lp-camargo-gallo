@@ -168,6 +168,10 @@ body {
 }
 #trust-cards-desktop .trust-icon { color: 
 var(--color-accent-500, #459AFF) !important; display: flex; justify-content: center; }
+#obras-em-execucao .max-w-5xl { max-width: none !important; }
+#obras-em-execucao .obra-wrapper { transition: transform 0.35s ease; }
+#obras-em-execucao .obras-em-execucao-container { flex-wrap: nowrap; overflow: visible; padding: 0 !important; width: 100%; }
+#obras-em-execucao .trust-card { flex: 1 1 300px; max-width: 300px; }
 #trust-wrapper { position: relative !important; padding: 3rem !important; overflow: hidden !important; }
 
 #trust-wrapper .trust-bar-left, #trust-wrapper .trust-bar-right { position: absolute !important; top: 0 !important; width: 100px !important; height: 100% !important; pointer-events: none !important; }

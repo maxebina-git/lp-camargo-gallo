@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Section tone="surface" size="none" id="faq" class="py-16">
+  <Section tone="surface-alt" size="none" id="faq" class="py-16">
     <Container>
       <div class="max-w-3xl mx-auto">
         <div class="flex flex-col items-center text-center gap-4 mb-10">
