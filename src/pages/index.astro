@@ -484,13 +484,16 @@ const footerCompany = {
   <script is:inline>
     gsap.registerPlugin(ScrollTrigger);
     const img = document.getElementById('sequence-img');
-    const minFrame = 2;
-    const maxFrame = 50;
-    let currentFrame = 2;
+    const SEQUENCES = [{ min: 2, max: 50 }, { min: 51, max: 100 }, { min: 101, max: 200 }];
+    const sequence = SEQUENCES[Math.floor(Math.random() * SEQUENCES.length)];
+    const minFrame = sequence.min;
+    const maxFrame = sequence.max;
+    let currentFrame = minFrame;
     const proxy = { progress: 0 };
     function frameSrc(n) {
       return '/lp-camargo-gallo/assets/frames/' + String(n).padStart(3, '0') + '.png';
     }
+    img.src = frameSrc(minFrame);
     for (let i = minFrame; i <= maxFrame; i++) {
       const preload = new Image();
       preload.src = frameSrc(i);

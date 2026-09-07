@@ -3,6 +3,9 @@ dist/
 # generated types
 .astro/
 
+# image frames backup (1920x1080 originals)
+public/assets/frames/_backup_orig/
+
 # dependencies
 node_modules/
 
