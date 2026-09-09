@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://camargogallo.com.br/lp-camargo-gallo/sitemap-index.xml
