@@ -33,8 +33,13 @@ const { title, description } = Astro.props
     <meta property="og:image" content="https://camargogallo.com.br/lp-camargo-gallo/og-image.jpg" />
     <link rel="icon" href="/lp-camargo-gallo/favicon.ico" type="image/x-icon" />
     <link rel="sitemap" href="/lp-camargo-gallo/sitemap-index.xml" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+      import { gsap } from 'gsap'
+      import { ScrollTrigger } from 'gsap/ScrollTrigger'
+      gsap.registerPlugin(ScrollTrigger)
+      window.gsap = gsap
+      window.ScrollTrigger = ScrollTrigger
+    </script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
