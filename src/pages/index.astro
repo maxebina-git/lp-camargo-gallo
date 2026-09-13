@@ -67,8 +67,8 @@ const footerCompany = {
           <Heading as="1" size="display">Engenharia, Estrutura e Tecnologia para <span class="underline decoration-[var(--color-accent-500)] underline-offset-4">Grandes Intervenções em Fachadas</span>.</Heading>
           <Text size="lg" tone="secondary">Especialistas em grandes intervenções em condomínios habitados. Unimos eficiência, segurança e mínimo impacto na rotina dos moradores para entregar soluções tecnicamente precisas e duráveis.</Text>
           <div class="hero-btns flex flex-col w-full gap-3">
-            <Button as="a" href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" class="w-full md:w-1/2 font-body" variant="primary" size="lg">Solicitar Vistoria Técnica</Button>
-            <Button variant="secondary" onclick="animarScroll()" class="w-full md:w-1/2 font-body" size="lg">Escrever mensagem</Button>
+            <Button as="a" href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="w-full md:w-1/2 font-body" variant="primary" size="lg">Solicitar Vistoria Técnica</Button>
+            <Button variant="secondary" onclick="gtag('event', 'lp_scroll_to_form', { 'event_category': 'navegacao', 'event_label': 'cta_formulario' }); animarScroll()" class="w-full md:w-1/2 font-body" size="lg">Escrever mensagem</Button>
           </div>
         </div>
       </Reveal>
@@ -431,11 +431,11 @@ const footerCompany = {
           <Heading as="2" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
           <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
           <div class="flex flex-wrap items-center justify-center gap-3">
-            <a href="tel:+551129248556" class="flex items-center gap-2 font-body text-ink">
+            <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink">
               <Phone class="w-4 h-4" /> (11) 2924-8556
             </a>
             <span class="opacity-50">|</span>
-            <a href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 font-body text-ink">
+            <a href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.198.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
               </svg>
@@ -648,6 +648,7 @@ const footerCompany = {
         .then(r => r.text())
         .then(text => {
           if (text.trim() === 'OK') {
+            gtag('event', 'lp_form_submit', { 'event_category': 'contato', 'event_label': 'form_lp' });
             document.getElementById('form-feedback').classList.remove('hidden');
             form.reset();
             document.getElementById('erro-nome').classList.add('hidden');
@@ -678,6 +679,19 @@ const footerCompany = {
       if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
       if (!ok) { e.preventDefault(); }
     }
+  </script>
+
+  <script is:inline>
+    document.addEventListener('click', function (event) {
+      var link = event.target && event.target.closest ? event.target.closest('footer a.footer-contacts-link') : null;
+      if (!link) return;
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf('tel:') === 0) {
+        gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_footer' });
+      } else if (href.indexOf('https://wa.me/') === 0) {
+        gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_footer' });
+      }
+    });
   </script>
 
   <BackToTop client:load>
