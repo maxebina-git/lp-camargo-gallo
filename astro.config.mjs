@@ -7,8 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://camargogallo.com.br',
-  base: '/lp-camargo-gallo/',
+  site: 'https://staging.camargogallo.com.br',
   integrations: [vue(), sitemap()],
 
   vite: {
