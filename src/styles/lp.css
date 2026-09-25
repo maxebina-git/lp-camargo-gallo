@@ -1,5 +1,40 @@
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+:where([id]) {
+  scroll-margin-top: 5.5rem;
+}
+
+.hero-title {
+  font-size: clamp(1.75rem, 7.6vw, 2.5rem);
+  line-height: var(--leading-tight);
+}
+
+.hero-copy {
+  font-size: var(--text-base);
+  line-height: 1.45;
+}
+
+.hero-content {
+  gap: 1rem;
+}
+
+@media (min-width: 64rem) {
+  .hero-copy {
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+  }
+
+  .hero-content {
+    gap: 5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .whatsapp-floating {
+    display: none;
+  }
 }
 
 .accordion-item [data-accordion-trigger],
@@ -10,68 +45,16 @@ body {
   cursor: pointer !important;
 }
 
-#scroll-wrapper {
-  height: 500vh;
+.dots {
+  animation: dotFade 1.2s infinite ease-in-out;
 }
 
-#sticky-viewport {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-  width: 100%;
+@keyframes dotFade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
-#central-stage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
-#central-stage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-#orbit-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  pointer-events: none;
-  padding: 24px !important;
-}
-
-.orbit-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 24px !important;
-  pointer-events: auto;
-  width: 360px;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px !important;
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-ink) 10%, transparent);
-}
-
-@media (max-width: 640px) {
-  .orbit-card {
-    width: 288px;
-    height: auto;
-  }
-}
-
-.orbit-card-title {
+.trust-card-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: var(--weight-bold);
@@ -82,7 +65,7 @@ body {
   text-align: center;
 }
 
-.orbit-card-desc {
+.trust-card-description {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
@@ -92,88 +75,13 @@ body {
   text-align: center;
 }
 
-.orbit-card div[role="separator"] {
+.trust-card div[role="separator"] {
   margin-top: 16px !important;
   margin-bottom: 16px !important;
 }
 
-@media (min-width: 768px) {
-  #servicos {
-    display: none !important;
-  }
-}
-
-.logo-white-box {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.75);
-  border: none;
-  border-radius: var(--radius-lg);
-  z-index: 5;
-  pointer-events: none;
-  padding: 16px;
-}
-
-@media (max-width: 767px) {
-  #orbit-container {
-    display: none !important;
-  }
-}
-
-.dots { animation: dotFade 1.2s infinite ease-in-out; }
-@keyframes dotFade {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-#fixed-cta {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
-}
-
-.hero-btns {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 0.5rem;
-  justify-content: center;
-  width: 100%;
-}
-.hero-btns button,
-.hero-btns a {
-  width: 100%;
-}
-@media (min-width: 768px) {
-  .hero-btns {
-    flex-direction: row;
-  }
-  .hero-btns button,
-  .hero-btns a {
-    width: auto;
-  }
-}
-
-
-#trust-cards-desktop .orbit-card.trust-card { position: relative !important; }
-#trust-cards-desktop .trust-card { flex: 1 1 300px; max-width: 300px; }
-#trust-cards-desktop .trust-card-container { flex-wrap: nowrap; overflow: hidden; padding: 3rem !important; }
-#trust-cards-desktop [role=separator] { margin-left: auto; margin-right: auto; }
 .trust-icon {
   display: flex;
   justify-content: center;
   text-align: center;
 }
-#trust-cards-desktop .trust-icon { color: 
-var(--color-accent-500, #459AFF) !important; display: flex; justify-content: center; }
-#obras-em-execucao .max-w-5xl { max-width: none !important; }
-#obras-em-execucao .obra-wrapper { transition: transform 0.35s ease; }
-#obras-em-execucao .obras-em-execucao-container { flex-wrap: nowrap; overflow: visible; padding: 0 !important; width: 100%; }
-#obras-em-execucao .trust-card { flex: 1 1 300px; max-width: 300px; }
-#trust-wrapper { position: relative !important; padding: 3rem !important; overflow: hidden !important; }
-
-#trust-wrapper .trust-bar-left, #trust-wrapper .trust-bar-right { position: absolute !important; top: 0 !important; width: 100px !important; height: 100% !important; pointer-events: none !important; }
-#trust-wrapper .trust-bar-left { left: 0 !important; z-index: 50 !important; background: linear-gradient(to right, var(--color-surface) 0%, transparent 100%) !important; }
-#trust-wrapper .trust-bar-right { right: 0 !important; z-index: 50 !important; background: linear-gradient(to left, var(--color-surface) 0%, transparent 100%) !important; }
