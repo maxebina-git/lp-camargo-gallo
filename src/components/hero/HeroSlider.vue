@@ -131,6 +131,9 @@ const slideClass =
               fetchpriority="high"
               decoding="async"
             />
+            <Heading as="2" size="xl" class="max-w-[360px] text-center text-ink">
+              Confiança que se mede
+            </Heading>
             <div class="grid w-full max-w-[360px] grid-cols-2 gap-3">
               <FeatureCard
                 v-for="d in diferenciais"
