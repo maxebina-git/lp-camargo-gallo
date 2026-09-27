@@ -228,6 +228,17 @@ const slideClass =
               fetchpriority="high"
               decoding="async"
             />
+            <div class="hero-arch max-w-[360px]">
+              <img
+                class="hero-arch-media"
+                :class="{ 'is-in': index === 1 }"
+                src="/assets/trat-patologias-revestimentos-ceramicos.webp"
+                alt="Exemplo de tratamento de patologias em revestimentos cerâmicos"
+                width="224"
+                height="352"
+                decoding="async"
+              />
+            </div>
           </div>
         </Container>
       </CarouselSlide>

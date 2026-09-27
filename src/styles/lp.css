@@ -20,6 +20,36 @@ body {
   gap: 1rem;
 }
 
+.hero-arch {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 858 / 512;
+  background-color: var(--color-deep);
+  border: 8px solid var(--color-divider);
+  border-bottom: none;
+  border-radius: 50% 50% 0 0 / 70% 70% 0 0;
+}
+
+.hero-arch-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 0;
+  transform: translateY(100%);
+  transition:
+    opacity var(--duration-500) var(--ease-out),
+    transform var(--duration-500) var(--ease-out);
+}
+
+.hero-arch-media.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (min-width: 64rem) {
   .hero-copy {
     font-size: var(--text-lg);
