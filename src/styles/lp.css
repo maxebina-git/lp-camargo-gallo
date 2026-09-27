@@ -20,10 +20,15 @@ body {
   gap: 1rem;
 }
 
-.hero-arch {
+.hero-arch-slide {
   position: relative;
-  overflow: hidden;
-  width: 100%;
+}
+
+.hero-arch {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   aspect-ratio: 858 / 512;
   background-color: var(--color-deep);
   border: 8px solid var(--color-divider);
@@ -31,13 +36,17 @@ body {
   border-radius: 50% 50% 0 0 / 70% 70% 0 0;
 }
 
+.hero-arch-reveal {
+  position: relative;
+  width: 58%;
+  margin-inline: auto;
+  overflow: hidden;
+}
+
 .hero-arch-media {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 35%;
+  height: auto;
   opacity: 0;
   transform: translateY(100%);
   transition:
@@ -45,9 +54,20 @@ body {
     transform var(--duration-500) var(--ease-out);
 }
 
-.hero-arch-media.is-in {
+.hero-arch-reveal.is-in .hero-arch-media {
   opacity: 1;
   transform: translateY(0);
+  transition-delay: 400ms;
+}
+
+.hero-arch-reveal.is-in[data-reveal='swap'] .hero-arch-media {
+  transition-delay: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-arch-reveal.is-in .hero-arch-media {
+    transition-delay: 0s;
+  }
 }
 
 @media (min-width: 64rem) {

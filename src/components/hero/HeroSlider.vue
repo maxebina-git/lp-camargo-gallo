@@ -11,10 +11,12 @@ import {
   CarouselSlide,
 } from 'ds-grupo-rkb'
 import { diferenciais } from '../../data/diferenciais'
+import { heroFotos } from '../../data/hero-fotos'
 
 const WA = 'https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas'
 
 const index = ref(0)
+const fotosIndex = ref(0)
 
 type Globals = {
   gtag?: (...args: unknown[]) => void
@@ -120,14 +122,14 @@ const slideClass =
             </div>
           </div>
           <div
-            class="order-1 hidden w-4/12 flex-col items-center justify-center gap-6 px-4 lg:order-1 lg:flex"
+            class="order-1 hidden w-4/12 flex-col items-center justify-center gap-12 px-4 lg:order-1 lg:flex"
           >
             <img
               src="/assets/logo-camargo-gallo.png"
               alt="Camargo Gallo"
               width="166"
               height="232"
-              class="h-auto w-[166px]"
+              class="h-auto w-[120px]"
               fetchpriority="high"
               decoding="async"
             />
@@ -217,28 +219,51 @@ const slideClass =
             </div>
           </div>
           <div
-            class="order-1 hidden w-4/12 flex-col items-center justify-center gap-6 px-4 lg:order-1 lg:flex"
+            class="order-1 hidden w-4/12 flex-col items-center justify-center gap-36 px-4 lg:order-1 lg:flex"
           >
             <img
               src="/assets/logo-camargo-gallo.png"
               alt="Camargo Gallo"
               width="166"
               height="232"
-              class="h-auto w-[166px]"
+              class="h-auto w-[120px]"
               fetchpriority="high"
               decoding="async"
             />
-            <div class="hero-arch max-w-[360px]">
-              <img
-                class="hero-arch-media"
-                :class="{ 'is-in': index === 1 }"
-                src="/assets/trat-patologias-revestimentos-ceramicos.webp"
-                alt="Exemplo de tratamento de patologias em revestimentos cerâmicos"
-                width="224"
-                height="352"
-                decoding="async"
-              />
-            </div>
+            <Carousel
+              v-model:index="fotosIndex"
+              class="w-full max-w-[360px]"
+              :loop="true"
+              nav-position="bottom-right"
+              nav-class="[&_button]:h-8 [&_button]:w-8"
+              aria-label="Exemplos de tratamento de fachadas"
+            >
+              <CarouselSlide v-for="(foto, i) in heroFotos" :key="foto.src">
+                <div class="hero-arch-slide">
+                  <div class="hero-arch" aria-hidden="true"></div>
+                  <div
+                    class="hero-arch-reveal"
+                    :class="{ 'is-in': index === 1 && fotosIndex === i }"
+                    :data-reveal="fotosIndex > 0 ? 'swap' : 'slide'"
+                  >
+                    <img
+                      class="hero-arch-media"
+                      :src="foto.src"
+                      :alt="foto.alt"
+                      width="224"
+                      height="352"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+                <a
+                  :href="foto.href"
+                  class="mt-3 block text-left font-body text-xs font-bold uppercase leading-tight tracking-wide text-deep hover:underline"
+                >
+                  {{ foto.legenda }}
+                </a>
+              </CarouselSlide>
+            </Carousel>
           </div>
         </Container>
       </CarouselSlide>
