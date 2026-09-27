@@ -2,7 +2,7 @@ name: Deploy Astro LP
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
 
 jobs:
   deploy:
