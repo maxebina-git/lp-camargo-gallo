@@ -264,7 +264,7 @@ const slideClass =
                 </div>
               </div>
 
-              <div class="mt-3 flex items-end justify-between gap-3">
+              <div class="mt-3 flex items-center justify-between gap-3">
                 <a
                   :href="fotoAtiva.href"
                   class="font-body text-xs font-bold uppercase leading-tight tracking-wide text-deep hover:underline"

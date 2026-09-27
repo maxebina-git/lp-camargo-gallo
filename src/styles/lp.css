@@ -36,11 +36,13 @@ body {
   border-radius: 50% 50% 0 0 / 70% 70% 0 0;
 }
 
+/* 360x328: a altura preserva a foto de tratamento (retrato) no tamanho atual de
+   328px, e a largura cheia da caixa deixa a foto aerea (paisagem) caber inteira
+   em 360x236. Com contain nada e cortado, so escala. */
 .hero-arch-slot {
   position: relative;
-  width: 58%;
-  margin-inline: auto;
-  aspect-ratio: 224 / 352;
+  width: 100%;
+  aspect-ratio: 360 / 328;
   overflow: hidden;
 }
 
@@ -49,8 +51,8 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
+  object-position: center bottom;
   opacity: 0;
   transform: translateY(100%);
   transition:
