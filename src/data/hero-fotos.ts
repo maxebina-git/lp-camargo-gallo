@@ -12,4 +12,10 @@ export const heroFotos: HeroFoto[] = [
     legenda: 'Tratamento de patologias em revestimentos cerâmicos',
     href: '#servicos',
   },
+  {
+    src: '/assets/hero-slide/substituicao-de-revestimentos.webp',
+    alt: 'Vista aérea de edifício residencial com substituição de revestimento',
+    legenda: 'Substituição de revestimentos',
+    href: '#servicos',
+  },
 ]

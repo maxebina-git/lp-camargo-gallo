@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   Button,
   Container,
@@ -10,6 +10,7 @@ import {
   Carousel,
   CarouselSlide,
 } from 'ds-grupo-rkb'
+import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import { diferenciais } from '../../data/diferenciais'
 import { heroFotos } from '../../data/hero-fotos'
 
@@ -17,6 +18,22 @@ const WA = 'https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20m
 
 const index = ref(0)
 const fotosIndex = ref(0)
+
+const temVariasFotos = computed(() => heroFotos.length > 1)
+const fotoAtiva = computed(() => heroFotos[fotosIndex.value] ?? heroFotos[0])
+const v2JaEntrou = ref(false)
+
+watch(index, (valor) => {
+  if (valor === 1 && !v2JaEntrou.value) setTimeout(() => (v2JaEntrou.value = true), 700)
+})
+
+function fotoAnterior() {
+  fotosIndex.value = (fotosIndex.value - 1 + heroFotos.length) % heroFotos.length
+}
+
+function fotoProxima() {
+  fotosIndex.value = (fotosIndex.value + 1) % heroFotos.length
+}
 
 type Globals = {
   gtag?: (...args: unknown[]) => void
@@ -230,40 +247,54 @@ const slideClass =
               fetchpriority="high"
               decoding="async"
             />
-            <Carousel
-              v-model:index="fotosIndex"
-              class="w-full max-w-[360px]"
-              :loop="true"
-              nav-position="bottom-right"
-              nav-class="[&_button]:h-8 [&_button]:w-8"
-              aria-label="Exemplos de tratamento de fachadas"
-            >
-              <CarouselSlide v-for="(foto, i) in heroFotos" :key="foto.src">
-                <div class="hero-arch-slide">
-                  <div class="hero-arch" aria-hidden="true"></div>
-                  <div
-                    class="hero-arch-reveal"
+            <div class="w-full max-w-[360px]">
+              <div class="hero-arch-slide">
+                <div class="hero-arch" aria-hidden="true"></div>
+                <div class="hero-arch-slot" :data-reveal="v2JaEntrou ? 'swap' : 'slide'">
+                  <img
+                    v-for="(foto, i) in heroFotos"
+                    :key="foto.src"
+                    class="hero-arch-media"
                     :class="{ 'is-in': index === 1 && fotosIndex === i }"
-                    :data-reveal="fotosIndex > 0 ? 'swap' : 'slide'"
-                  >
-                    <img
-                      class="hero-arch-media"
-                      :src="foto.src"
-                      :alt="foto.alt"
-                      width="224"
-                      height="352"
-                      decoding="async"
-                    />
-                  </div>
+                    :aria-hidden="!(index === 1 && fotosIndex === i)"
+                    :src="foto.src"
+                    :alt="foto.alt"
+                    decoding="async"
+                  />
                 </div>
+              </div>
+
+              <div class="mt-3 flex items-end justify-between gap-3">
                 <a
-                  :href="foto.href"
-                  class="mt-3 block text-left font-body text-xs font-bold uppercase leading-tight tracking-wide text-deep hover:underline"
+                  :href="fotoAtiva.href"
+                  class="font-body text-xs font-bold uppercase leading-tight tracking-wide text-deep hover:underline"
                 >
-                  {{ foto.legenda }}
+                  {{ fotoAtiva.legenda }}
                 </a>
-              </CarouselSlide>
-            </Carousel>
+                <div class="flex shrink-0 gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    iconOnly
+                    aria-label="Foto anterior"
+                    :disabled="!temVariasFotos"
+                    @click="fotoAnterior"
+                  >
+                    <ChevronLeft class="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    iconOnly
+                    aria-label="Próxima foto"
+                    :disabled="!temVariasFotos"
+                    @click="fotoProxima"
+                  >
+                    <ChevronRight class="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </Container>
       </CarouselSlide>
