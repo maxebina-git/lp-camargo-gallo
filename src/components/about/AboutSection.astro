@@ -1,0 +1,71 @@
+---
+import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
+import AboutBadges from './AboutBadges.vue'
+---
+
+<script>
+  function initParalax() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const gsap = window.gsap
+    const ScrollTrigger = window.ScrollTrigger
+    if (!gsap || !ScrollTrigger) return
+    gsap.registerPlugin(ScrollTrigger)
+
+    document.querySelectorAll('[data-parallax]').forEach((box) => {
+      const img = box.querySelector('[data-parallax-img]')
+      if (!img) return
+      gsap.fromTo(
+        img,
+        { yPercent: 0 },
+        {
+          // A imagem tem h-[200%] (= +100% da altura do box), entao tolera
+          // deslocamento de ate 100% do box. yPercent -49 = 98% (folga).
+          // Fonte 1201x718, box 1201:718: cover amplia ~1,008x (imperceptivel).
+          yPercent: -49,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: box,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
+  }
+
+  // O window.gsap e definido pelo BaseLayout; ambos sao modulos bundlados, entao
+  // esperar o load evita depender da ordem de execucao entre eles.
+  if (document.readyState === 'complete') initParalax()
+  else window.addEventListener('load', initParalax, { once: true })
+</script>
+
+<Section tone="warm" size="lg" class="py-16">
+  <Container size="lg">
+    <div class="grid gap-10 md:grid-cols-2 md:items-center">
+      <div data-parallax class="relative aspect-[1201/718] overflow-hidden">
+        <img
+          data-parallax-img
+          src="/about-image.png"
+          alt="Equipe da Camargo Gallo executando recuperação de fachada"
+          width="1201"
+          height="718"
+          class="absolute inset-x-0 top-0 h-[200%] w-full object-cover"
+          decoding="async"
+        />
+      </div>
+      <div class="flex flex-col gap-4">
+        <Heading as="2" size="display" class="about-title">Sobre a Camargo Gallo Engenharia</Heading>
+        <Heading as="3" size="xl" class="text-deep">Técnica e Trabalho, Renovando Construções</Heading>
+        <Text tone="secondary">
+          A Camargo Gallo Engenharia é uma empresa especializada na recuperação e tratamento de fachadas
+          prediais, com foco nas anomalias e patologias construtivas e possui elevada capacitação técnica
+          para a correta intervenção e manutenção do seu empreendimento.
+        </Text>
+      </div>
+    </div>
+
+    <AboutBadges class="mt-10" />
+  </Container>
+</Section>
