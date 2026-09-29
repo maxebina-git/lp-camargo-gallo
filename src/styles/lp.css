@@ -2,11 +2,21 @@ body {
   overflow-x: clip;
 }
 
+#servicos {
+  overflow-x: visible;
+}
+
+#servicos .servicos-slider {
+  margin-right: calc(-1 * (100vw - 100%) / 2);
+  padding-right: calc((100vw - 100%) / 2);
+}
+
 :where([id]) {
   scroll-margin-top: 5.5rem;
 }
 
-.hero-title {
+.hero-title,
+.about-title {
   font-size: clamp(1.75rem, 7.6vw, 2.5rem);
   line-height: var(--leading-tight);
 }
@@ -113,34 +123,59 @@ body {
   50% { opacity: 0.3; }
 }
 
-.trust-card-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: var(--weight-bold);
-  font-size: var(--text-xl);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-  color: var(--color-ink);
-  text-align: center;
-}
-
-.trust-card-description {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  line-height: var(--leading-normal);
-  color: var(--color-text-secondary);
-  white-space: normal;
-  overflow-wrap: break-word;
-  text-align: center;
-}
-
-.trust-card div[role="separator"] {
-  margin-top: 16px !important;
-  margin-bottom: 16px !important;
-}
-
 .trust-icon {
   display: flex;
   justify-content: center;
   text-align: center;
+}
+
+/* Badges da seção Sobre (AboutBadges.vue).
+   A grade usa media queries explicitas (nao tailwind sm:/md:/xl:) porque o
+   ds-grupo-rkb embute um Tailwind compilado proprio cujo .sm\:grid-cols-2
+   aparece DEPOIS das utilities do app em dev e, por igual especificidade,
+   venceria o md:grid-cols-3/xl:grid-cols-5 (fixando 2 colunas). Em build a
+   ordem ja e correta; estas regras garantem o mesmo comportamento nos dois. */
+.about-badges {
+  display: grid;
+  gap: 1.5rem; /* gap-6 */
+  text-align: center;
+}
+
+@media (width >= 40rem) {
+  .about-badges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 48rem) {
+  .about-badges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 80rem) {
+  .about-badges {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Duração/atraso por card vêm inline (style), via dur/delay no componente. */
+.about-badge {
+  animation-name: badgeFloat;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  will-change: transform;
+}
+
+@keyframes badgeFloat {
+  to {
+    transform: translateY(-14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-badge {
+    animation: none;
+  }
 }
