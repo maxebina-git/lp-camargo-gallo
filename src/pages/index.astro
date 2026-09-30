@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import {
   Button,
-  Tag,
   Container,
   FormField,
   Input,
@@ -19,12 +18,14 @@ import {
   Footer,
 } from 'ds-grupo-rkb'
 import LegalDrawer from '../components/legal/LegalDrawer.vue'
-import FaqSection from '../components/faq/FaqSection.vue'
 import WhatsappButton from '../components/WhatsappButton.vue'
 import HeroSlider from '../components/hero/HeroSlider.vue'
 import AboutSection from '../components/about/AboutSection.astro'
+import PortfolioSection from '../components/portfolio/PortfolioSection.astro'
 import ServiceCard from '../components/services/ServiceCard.vue'
 import { servicos } from '../data/servicos'
+import { insights } from '../data/insights'
+import InsightCard from '../components/insights/InsightCard.astro'
 import lucide from '@lucide/vue'
 const { LucideMail, ChevronUp } = lucide
 
@@ -59,15 +60,12 @@ const headerNav = [
   { label: 'SEGURANÇA', href: '#' },
   { label: 'PARCEIROS', href: '#' },
   { label: 'PORTFÓLIO', href: '#' },
-  { label: 'BLOG', href: '#' },
   { label: 'CONTATO', href: '#contato' },
 ];
 
 ---
 
 <style>
-  .tag-amber { color: var(--color-material-amber-500); background-color: var(--color-material-amber-500); }
-
   .servico-reveal {
     opacity: 0;
     transform: translateY(24px);
@@ -109,19 +107,19 @@ const headerNav = [
 
   <AboutSection />
 
-  <Section tone="surface" id="servicos" class="py-16">
+  <Section tone="surface-alt" id="servicos" class="py-16">
 
 
     <Container size="lg">
       <Reveal client:visible>
-        <div class="flex flex-col items-center text-center mb-6 gap-3">
-          <Tag class="tag-amber">{servicos.length} Serviços</Tag>
-          <Heading as="2" size="display">Serviços completos de ponta a ponta</Heading>
-          <Text tone="secondary">Do diagnóstico à pintura premium — acompanhamento online e conformidade NR-35.</Text>
+        <div class="flex flex-col items-center text-center mb-12 gap-3">
+          <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-border"></div>
+          <Heading as="2" size="display" class="section-title mt-3">Serviços completos de ponta a ponta</Heading>
+          <Heading as="3" size="xl" class="text-deep">Do diagnóstico à pintura premium — acompanhamento online e conformidade NR-35.</Heading>
         </div>
       </Reveal>
       <div class="relative">
-        <div class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Serviços">
+        <div class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Serviços">
           <div class="servicos-track flex gap-6" data-servicos-track>
             {servicos.map((s) => (
               <div class="servico-item servico-reveal shrink-0 snap-start">
@@ -131,205 +129,254 @@ const headerNav = [
           </div>
         </div>
         <button
-          id="servicos-prev"
+          data-servicos-prev
           class="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/90 text-ink shadow-lg backdrop-blur transition hover:bg-white"
           aria-label="Serviço anterior"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
         </button>
         <button
-          id="servicos-next"
+          data-servicos-next
           class="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/90 text-ink shadow-lg backdrop-blur transition hover:bg-white"
           aria-label="Próximo serviço"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
         </button>
       </div>
+      <div class="flex justify-center mt-12">
+        <Button as="a" href="#" variant="secondary" size="lg">Ver + Serviços</Button>
+      </div>
+    </Container>
+  </Section>
+
+  
+  
+  <PortfolioSection />
+
+  <Section tone="warm" id="insights" class="py-16">
+    <Container size="lg">
+      <Reveal client:visible>
+        <div class="flex flex-col items-center text-center mb-12 gap-3">
+          <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-divider"></div>
+          <Heading as="2" size="display" class="section-title mt-3">Insights</Heading>
+          <Heading as="3" size="xl" class="text-deep">Da identificação de patologias às soluções preventivas — insight antecipado para proteção duradoura</Heading>
+        </div>
+      </Reveal>
+      <div class="relative">
+        <div class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Serviços cópia">
+          <div class="servicos-track flex gap-6" data-servicos-track>
+            {insights.map((insight) => (
+              <div class="servico-item servico-reveal shrink-0 snap-start">
+                <InsightCard titulo={insight.titulo} resumo={insight.resumo} data={insight.data} categoria={insight.categoria} slug={insight.slug} imagem={insight.imagem} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <button
+          data-servicos-prev
+          class="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/90 text-ink shadow-lg backdrop-blur transition hover:bg-white"
+          aria-label="Insight anterior"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button
+          data-servicos-next
+          class="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/90 text-ink shadow-lg backdrop-blur transition hover:bg-white"
+          aria-label="Próximo insight"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+      <div class="flex justify-center mt-12">
+        <Button as="a" href="#" variant="primary" size="lg">Ver + Insights</Button>
+      </div>
     </Container>
   </Section>
 
   <script is:inline>
     (function () {
-      var slider = document.querySelector('.servicos-slider');
-      var track = document.querySelector('[data-servicos-track]');
-      var prev = document.getElementById('servicos-prev');
-      var next = document.getElementById('servicos-next');
-      if (!slider || !track || !prev || !next) return;
+      function setup(slider, track, prev, next) {
+        if (!slider || !track || !prev || !next) return;
 
-      var total = track.children.length;
-      if (total < 2) return;
+        var total = track.children.length;
+        if (total < 2) return;
 
-      var realStart = 0;
-      var realEnd = total - 1;
-      var slides = [];
-      var locked = false;
-      var touched = false;
-      var unlockTimer = null;
+        var realStart = 0;
+        var realEnd = total - 1;
+        var slides = [];
+        var locked = false;
+        var touched = false;
+        var unlockTimer = null;
 
-      function itemBox(el) {
-        var rect = el.getBoundingClientRect();
-        if (rect.width) return rect;
-        var inner = el.querySelector('.servico-item');
-        return inner ? inner.getBoundingClientRect() : rect;
-      }
+        function itemBox(el) {
+          var rect = el.getBoundingClientRect();
+          if (rect.width) return rect;
+          var inner = el.querySelector('.servico-item');
+          return inner ? inner.getBoundingClientRect() : rect;
+        }
 
-      function makeClone(el) {
-        var src = el.classList.contains('servico-item') ? el : (el.querySelector('.servico-item') || el);
-        var node = document.createElement('div');
-        node.className = 'servico-item servico-clone shrink-0 snap-start';
-        Array.prototype.forEach.call(src.childNodes, function (child) {
-          node.appendChild(child.cloneNode(true));
-        });
-        node.setAttribute('aria-hidden', 'true');
-        node.setAttribute('inert', '');
-        Array.prototype.forEach.call(node.querySelectorAll('a, button, [tabindex]'), function (focusable) {
-          focusable.setAttribute('tabindex', '-1');
-        });
-        return node;
-      }
+        function makeClone(el) {
+          var src = el.classList.contains('servico-item') ? el : (el.querySelector('.servico-item') || el);
+          var node = document.createElement('div');
+          node.className = 'servico-item servico-clone shrink-0 snap-start';
+          Array.prototype.forEach.call(src.childNodes, function (child) {
+            node.appendChild(child.cloneNode(true));
+          });
+          node.setAttribute('aria-hidden', 'true');
+          Array.prototype.forEach.call(node.querySelectorAll('a, button, [tabindex]'), function (focusable) {
+            focusable.setAttribute('tabindex', '-1');
+          });
+          return node;
+        }
 
-      function observeReveal() {
-        if (!('IntersectionObserver' in window)) {
+        function observeReveal() {
+          if (!('IntersectionObserver' in window)) {
+            Array.prototype.forEach.call(track.children, function (el) {
+              if (!el.classList.contains('servico-clone')) el.classList.add('is-visible');
+            });
+            return;
+          }
+
+          var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              entry.target.classList.toggle('is-visible', entry.isIntersecting);
+            });
+          }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
           Array.prototype.forEach.call(track.children, function (el) {
-            if (!el.classList.contains('servico-clone')) el.classList.add('is-visible');
+            if (!el.classList.contains('servico-clone')) observer.observe(el);
           });
-          return;
         }
 
-        var observer = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        function build() {
+          Array.prototype.slice.call(track.children).forEach(function (el) {
+            if (el.classList.contains('servico-clone')) el.remove();
           });
-        }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
 
-        Array.prototype.forEach.call(track.children, function (el) {
-          if (!el.classList.contains('servico-clone')) observer.observe(el);
-        });
-      }
+          var originals = Array.prototype.slice.call(track.children);
+          var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+          var width = itemBox(originals[0]).width || itemBox(originals[originals.length - 1]).width || 300;
+          var step = width + gap || 1;
 
-      function build() {
-        Array.prototype.slice.call(track.children).forEach(function (el) {
-          if (el.classList.contains('servico-clone')) el.remove();
-        });
+          var visible = Math.ceil(slider.clientWidth / step) + 1;
+          var before = originals.slice(Math.max(0, originals.length - visible));
+          var anchor = track.firstChild;
 
-        var originals = Array.prototype.slice.call(track.children);
-        var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-        var width = itemBox(originals[0]).width || itemBox(originals[originals.length - 1]).width || 300;
-        var step = width + gap || 1;
+          before.forEach(function (el) { track.insertBefore(makeClone(el), anchor); });
+          originals.slice(0, visible).forEach(function (el) { track.appendChild(makeClone(el)); });
 
-        var visible = Math.ceil(slider.clientWidth / step) + 1;
-        var before = originals.slice(Math.max(0, originals.length - visible));
-        var anchor = track.firstChild;
-
-        before.forEach(function (el) { track.insertBefore(makeClone(el), anchor); });
-        originals.slice(0, visible).forEach(function (el) { track.appendChild(makeClone(el)); });
-
-        realStart = before.length;
-        realEnd = realStart + originals.length - 1;
-        slides = Array.prototype.slice.call(track.children);
-      }
-
-      function jumpTo(x) {
-        slider.scrollLeft = x;
-      }
-
-      function positions() {
-        var left = slider.getBoundingClientRect().left;
-        var base = slider.scrollLeft;
-        return slides.map(function (el) {
-          return base + (itemBox(el).left - left);
-        });
-      }
-
-      function nearestIndex() {
-        var pos = positions();
-        var x = slider.scrollLeft;
-        var best = 0;
-        var dist = Infinity;
-        for (var i = 0; i < pos.length; i++) {
-          var d = Math.abs(pos[i] - x);
-          if (d < dist) { dist = d; best = i; }
+          realStart = before.length;
+          realEnd = realStart + originals.length - 1;
+          slides = Array.prototype.slice.call(track.children);
         }
-        return best;
-      }
 
-      function toReal(i) {
-        if (i > realEnd) return realStart + ((i - realStart) % total);
-        if (i < realStart) return realStart + ((((i - realStart) % total) + total) % total);
-        return i;
-      }
-
-      function settle() {
-        var i = nearestIndex();
-        var real = toReal(i);
-        if (real !== i) jumpTo(positions()[real]);
-        return real - realStart;
-      }
-
-      function unlock() {
-        locked = false;
-        if (unlockTimer) { clearTimeout(unlockTimer); unlockTimer = null; }
-      }
-
-      function waitScroll() {
-        locked = true;
-        if (unlockTimer) clearTimeout(unlockTimer);
-        var done = false;
-        function finish() {
-          if (done) return;
-          done = true;
-          slider.removeEventListener('scrollend', finish);
-          unlock();
-          settle();
+        function jumpTo(x) {
+          slider.scrollLeft = x;
         }
-        slider.addEventListener('scrollend', finish, { once: true });
-        unlockTimer = setTimeout(finish, 900);
+
+        function positions() {
+          var left = slider.getBoundingClientRect().left;
+          var base = slider.scrollLeft;
+          return slides.map(function (el) {
+            return base + (itemBox(el).left - left);
+          });
+        }
+
+        function nearestIndex() {
+          var pos = positions();
+          var x = slider.scrollLeft;
+          var best = 0;
+          var dist = Infinity;
+          for (var i = 0; i < pos.length; i++) {
+            var d = Math.abs(pos[i] - x);
+            if (d < dist) { dist = d; best = i; }
+          }
+          return best;
+        }
+
+        function toReal(i) {
+          if (i > realEnd) return realStart + ((i - realStart) % total);
+          if (i < realStart) return realStart + ((((i - realStart) % total) + total) % total);
+          return i;
+        }
+
+        function settle() {
+          var i = nearestIndex();
+          var real = toReal(i);
+          if (real !== i) jumpTo(positions()[real]);
+          return real - realStart;
+        }
+
+        function unlock() {
+          locked = false;
+          if (unlockTimer) { clearTimeout(unlockTimer); unlockTimer = null; }
+        }
+
+        function waitScroll() {
+          locked = true;
+          if (unlockTimer) clearTimeout(unlockTimer);
+          var done = false;
+          function finish() {
+            if (done) return;
+            done = true;
+            slider.removeEventListener('scrollend', finish);
+            unlock();
+            settle();
+          }
+          slider.addEventListener('scrollend', finish, { once: true });
+          unlockTimer = setTimeout(finish, 900);
+        }
+
+        function stepBy(delta) {
+          if (locked) return;
+          waitScroll();
+          var i = nearestIndex() + delta;
+          i = Math.max(0, Math.min(slides.length - 1, i));
+          slider.scrollTo({ left: positions()[i], behavior: 'smooth' });
+        }
+
+        function currentCard() {
+          return toReal(nearestIndex()) - realStart;
+        }
+
+        function reposition(keep) {
+          build();
+          jumpTo(positions()[realStart + keep]);
+        }
+
+        reposition(0);
+        observeReveal();
+        window.addEventListener('load', function () {
+          if (!touched) reposition(currentCard());
+        });
+
+        prev.addEventListener('click', function () { touched = true; stepBy(-1); });
+        next.addEventListener('click', function () { touched = true; stepBy(1); });
+
+        var idle = null;
+        slider.addEventListener('scroll', function () {
+          if (locked) return;
+          if (idle) clearTimeout(idle);
+          idle = setTimeout(settle, 160);
+        }, { passive: true });
+
+        var resizeTimer = null;
+        window.addEventListener('resize', function () {
+          if (resizeTimer) clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () { reposition(currentCard()); }, 200);
+        });
       }
 
-      function stepBy(delta) {
-        if (locked) return;
-        waitScroll();
-        var i = nearestIndex() + delta;
-        i = Math.max(0, Math.min(slides.length - 1, i));
-        slider.scrollTo({ left: positions()[i], behavior: 'smooth' });
-      }
-
-      function currentCard() {
-        return toReal(nearestIndex()) - realStart;
-      }
-
-      function reposition(keep) {
-        build();
-        jumpTo(positions()[realStart + keep]);
-      }
-
-      reposition(0);
-      observeReveal();
-      window.addEventListener('load', function () {
-        if (!touched) reposition(currentCard());
-      });
-
-      prev.addEventListener('click', function () { touched = true; stepBy(-1); });
-      next.addEventListener('click', function () { touched = true; stepBy(1); });
-
-      var idle = null;
-      slider.addEventListener('scroll', function () {
-        if (locked) return;
-        if (idle) clearTimeout(idle);
-        idle = setTimeout(settle, 160);
-      }, { passive: true });
-
-      var resizeTimer = null;
-      window.addEventListener('resize', function () {
-        if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () { reposition(currentCard()); }, 200);
+      Array.prototype.forEach.call(document.querySelectorAll('.servicos-slider'), function (sl) {
+        setup(
+          sl,
+          sl.querySelector('[data-servicos-track]'),
+          sl.parentElement.querySelector('[data-servicos-prev]'),
+          sl.parentElement.querySelector('[data-servicos-next]')
+        );
       });
     })();
   </script>
-
-  <div class="bg-surface-alt text-ink">
-    <FaqSection client:load />
-  </div>
 
   <section id="contato" class="bg-surface text-ink py-16">
     <Container>
