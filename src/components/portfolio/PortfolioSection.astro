@@ -1,0 +1,286 @@
+---
+import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
+import { portfolio } from '../../data/portfolio'
+---
+
+<script>
+  // Acordeao vertical comandado pelo scroll: uma obra expandida por vez, na
+  // ordem em que aparecem na lista. O ScrollTrigger cuida so do pin; o indice e
+  // derivado do progresso, o que torna a troca bidirecional — rolar para cima
+  // refaz o mesmo caminho ao contrario.
+  // O window.gsap/ScrollTrigger sao definidos pelo BaseLayout (modulos bundlados),
+  // entao init so roda depois do load para nao depender da ordem de execucao.
+  function initPortfolio() {
+    const raiz = document.querySelector('[data-portfolio]')
+    if (!raiz) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (window.matchMedia('(max-width: 767px)').matches) return
+
+    const gsap = window.gsap
+    const ScrollTrigger = window.ScrollTrigger
+    if (!gsap || !ScrollTrigger) return
+    gsap.registerPlugin(ScrollTrigger)
+
+    const itens = Array.from(raiz.querySelectorAll('[data-portfolio-item]'))
+    const total = itens.length
+    if (total < 2) return
+
+    const passos = total - 1
+    let indice = 0
+
+    raiz.classList.add('is-acordeao')
+
+    function aplicar() {
+      itens.forEach((item, i) => {
+        item.classList.toggle('is-ativo', i === indice)
+        item.classList.toggle('is-recolhida', i !== indice)
+      })
+      raiz.dataset.ativo = String(indice)
+    }
+
+    const btnCases = document.getElementById('portfolio-cases-btn')
+    const mostrarBtn = () => btnCases?.classList.add('is-visible')
+    const ocultarBtn = () => btnCases?.classList.remove('is-visible')
+
+    ScrollTrigger.create({
+      trigger: raiz,
+      start: 'top top',
+      end: () => '+=' + window.innerHeight * passos,
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      onEnter: mostrarBtn,
+      onLeave: ocultarBtn,
+      onEnterBack: mostrarBtn,
+      onLeaveBack: ocultarBtn,
+      onUpdate: (self) => {
+        const alvo = Math.min(total - 1, Math.max(0, Math.round(self.progress * passos)))
+        if (alvo !== indice) {
+          indice = alvo
+          aplicar()
+        }
+      },
+      onRefresh: aplicar,
+    })
+
+    aplicar()
+  }
+
+  if (document.readyState === 'complete') initPortfolio()
+  else window.addEventListener('load', initPortfolio, { once: true })
+</script>
+
+<Section tone="surface-brand" id="portfolio" class="bg-surface-brand py-16 md:py-0">
+  <div data-portfolio class="md:h-[100dvh] md:overflow-hidden">
+    <Container size="lg" class="py-16 md:flex md:h-full md:flex-col md:justify-center">
+      <div class="mb-10 flex flex-col items-center gap-4 text-center md:mb-6">
+        <div role="separator" aria-hidden="true" class="h-4 w-[75%] rounded-full bg-deep"></div>
+        <Heading as="2" size="display" class="section-title">Portfólio</Heading>
+        <Heading as="3" size="xl" class="text-deep">
+          Projetos selecionados de recuperação, modernização e manutenção de fachadas.
+        </Heading>
+      </div>
+
+      <ul data-portfolio-lista class="flex flex-col gap-3 md:flex-1 md:justify-center">
+        {portfolio.slice(0, 5).map((obra) => (
+          <li
+            data-portfolio-item
+            class="grid items-center gap-6 md:grid-cols-[1fr_2fr_1fr] md:gap-8 md:overflow-hidden"
+          >
+            <div class="flex items-center gap-4 md:min-h-0 md:flex-col md:items-end md:justify-center md:gap-3 text-right" data-portfolio-titulo>
+              <Heading as="3" size="xl" class="text-ink">
+                {obra.titulo}
+              </Heading>
+              <span
+                role="separator"
+                aria-hidden="true"
+                class="h-px flex-1 bg-border md:w-full"
+              ></span>
+            </div>
+
+            <div class="flex justify-center" data-portfolio-foto>
+              <div
+                data-portfolio-thumb
+                class="aspect-[3/2] w-full overflow-hidden rounded-xl bg-surface-alt md:max-w-none"
+              >
+                <img
+                  src={obra.imagem}
+                  alt={obra.titulo}
+                  width="600"
+                  height="600"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3" data-portfolio-texto>
+              <Text tone="secondary">{obra.resumo}</Text>
+              <p class="font-body text-xs uppercase tracking-wide text-deep">
+                {[obra.local, obra.ano].filter(Boolean).join(' · ')}
+              </p>
+              <a
+                href="#"
+                class="cta-portfolio self-start mt-2 inline-flex items-center gap-2 rounded-lg bg-deep px-3 py-1.5 text-xs font-body uppercase tracking-wide text-white shadow-md hover:bg-deep/80 transition-opacity duration-400"
+                onclick="document.getElementById('portfolio')?.scrollIntoView({behavior:'smooth'}); return false;"
+              >
+                Ver detalhes
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Container>
+  </div>
+  </Section>
+
+  <!-- Botao flutuante de portfolio: aparece apenas durante o pin -->
+  <a
+    href="#"
+    id="portfolio-cases-btn"
+    aria-label="Veja + cases"
+    class="portfolio-cases-btn fixed bottom-8 z-[60] bg-deep text-white rounded-full shadow-xl p-4 hover:bg-deep/90 transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep cursor-pointer flex items-center justify-center right-[4rem]"
+    onclick="document.getElementById('portfolio')?.scrollIntoView({behavior:'smooth'}); return false;"
+  >
+    Veja + cases
+  </a>
+
+<style>
+  /* O estado de acordeao so vale a partir de md E quando o JS rodou. Sem isso —
+     mobile, reduced-motion ou JS bloqueado — todos os itens ficam expandidos em
+     fluxo normal, legiveis. */
+
+  /* O item contrai pela altura; a transicao fica no proprio elemento para o
+     mobile nunca animar nada. */
+  [data-portfolio-item] {
+    transition: height 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-portfolio-item] [data-portfolio-titulo],
+  [data-portfolio-item] [data-portfolio-titulo] h3,
+  [data-portfolio-item] [data-portfolio-foto],
+  [data-portfolio-item] [data-portfolio-texto],
+  [data-portfolio-item] [data-portfolio-thumb],
+  [data-portfolio-item] [data-portfolio-foto] img {
+    transition:
+      opacity 400ms ease-out,
+      filter 400ms ease-out;
+  }
+
+  /* A altura da descricao fecha junto com o item, nao de um golpe. */
+  [data-portfolio-item] [data-portfolio-texto] {
+    transition:
+      opacity 400ms ease-out,
+      filter 400ms ease-out,
+      max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-portfolio-item] [data-portfolio-thumb] {
+    transition:
+      width 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      max-width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (min-width: 48rem) {
+    /* O gap e controlado aqui porque a coluna precisa caber inteira em 100dvh:
+     1 expandida + 5 recolhidas. Utilitario do Tailwind nao garantia a
+     precedencia sobre o gap do fluxo mobile. */
+    [data-portfolio-lista] {
+      row-gap: 0.5rem;
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item] {
+      height: 4.5rem;
+      /* A linha precisa ter a altura do item: sem isso o grid usa a altura do
+         conteudo (titulo e descricao continuam ocupando espaco mesmo com
+         opacity 0) e o align-items:center empurra a foto para fora da caixa,
+         ja que o overflow do item corta. */
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item].is-ativo {
+      height: 20rem;
+    }
+
+    /* min() impede a foto de estourar a coluna em telas estreitas de desktop;
+       o aspect-square do elemento resolve a altura a partir da largura. */
+    [data-portfolio].is-acordeao [data-portfolio-thumb] {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    /* Fechado: a foto mantem a largura da ativa e so perde a altura, virando
+       uma faixa com os quatro cantos arredondados visiveis. Titulo e descricao
+       voltam a aparecer, so que recuados e desfocados. */
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-thumb] {
+      height: 5rem;
+    }
+
+    /* Mesma transparencia nos tres blocos do item fechado, com o titulo mais
+       legivel por ser o que identifica a obra. */
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-foto],
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] {
+      opacity: 0.5;
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-titulo] {
+      opacity: 0.25;
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-titulo] h3 {
+      filter: blur(6px);
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-foto] img {
+      filter: blur(3px);
+    }
+
+    /* A descricao e o bloco mais alto dos tres; fechar em 50% da altura evita
+        que a faixa de texto saia cortada no meio de uma linha. */
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] {
+      filter: blur(4px);
+      max-height: 50%;
+      overflow: hidden;
+    }
+
+    /* CTA: aparece apenas quando o item esta ativo, com fade. */
+    .cta-portfolio {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 400ms ease-out;
+    }
+
+    [data-portfolio-item].is-ativo .cta-portfolio {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  /* Botao flutuante de portfolio: vem da dir (proximo do WhatsApp) para esq
+     (posicao final), da transparencia 0 para 100, apenas durante o pin. */
+  .portfolio-cases-btn {
+    opacity: 0;
+    right: 4rem;
+    transition: right 600ms ease-out, opacity 400ms ease-out;
+  }
+
+  .portfolio-cases-btn.is-visible {
+    opacity: 1;
+    right: 10rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-portfolio-item] {
+      transition: none;
+    }
+
+    .portfolio-cases-btn,
+    .portfolio-cases-btn.is-visible {
+      transition: none;
+      opacity: 1;
+    right: 13rem;
+    }
+  }
+</style>
