@@ -21,7 +21,17 @@ if ($_SERVER['CONTENT_TYPE'] === 'application/json') {
     $input = $_REQUEST;
     // If $_POST is empty, try to parse the input
     if (empty($input) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        parse_str(file_get_contents('php://input'), $input);
+        $content = trim(file_get_contents('php://input'));
+        if (!empty($content)) {
+            // Try to parse as JSON
+            $maybeJson = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_NONE && $maybeJson !== null) {
+                $input = $maybeJson;
+            } else {
+                // Try to parse as query string
+                parse_str($content, $input);
+            }
+        }
     }
 }
 
