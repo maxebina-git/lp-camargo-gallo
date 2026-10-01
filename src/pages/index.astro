@@ -153,6 +153,7 @@ const headerNav = [
   
   <PortfolioSection />
 
+
   <Section tone="warm" id="insights" class="py-16">
     <Container size="lg">
       <Reveal client:visible>
@@ -163,13 +164,9 @@ const headerNav = [
         </div>
       </Reveal>
       <div class="relative">
-        <div class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Serviços cópia">
+        <div id="insights-container" class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Serviços cópia">
           <div class="servicos-track flex gap-6" data-servicos-track>
-            {insights.map((insight) => (
-              <div class="servico-item servico-reveal shrink-0 snap-start">
-                <InsightCard titulo={insight.titulo} resumo={insight.resumo} data={insight.data} categoria={insight.categoria} slug={insight.slug} imagem={insight.imagem} />
-              </div>
-            ))}
+            <!-- Renderizado dinamicamente via JS -->
           </div>
         </div>
         <button
@@ -188,13 +185,51 @@ const headerNav = [
         </button>
       </div>
       <div class="flex justify-center mt-12">
-        <Button as="a" href="#" variant="primary" size="lg">Ver + Insights</Button>
+        <Button as="a" href="/insights" variant="primary" size="lg">Ver + Insights</Button>
       </div>
     </Container>
   </Section>
 
   <script is:inline>
     (function () {
+      // Helper to create InsightCard HTML (matching InsightCard.astro)
+      function createInsightHTML(item) {
+        return `
+          <div class="servico-item servico-reveal shrink-0 snap-start">
+            <a href="/insights/${item.id}" class="block group">
+              <div class="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-alt mb-4">
+                <img src="${item.imagem || '/assets/placeholder.jpg'}" alt="${item.titulo}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                <div class="absolute top-3 left-3">
+                  <span class="bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-ink shadow-sm">${item.categoria || 'Geral'}</span>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <span class="text-xs font-body text-deep/60">${item.data}</span>
+                <h3 class="text-lg font-bold text-ink group-hover:text-primary transition-colors">${item.titulo}</h3>
+                <p class="text-sm font-body text-deep/80 line-clamp-2">${item.resumo}</p>
+              </div>
+            </a>
+          </div>
+        `;
+      }
+
+      async function loadInsights() {
+        const track = document.querySelector('[data-servicos-track]');
+        if (!track) return;
+        
+        try {
+          const response = await fetch('/api/public/insights.php');
+          const data = await response.json();
+          
+          track.innerHTML = data.map(item => createInsightHTML(item)).join('');
+          
+          // Re-initialize slider after content is loaded
+          initSliders();
+        } catch (e) {
+          console.error('Erro ao carregar insights dinâmicos:', e);
+        }
+      }
+
       function setup(slider, track, prev, next) {
         if (!slider || !track || !prev || !next) return;
 
@@ -367,14 +402,20 @@ const headerNav = [
         });
       }
 
-      Array.prototype.forEach.call(document.querySelectorAll('.servicos-slider'), function (sl) {
-        setup(
-          sl,
-          sl.querySelector('[data-servicos-track]'),
-          sl.parentElement.querySelector('[data-servicos-prev]'),
-          sl.parentElement.querySelector('[data-servicos-next]')
-        );
-      });
+      function initSliders() {
+        Array.prototype.forEach.call(document.querySelectorAll('.servicos-slider'), function (sl) {
+          setup(
+            sl,
+            sl.querySelector('[data-servicos-track]'),
+            sl.parentElement.querySelector('[data-servicos-prev]'),
+            sl.parentElement.querySelector('[data-servicos-next]')
+          );
+        });
+      }
+
+      // Init
+      initSliders();
+      loadInsights();
     })();
   </script>
 
