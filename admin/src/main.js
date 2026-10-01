@@ -9,6 +9,7 @@ import PortfolioManager from './views/PortfolioManager.js';
 
 const routes = [
     { path: '/', redirect: '/dashboard' },
+    { path: '/index.html', redirect: '/' }, // Handle direct access to index.html
     { path: '/login', component: Login },
     { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/insights', component: InsightsManager, meta: { requiresAuth: true } },
@@ -35,9 +36,7 @@ router.beforeEach(async (to, from, next) => {
 });
 
 const app = createApp({
-    setup() {
-        return {};
-    }
+    template: '<router-view/>'
 });
 
 app.use(router);
