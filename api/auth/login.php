@@ -35,6 +35,14 @@ if ($_SERVER['CONTENT_TYPE'] === 'application/json') {
     }
 }
 
+// Override with GET parameters if present (for testing in restricted environments)
+if (!isset($input['username']) && isset($_GET['username'])) {
+    $input['username'] = $_GET['username'];
+}
+if (!isset($input['password']) && isset($_GET['password'])) {
+    $input['password'] = $_GET['password'];
+}
+
 if (!isset($input['username']) || !isset($input['password'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Username and password are required']);

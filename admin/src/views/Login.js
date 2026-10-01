@@ -39,10 +39,11 @@ export default {
             this.loading = true;
             this.error = '';
             try {
-                const response = await fetch('/api/auth/login.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams(this.form).toString()
+                const url = new URL('/api/auth/login.php', window.location.origin);
+                url.searchParams.append('username', this.form.username);
+                url.searchParams.append('password', this.form.password);
+                const response = await fetch(url.toString(), {
+                    method: 'GET'
                 });
                 const data = await response.json();
                 if (response.ok) {
