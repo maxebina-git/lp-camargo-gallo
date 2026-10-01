@@ -20,7 +20,7 @@ jobs:
       - name: Build Astro
         run: npm run build
 
-      - name: FTP Deploy to Staging
+      - name: FTP Deploy Frontend to Staging
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -28,6 +28,21 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /public_html/staging/
-          exclude: |
-            **/.git*
-            **/.git*/**
+
+      - name: FTP Deploy Backend API to Staging
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./api/
+          server-dir: /public_html/staging/api/
+
+      - name: FTP Deploy Admin Panel to Staging
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./admin/
+          server-dir: /public_html/staging/admin/
