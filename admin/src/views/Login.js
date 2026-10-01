@@ -41,8 +41,8 @@ export default {
             try {
                 const response = await fetch('/api/auth/login.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(this.form)
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(this.form).toString()
                 });
                 const data = await response.json();
                 if (response.ok) {

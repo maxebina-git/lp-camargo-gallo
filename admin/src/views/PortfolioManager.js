@@ -133,8 +133,8 @@ export default {
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...this.form, id: this.editingId })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ ...this.form, id: this.editingId }).toString()
                 });
                 if (response.ok) {
                     this.closeModal();
@@ -149,8 +149,8 @@ export default {
             try {
                 await fetch('/api/portfolio/delete.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ id }).toString()
                 });
                 this.fetchItems();
             } catch (e) {

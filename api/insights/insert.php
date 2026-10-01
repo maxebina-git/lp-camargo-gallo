@@ -18,7 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
+// Get input data
+if ($_SERVER['CONTENT_TYPE'] === 'application/json') {
+    $input = json_decode(file_get_contents('php://input'), true);
+} else {
+    // Handle application/x-www-form-urlencoded or fallback
+    $input = $_REQUEST;
+    // If $_POST is empty, try to parse the input
+    if (empty($input) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        parse_str(file_get_contents('php://input'), $input);
+    }
+}
 
 if (!isset($input['titulo'], $input['resumo'], $input['conteudo'], $input['data'])) {
     http_response_code(400);
