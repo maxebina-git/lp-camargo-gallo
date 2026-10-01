@@ -17,8 +17,8 @@ const config = {
     port: 21,
     localRoot: __dirname + '/' + localDir,
     remoteRoot: '/public_html/' + remoteDir + '/',
-    // Optionally set passive mode
-    // passive: false,
+    // Enable passive mode for compatibility with some FTP servers
+    passive: true,
 };
 
 console.log(`Uploading ${localDir} to /public_html/${remoteDir}/`);
