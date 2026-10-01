@@ -25,7 +25,7 @@ jobs:
         run: npm run build
 
       - name: Deploy Admin Panel to Staging
-        run: node deploy-ftp.js admin staging/admin-test
+        run: node deploy-ftp.js admin staging/test-panel
 
       - name: Deploy Backend API to Staging
         run: node deploy-ftp.js api staging/api
