@@ -2,6 +2,7 @@ const { createApp } = Vue;
 const { createRouter, createWebHistory } = VueRouter;
 
 // Import views (we will implement these files next)
+// Last updated: 2026-10-01 to fix routing and use production builds
 import Login from './views/Login.js';
 import Dashboard from './views/Dashboard.js';
 import InsightsManager from './views/InsightsManager.js';
