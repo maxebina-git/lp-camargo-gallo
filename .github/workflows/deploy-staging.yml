@@ -26,7 +26,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./admin/
+          local-dir: admin/
           server-dir: /public_html/admin/
 
       - name: FTP Deploy Backend API to Staging
