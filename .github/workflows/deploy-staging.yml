@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: /public_html/staging/
+          server-dir: /public_html/
 
       - name: FTP Deploy Backend API to Staging
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./api/
-          server-dir: /public_html/staging/api/
+          server-dir: /public_html/api/
 
       - name: FTP Deploy Admin Panel to Staging
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
@@ -45,4 +45,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./admin/
-          server-dir: /public_html/staging/admin/
+          server-dir: /public_html/admin/
