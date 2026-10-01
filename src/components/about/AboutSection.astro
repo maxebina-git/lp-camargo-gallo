@@ -1,5 +1,5 @@
 ---
-import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
+import { Button, Container, Heading, Section, Text } from 'ds-grupo-rkb'
 import AboutBadges from './AboutBadges.vue'
 ---
 
@@ -44,7 +44,7 @@ import AboutBadges from './AboutBadges.vue'
 <Section tone="warm" size="lg" class="py-16">
   <Container size="lg">
     <div class="grid gap-10 md:grid-cols-2 md:items-center">
-      <div data-parallax class="relative aspect-[1201/718] overflow-hidden">
+      <div data-parallax class="relative aspect-[1201/718] overflow-hidden rounded-xl">
         <img
           data-parallax-img
           src="/about-image.png"
@@ -56,13 +56,14 @@ import AboutBadges from './AboutBadges.vue'
         />
       </div>
       <div class="flex flex-col gap-4">
-        <Heading as="2" size="display" class="about-title">Sobre a Camargo Gallo Engenharia</Heading>
+        <Heading as="2" size="display" class="section-title">Sobre a Camargo Gallo Engenharia</Heading>
         <Heading as="3" size="xl" class="text-deep">Técnica e Trabalho, Renovando Construções</Heading>
         <Text tone="secondary">
           A Camargo Gallo Engenharia é uma empresa especializada na recuperação e tratamento de fachadas
           prediais, com foco nas anomalias e patologias construtivas e possui elevada capacitação técnica
           para a correta intervenção e manutenção do seu empreendimento.
         </Text>
+        <Button as="a" href="#" variant="secondary" class="self-end font-body">Saiba mais</Button>
       </div>
     </div>
 

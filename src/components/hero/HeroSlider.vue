@@ -189,7 +189,7 @@ const slideClass =
             @ir-para="irParaSlide"
           />
           <div
-            class="order-1 max-lg:order-3 max-lg:mt-8 flex w-4/12 max-lg:w-full flex-col items-center justify-center gap-36 px-4"
+            class="order-1 max-lg:order-3 max-lg:mt-8 flex w-4/12 max-lg:w-full flex-col items-center justify-center gap-8 px-4"
           >
             <img
               src="/assets/logo-camargo-gallo.png"

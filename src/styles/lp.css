@@ -2,13 +2,30 @@ body {
   overflow-x: clip;
 }
 
-#servicos {
+#servicos,
+#insights {
   overflow-x: visible;
 }
 
-#servicos .servicos-slider {
+/* O slider e um scroll container: overflow-x:auto computa overflow-y como auto
+   tambem, entao ele recorta nas quatro bordas. O card cresce 10px por lado em
+   Y (5% de 400px) e 7,5px em X (5% de 300px) no hover:scale-105, entao o
+   headroom precisa ser >= 11px vertical e >= 8px horizontal. O padding cria a
+   area visivel e a margem negativa de mesma medida cancela o efeito no layout,
+   mantendo os cards alinhados com o titulo e a altura da section iguais.
+   scroll-padding-left e obrigatorio: sem ele o snap-start cola o primeiro card
+   na borda do container e ignora o padding-left, comendo o headroom do hover. */
+#servicos .servicos-slider,
+#insights .servicos-slider {
   margin-right: calc(-1 * (100vw - 100%) / 2);
+  margin-left: -0.75rem;
+  margin-top: -1.25rem;
+  margin-bottom: -1.25rem;
   padding-right: calc((100vw - 100%) / 2);
+  padding-left: 0.75rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  scroll-padding-left: 0.75rem;
 }
 
 :where([id]) {
@@ -16,7 +33,7 @@ body {
 }
 
 .hero-title,
-.about-title {
+.section-title {
   font-size: clamp(1.75rem, 7.6vw, 2.5rem);
   line-height: var(--leading-tight);
 }
@@ -109,8 +126,7 @@ body {
 .accordion-item [data-accordion-trigger],
 .accordion-item button,
 .accordion-item .accordion-trigger,
-.accordion-item h3,
-#faq button[type="button"] {
+.accordion-item h3 {
   cursor: pointer !important;
 }
 

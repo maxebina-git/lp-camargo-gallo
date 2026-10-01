@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\Users\\maxeb\\Projetos\\ds-grupo-rkb\\src\\tokens\\semantic.css/**)",
+      "Bash(git tag)",
+      "Bash(cd *)",
+      "Bash(npm install)",
+      "Bash(npm run *)",
+      "Bash(mkdir *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
+    ]
+  },
+  "$version": 4
+}
