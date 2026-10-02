@@ -25,7 +25,7 @@ jobs:
         run: npm run build
 
       - name: Deploy Admin Panel to Staging
-        run: node deploy-ftp.js admin staging/vue-admin-panel
+        run: node deploy-ftp.js admin staging/admin
 
       - name: Deploy Backend API to Staging
         run: node deploy-ftp.js api staging/api
