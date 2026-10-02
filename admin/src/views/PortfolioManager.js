@@ -24,7 +24,7 @@ export default {
                 <table class="w-full text-left">
                     <thead class="bg-gray-50 border-b">
                         <tr>
-                            <th class="w-10 px-2 py-3"></th>
+                            <th class="w-10 px-2 py-3 text-xs font-medium text-gray-500 uppercase">Ordem</th>
                             <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase">Título</th>
                             <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase">Categoria</th>
                             <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase">Status</th>
