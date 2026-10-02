@@ -105,6 +105,34 @@
         @keyframes rollerSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes cableGrow { 0%, 100% { height: 0; } 50% { height: 145px; } }
         @keyframes platformMove { 0%, 100% { top: 166px; } 50% { top: 311px; } }
+
+        .anim-right-wrap { position: relative; width: 224px; height: 238px; }
+        .anim-right-wrap .scene { position: relative; width: 320px; height: 340px; transform: scale(0.7); transform-origin: top left; }
+        .anim-right-wrap .particles { position: absolute; inset: 0; pointer-events: none; }
+        .anim-right-wrap .particle { position: absolute; width: 3px; height: 3px; background: rgba(212,160,84,0.4); border-radius: 50%; animation: particleFloat 8s ease-in-out infinite; }
+        .anim-right-wrap .particle:nth-child(1) { left: 15%; top: 20%; animation-delay: 0s; animation-duration: 7s; }
+        .anim-right-wrap .particle:nth-child(2) { left: 75%; top: 30%; animation-delay: 1s; animation-duration: 9s; }
+        .anim-right-wrap .particle:nth-child(3) { left: 40%; top: 60%; animation-delay: 2s; animation-duration: 6s; }
+        .anim-right-wrap .particle:nth-child(4) { left: 85%; top: 70%; animation-delay: 3s; animation-duration: 8s; }
+        .anim-right-wrap .particle:nth-child(5) { left: 25%; top: 80%; animation-delay: 4s; animation-duration: 10s; }
+        .anim-right-wrap .particle:nth-child(6) { left: 60%; top: 15%; animation-delay: 0.5s; animation-duration: 7.5s; }
+        .anim-right-wrap .particle:nth-child(7) { left: 10%; top: 50%; animation-delay: 2.5s; animation-duration: 8.5s; }
+        .anim-right-wrap .particle:nth-child(8) { left: 90%; top: 45%; animation-delay: 1.5s; animation-duration: 6.5s; }
+        .anim-right-wrap .ground { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 260px; height: 4px; background: linear-gradient(90deg, transparent, #d4a054, #e8b96a, #d4a054, transparent); border-radius: 2px; }
+        .anim-right-wrap .building { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 120px; display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; }
+        .anim-right-wrap .floor { width: 100%; height: 22px; background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid rgba(212,160,84,0.15); border-radius: 2px; position: relative; overflow: hidden; }
+        .anim-right-wrap .floor::after { content: ''; position: absolute; inset: 3px; background: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(212,160,84,0.08) 8px, rgba(212,160,84,0.08) 9px); }
+        .anim-right-wrap .floor .window { position: absolute; width: 8px; height: 10px; background: rgba(212,160,84,0.25); border-radius: 1px; top: 50%; transform: translateY(-50%); animation: windowFlicker 3s ease-in-out infinite; }
+        .anim-right-wrap .floor .window:nth-child(1) { left: 10px; animation-delay: 0.5s; }
+        .anim-right-wrap .floor .window:nth-child(2) { left: 24px; animation-delay: 1.2s; }
+        .anim-right-wrap .floor .window:nth-child(3) { left: 38px; animation-delay: 0.8s; }
+        .anim-right-wrap .floor .window:nth-child(4) { left: 52px; animation-delay: 1.5s; }
+        .anim-right-wrap .floor .window:nth-child(5) { left: 66px; animation-delay: 0.3s; }
+        .anim-right-wrap .floor .window:nth-child(6) { left: 80px; animation-delay: 1.8s; }
+        .anim-right-wrap .floor .window:nth-child(7) { left: 94px; animation-delay: 0.7s; }
+        .anim-right-wrap .floor.shake { animation: shakeFloor 0.5s ease-in-out; }
+        .anim-right-wrap .floor.pastel { background: linear-gradient(135deg, #f2dfa8, #e9cf91); border-color: rgba(212,160,84,0.4); }
+        @keyframes shakeFloor { 0% { transform: translateX(0); } 20% { transform: translateX(-2px); } 40% { transform: translateX(2px); } 60% { transform: translateX(-1px); } 80% { transform: translateX(1px); } 100% { transform: translateX(0); } }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">

@@ -88,6 +88,30 @@ export default {
                         <div class="dust"></div>
                     </div>
                 </div>
+                <div class="anim-right-wrap">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scene">
+                        <div class="building">
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                        </div>
+                        <div class="ground"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -114,11 +138,19 @@ export default {
         return {
             insightsCount: 0,
             portfolioCount: 0,
-            usersCount: 0
+            usersCount: 0,
+            floorShakeTimer: null
         };
     },
     mounted() {
         this.fetchCounts();
+        this.startFloorShake();
+    },
+    beforeUnmount() {
+        if (this.floorShakeTimer) {
+            clearTimeout(this.floorShakeTimer);
+            this.floorShakeTimer = null;
+        }
     },
     methods: {
         apiBase() {
@@ -137,6 +169,24 @@ export default {
             } catch (e) {
                 console.error('Erro ao carregar contagens', e);
             }
+        },
+        startFloorShake() {
+            const floors = this.$el.querySelectorAll('.anim-right-wrap .floor');
+            if (!floors.length) return;
+
+            const floor = floors[Math.floor(Math.random() * floors.length)];
+            floor.classList.add('shake');
+
+            setTimeout(() => {
+                floor.classList.remove('shake');
+                floor.classList.add('pastel');
+            }, 500);
+
+            setTimeout(() => {
+                floor.classList.remove('pastel');
+            }, 3000);
+
+            this.floorShakeTimer = setTimeout(() => this.startFloorShake(), 3500 + Math.random() * 1500);
         },
         async handleLogout() {
             try {
