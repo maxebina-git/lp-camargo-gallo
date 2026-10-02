@@ -1,6 +1,4 @@
 <?php
-// TEST: FTP deploy test
-echo "TEST: FTP deploy test\n";
 session_start();
 require_once '../db_config.php';
 
