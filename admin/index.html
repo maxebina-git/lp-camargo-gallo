@@ -4,15 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Camargo Gallo</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.prod.js"></script>
-    <script src="https://cdn.tailwindcss.com?version=4.3.3"></script>
+    <script src="https://unpkg.com/vue@3.5.43/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue-router@4.6.4/dist/vue-router.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com?version=3.4.17"></script>
     <style>
         [v-cloak] { display: none; }
+        #boot-fallback { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
     <div id="app" v-cloak></div>
+    <div id="boot-fallback" class="max-w-lg mx-auto mt-24 p-6 bg-white rounded-lg shadow-xl border-l-4 border-red-500">
+        <h1 class="text-lg font-bold text-gray-800 mb-2">Falha ao carregar o painel</h1>
+        <p class="text-sm text-gray-600 mb-3">O painel admin nao iniciou. Erro capturado:</p>
+        <pre id="boot-error" class="text-xs text-red-700 bg-red-50 p-3 rounded overflow-auto whitespace-pre-wrap"></pre>
+        <p class="text-xs text-gray-500 mt-3">Veja o console do navegador para o stack trace completo.</p>
+    </div>
+    <script>
+        (function () {
+            var app = document.getElementById('app');
+            var errors = [];
+            window.addEventListener('error', function (e) {
+                errors.push(e.message + (e.filename ? ' (' + e.filename + ':' + e.lineno + ')' : ''));
+            });
+            window.addEventListener('unhandledrejection', function (e) {
+                errors.push('Promise rejeitada: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+            });
+            setTimeout(function () {
+                if (app.hasAttribute('v-cloak')) {
+                    app.removeAttribute('v-cloak');
+                    document.getElementById('boot-error').textContent =
+                        errors.length ? errors.join('\n\n') : 'Nenhum erro capturado; o app nao montou.';
+                    document.getElementById('boot-fallback').style.display = 'block';
+                }
+            }, 6000);
+        })();
+    </script>
     <script src="src/main.js" type="module"></script>
 </body>
 </html>

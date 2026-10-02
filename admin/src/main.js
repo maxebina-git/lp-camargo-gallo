@@ -35,7 +35,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
         next();
     }
-};
+});
 
 const app = createApp({
     template: '<router-view/>'
