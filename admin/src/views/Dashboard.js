@@ -21,8 +21,41 @@ export default {
                 <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
                 <p class="text-gray-600">Bem-vindo ao painel de gestão de conteúdo.</p>
             </header>
-            
-            <div class="flex justify-center">
+
+            <div class="anim-row">
+                <div class="anim-left-wrap">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scene">
+                        <div class="building">
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                            <div class="floor"><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div><div class="window"></div></div>
+                        </div>
+                        <div class="roller roller-left"></div>
+                        <div class="roller roller-right"></div>
+                        <div class="cable cable-left"></div>
+                        <div class="cable cable-right"></div>
+                        <div class="platform">
+                            <div class="painter painter-1"><div class="helmet"></div><div class="head"></div><div class="body"></div></div>
+                            <div class="painter painter-2"><div class="helmet"></div><div class="head"></div><div class="body"></div></div>
+                            <div class="painter painter-3"><div class="helmet"></div><div class="head"></div><div class="body"></div></div>
+                        </div>
+                        <div class="ground"></div>
+                    </div>
+                </div>
                 <div class="anim-wrap">
                     <div class="particles">
                         <div class="particle"></div>
