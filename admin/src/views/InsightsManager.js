@@ -74,8 +74,19 @@ export default {
                                 <textarea v-model="form.conteudo" rows="6" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Imagem (URL ou caminho)</label>
-                                <input v-model="form.imagem" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                <label class="block text-sm font-medium text-gray-700">Imagem</label>
+                                <div class="mt-1 flex items-start gap-4">
+                                    <div class="w-28 h-28 flex-shrink-0 rounded-md border border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center">
+                                        <img v-if="form.imagem" :src="form.imagem" alt="Prévia" class="w-full h-full object-cover">
+                                        <span v-else class="text-xs text-gray-400">Sem imagem</span>
+                                    </div>
+                                    <div class="flex-1 space-y-2">
+                                        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onFileChange" :disabled="uploading" class="block w-full text-sm text-gray-600">
+                                        <p v-if="uploading" class="text-xs text-blue-600">Enviando imagem…</p>
+                                        <p v-if="uploadError" class="text-xs text-red-600">{{ uploadError }}</p>
+                                        <input v-model="form.imagem" type="text" placeholder="ou cole uma URL/caminho" class="block w-full border border-gray-300 rounded-md p-2 text-xs">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="flex justify-end space-x-3 mt-6">
@@ -93,6 +104,8 @@ export default {
             items: [],
             showModal: false,
             editingId: null,
+            uploading: false,
+            uploadError: '',
             form: { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' }
         };
     },
@@ -112,15 +125,43 @@ export default {
         openModal() {
             this.editingId = null;
             this.form = { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' };
+            this.uploading = false;
+            this.uploadError = '';
             this.showModal = true;
         },
         editItem(item) {
             this.editingId = item.id;
             this.form = { ...item };
+            this.uploading = false;
+            this.uploadError = '';
             this.showModal = true;
         },
         closeModal() {
             this.showModal = false;
+        },
+        onFileChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (file) this.uploadImage(file);
+        },
+        async uploadImage(file) {
+            const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+            this.uploading = true;
+            this.uploadError = '';
+            try {
+                const body = new FormData();
+                body.append('file', file);
+                const response = await fetch(`${apiBase}/insights/upload.php`, { method: 'POST', body });
+                const data = await response.json().catch(() => ({}));
+                if (response.ok && data.path) {
+                    this.form.imagem = data.path;
+                } else {
+                    this.uploadError = data.error || 'Falha no upload';
+                }
+            } catch (e) {
+                this.uploadError = 'Erro de conexão no upload';
+            } finally {
+                this.uploading = false;
+            }
         },
         async saveItem() {
             const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
