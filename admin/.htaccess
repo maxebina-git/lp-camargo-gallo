@@ -2,11 +2,9 @@ Options -Indexes
 DirectoryIndex index.html
 
 <IfModule mod_headers.c>
-  Header set X-Robots-Tag "noindex, nofollow"
-  <FilesMatch "\.(js|css|html)$">
-    Header set Cache-Control "no-cache, must-revalidate"
-    Header unset Expires
-  </FilesMatch>
+  Header always set X-Robots-Tag "noindex, nofollow"
+  Header always set Cache-Control "no-cache, must-revalidate"
+  Header always unset Expires
 </IfModule>
 
 <IfModule mod_rewrite.c>
