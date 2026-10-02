@@ -38,38 +38,38 @@ if ($_SERVER['CONTENT_TYPE'] === 'application/json') {
 // Override com parametros GET removido: senha na query string fica registrada
 // em logs de acesso. O login aceita somente POST com body (JSON ou form).
 
-if (!isset($input['username']) || !isset($input['password'])) {
+if (!isset($input['email']) || !isset($input['password'])) {
     http_response_code(400);
-    echo json_encode(['error' => 'Username and password are required']);
+    echo json_encode(['error' => 'Email and password are required']);
     exit;
 }
 
-$username = trim($input['username']);
+$email = trim($input['email']);
 $password = $input['password'];
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->prepare("SELECT id, username, password, role FROM users WHERE username = :username LIMIT 1");
-    $stmt->execute(['username' => $username]);
+    $stmt = $db->prepare("SELECT id, email, password, role FROM users WHERE email = :email LIMIT 1");
+    $stmt->execute(['email' => $email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
         // Password is correct, start session
         $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
+        $_SESSION['email'] = $user['email'];
         $_SESSION['role'] = $user['role'];
 
         echo json_encode([
             'success' => true,
             'message' => 'Login successful',
-            'user' => [
-                'username' => $user['username'],
-                'role' => $user['role']
-            ]
+                'user' => [
+                    'email' => $user['email'],
+                    'role' => $user['role']
+                ]
         ]);
     } else {
         http_response_code(401);
-        echo json_encode(['error' => 'Invalid username or password']);
+        echo json_encode(['error' => 'Invalid email or password']);
     }
 } catch (Exception $e) {
     http_response_code(500);

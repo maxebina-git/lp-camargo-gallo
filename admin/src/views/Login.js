@@ -8,8 +8,8 @@ export default {
             </div>
             <form @submit.prevent="handleLogin" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Usuário</label>
-                    <input v-model="form.username" type="text" required 
+                    <label class="block text-sm font-medium text-gray-700">E-mail</label>
+                    <input v-model="form.email" type="email" required 
                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
@@ -29,7 +29,7 @@ export default {
     `,
     data() {
         return {
-            form: { username: '', password: '' },
+            form: { email: '', password: '' },
             loading: false,
             error: ''
         };
@@ -44,7 +44,7 @@ export default {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: this.form.username,
+                        email: this.form.email,
                         password: this.form.password
                     })
                 });
