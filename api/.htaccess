@@ -1,0 +1,13 @@
+# Protege arquivos de configuracao da API.
+# db_config.php contem as credenciais do banco; nao deve ser baixavel.
+<Files "db_config.php">
+    Require all denied
+</Files>
+
+# Bloqueia artefatos de editor/backups que podem vazar codigo-fonte.
+<FilesMatch "\.(bak|old|orig|save|swp|log|sql|env|ini)$">
+    Require all denied
+</FilesMatch>
+
+# Impede listagem de diretorio da API.
+Options -Indexes

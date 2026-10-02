@@ -17,7 +17,7 @@ const config = {
     port: 21,
     localRoot: __dirname + '/' + localDir,
     remoteRoot: '/public_html/' + remoteDir + '/',
-    include: ['*', '**/*'],
+    include: ['*', '**/*', '.htaccess'],
     exclude: ['.DS_Store', '**/.DS_Store'],
     // Enable passive mode for compatibility with some FTP servers
     passive: true,
