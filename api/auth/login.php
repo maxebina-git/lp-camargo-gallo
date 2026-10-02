@@ -4,10 +4,10 @@ require_once '../db_config.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); // Adjust this for production security
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'])) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method Not Allowed']);
     exit;
@@ -35,13 +35,8 @@ if ($_SERVER['CONTENT_TYPE'] === 'application/json') {
     }
 }
 
-// Override with GET parameters if present (for testing in restricted environments)
-if (!isset($input['username']) && isset($_GET['username'])) {
-    $input['username'] = $_GET['username'];
-}
-if (!isset($input['password']) && isset($_GET['password'])) {
-    $input['password'] = $_GET['password'];
-}
+// Override com parametros GET removido: senha na query string fica registrada
+// em logs de acesso. O login aceita somente POST com body (JSON ou form).
 
 if (!isset($input['username']) || !isset($input['password'])) {
     http_response_code(400);

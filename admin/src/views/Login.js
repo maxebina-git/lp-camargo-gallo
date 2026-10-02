@@ -40,11 +40,13 @@ export default {
             this.error = '';
             try {
                 const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
-                const url = new URL(`${apiBase}/auth/login.php`, window.location.origin);
-                url.searchParams.append('username', this.form.username);
-                url.searchParams.append('password', this.form.password);
-                const response = await fetch(url.toString(), {
-                    method: 'GET'
+                const response = await fetch(`${apiBase}/auth/login.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: this.form.username,
+                        password: this.form.password
+                    })
                 });
                 const data = await response.json();
                 if (response.ok) {
