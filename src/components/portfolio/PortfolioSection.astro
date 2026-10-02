@@ -97,7 +97,7 @@ import { ChevronRight } from '@lucide/vue'
         '<div class="flex flex-col gap-3" data-portfolio-texto>' +
           '<p class="font-body text-base leading-normal font-normal text-text-secondary">' + esc(obra.descricao) + '</p>' +
           '<p class="font-body text-xs uppercase tracking-wide text-deep">' + esc(local) + '</p>' +
-          '<a href="' + href + '" class="cta-portfolio self-start mt-2 inline-flex items-center gap-2 rounded-lg bg-deep px-3 py-1.5 text-xs font-body uppercase tracking-wide text-white shadow-md hover:bg-deep/80 transition-opacity duration-400">Ver detalhes</a>' +
+          '<a href="' + href + '" class="cta-portfolio self-start mt-2 inline-flex items-center justify-center gap-2 select-none rounded-md font-medium transition duration-500 ease-out cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 bg-primary-500 text-on-primary hover:bg-primary-700 active:bg-primary-700 h-8 px-3 text-sm">Ver detalhes <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>' +
         '</div>' +
       '</li>'
   }
@@ -263,7 +263,6 @@ import { ChevronRight } from '@lucide/vue'
     .cta-portfolio {
       opacity: 0;
       pointer-events: none;
-      transition: opacity 400ms ease-out;
     }
 
     [data-portfolio-item].is-ativo .cta-portfolio {
