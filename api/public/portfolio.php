@@ -6,7 +6,7 @@ header('Access-Control-Allow-Origin: *');
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->query("SELECT id, slug, titulo, descricao, cidade, ano, imagem, categoria, data_obra, status FROM portfolio ORDER BY data_obra DESC, id ASC");
+    $stmt = $db->query("SELECT id, slug, titulo, descricao, cidade, ano, imagem, categoria, data_obra, status, ordem FROM portfolio ORDER BY ordem ASC, id ASC");
     $items = $stmt->fetchAll();
     echo json_encode($items);
 } catch (Exception $e) {
