@@ -7,6 +7,7 @@ import Login from './views/Login.js';
 import Dashboard from './views/Dashboard.js';
 import InsightsManager from './views/InsightsManager.js';
 import PortfolioManager from './views/PortfolioManager.js';
+import UsersManager from './views/UsersManager.js';
 
 const routes = [
     { path: '/', redirect: '/dashboard' },
@@ -15,6 +16,7 @@ const routes = [
     { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/insights', component: InsightsManager, meta: { requiresAuth: true } },
     { path: '/portfolio', component: PortfolioManager, meta: { requiresAuth: true } },
+    { path: '/users', component: UsersManager, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
