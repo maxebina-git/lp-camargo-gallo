@@ -1,5 +1,6 @@
 ---
-import { Container, Heading, Section } from 'ds-grupo-rkb'
+import { Button, Container, Heading, Section } from 'ds-grupo-rkb'
+import { ChevronRight } from '@lucide/vue'
 ---
 
 <script>
@@ -146,14 +147,18 @@ import { Container, Heading, Section } from 'ds-grupo-rkb'
   </Section>
 
   <!-- Botao flutuante de portfolio: aparece apenas durante o pin -->
-  <a
+  <Button
+    as="a"
     href="/portfolio"
+    variant="primary"
+    size="md"
+    trailingIcon={ChevronRight}
     id="portfolio-cases-btn"
     aria-label="Veja mais cases"
-    class="portfolio-cases-btn fixed bottom-8 z-[60] bg-deep text-white rounded-full shadow-xl p-4 hover:bg-deep/90 transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep cursor-pointer flex items-center justify-center right-[4rem]"
+    class="portfolio-cases-btn fixed bottom-8 z-[60]"
   >
     Veja + cases
-  </a>
+  </Button>
 
 <style is:global>
   /* O estado de acordeao so vale a partir de md E quando o JS rodou. Sem isso —
