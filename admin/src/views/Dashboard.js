@@ -2,7 +2,7 @@ export default {
     template: `
     <div class="min-h-screen flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 text-white flex flex-col">
+        <aside class="w-64 bg-gray-800 text-white flex flex-col mt-4 ml-4 rounded-l-2xl">
             <div class="p-6 text-2xl font-bold border-b border-gray-700">CG Admin</div>
             <nav class="flex-1 p-4 space-y-2">
                 <router-link to="/dashboard" class="block px-4 py-2 rounded hover:bg-gray-700 transition" :class="{'bg-gray-700': $route.path === '/dashboard'}">Dashboard</router-link>
