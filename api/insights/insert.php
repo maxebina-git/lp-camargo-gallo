@@ -39,7 +39,7 @@ if (!isset($input['titulo'], $input['resumo'], $input['conteudo'], $input['data'
 
 try {
     $db = Database::getInstance();
-    $slug = cg_unique_slug($db, $input['slug'] ?? $input['titulo']);
+    $slug = cg_unique_slug($db, 'insights', $input['slug'] ?? $input['titulo']);
 
     $stmt = $db->prepare("INSERT INTO insights (titulo, slug, resumo, conteudo, data, categoria, imagem, user_id) VALUES (:titulo, :slug, :resumo, :conteudo, :data, :categoria, :imagem, :user_id)");
     

@@ -150,7 +150,7 @@ export default {
             try {
                 const body = new FormData();
                 body.append('file', file);
-                const response = await fetch(`${apiBase}/insights/upload.php`, { method: 'POST', body });
+                const response = await fetch(`${apiBase}/upload.php`, { method: 'POST', body });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.path) {
                     this.form.imagem = data.path;

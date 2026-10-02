@@ -39,7 +39,7 @@ if (!isset($input['id'], $input['titulo'], $input['resumo'], $input['conteudo'],
 
 try {
     $db = Database::getInstance();
-    $slug = cg_unique_slug($db, $input['slug'] ?? $input['titulo'], (int) $input['id']);
+    $slug = cg_unique_slug($db, 'insights', $input['slug'] ?? $input['titulo'], (int) $input['id']);
 
     $stmt = $db->prepare("UPDATE insights SET titulo = :titulo, slug = :slug, resumo = :resumo, conteudo = :conteudo, data = :data, categoria = :categoria, imagem = :imagem WHERE id = :id");
     

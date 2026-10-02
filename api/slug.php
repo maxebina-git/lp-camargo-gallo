@@ -1,6 +1,6 @@
 <?php
 // Gera slugs ASCII a partir do titulo, com desambiguacao contra a tabela.
-// Usado por api/insights/insert.php e update.php.
+// Usado pelos insert/update de insights e portfolio. A tabela e whitelisted.
 
 function cg_slugify(string $text): string
 {
@@ -23,18 +23,26 @@ function cg_slugify(string $text): string
     return $text;
 }
 
-function cg_unique_slug(PDO $db, string $base, ?int $ignoreId = null): string
+function cg_unique_slug(PDO $db, string $table, string $base, ?int $ignoreId = null): string
 {
+    $fallbacks = [
+        'insights'  => 'insight',
+        'portfolio' => 'obra',
+    ];
+    if (!isset($fallbacks[$table])) {
+        throw new InvalidArgumentException('Tabela nao suportada para slug: ' . $table);
+    }
+
     $base = cg_slugify($base);
     if ($base === '') {
-        $base = 'insight';
+        $base = $fallbacks[$table];
     }
 
     $slug = $base;
     $suffix = 2;
 
     while (true) {
-        $sql = 'SELECT id FROM insights WHERE slug = :slug';
+        $sql = "SELECT id FROM {$table} WHERE slug = :slug";
         $params = [':slug' => $slug];
 
         if ($ignoreId !== null) {

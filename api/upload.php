@@ -1,4 +1,5 @@
 <?php
+// Upload de imagem compartilhado por insights e portfolio.
 session_start();
 
 header('Content-Type: application/json');
@@ -62,15 +63,15 @@ if (!isset($allowed[$mime])) {
     exit;
 }
 
-// api/insights/ -> ../../ -> raiz do site (/public_html/staging/assets/uploads/)
-$uploadDir = __DIR__ . '/../../assets/uploads/';
+// api/ -> ../ -> raiz do site (/public_html/staging/assets/uploads/)
+$uploadDir = __DIR__ . '/../assets/uploads/';
 if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
     http_response_code(500);
     echo json_encode(['error' => 'Nao foi possivel criar a pasta de uploads']);
     exit;
 }
 
-$filename = 'insight-' . date('Ymd-His') . '-' . bin2hex(random_bytes(6)) . '.' . $allowed[$mime];
+$filename = 'upload-' . date('Ymd-His') . '-' . bin2hex(random_bytes(6)) . '.' . $allowed[$mime];
 $target = $uploadDir . $filename;
 
 if (!move_uploaded_file($file['tmp_name'], $target)) {
