@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->query("SELECT id, titulo, categoria, status, data_obra, imagem, descricao FROM portfolio ORDER BY data_obra DESC");
+    $stmt = $db->query("SELECT id, titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem FROM portfolio ORDER BY data_obra DESC, id ASC");
     $items = $stmt->fetchAll();
     echo json_encode($items);
 } catch (Exception $e) {

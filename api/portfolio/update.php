@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../db_config.php';
+require_once '../slug.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -38,11 +39,16 @@ if (!isset($input['id'], $input['titulo'], $input['descricao'])) {
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, descricao = :descricao, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem WHERE id = :id");
+    $slug = cg_unique_slug($db, 'portfolio', $input['slug'] ?? $input['titulo'], (int) $input['id']);
+
+    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem WHERE id = :id");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
+        'slug'      => $slug,
         'descricao' => $input['descricao'],
+        'cidade'    => $input['cidade'] ?? null,
+        'ano'       => $input['ano'] ?? null,
         'categoria' => $input['categoria'] ?? null,
         'data_obra' => $input['data_obra'] ?? null,
         'status'    => $input['status'] ?? 'concluido',
@@ -50,7 +56,7 @@ try {
         'id'        => $input['id']
     ]);
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'slug' => $slug]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);

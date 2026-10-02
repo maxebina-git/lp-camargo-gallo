@@ -70,15 +70,34 @@ export default {
                                 <input v-model="form.data_obra" type="date" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
                             <div>
+                                <label class="block text-sm font-medium text-gray-700">Cidade</label>
+                                <input v-model="form.cidade" type="text" placeholder="Ex.: São Paulo, SP" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Ano</label>
+                                <input v-model="form.ano" type="text" inputmode="numeric" maxlength="4" placeholder="Ex.: 2024" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">Status</label>
                                 <select v-model="form.status" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                                     <option value="concluido">Concluído</option>
                                     <option value="em_andamento">Em Andamento</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Imagem (URL ou caminho)</label>
-                                <input v-model="form.imagem" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Imagem</label>
+                                <div class="mt-1 flex items-start gap-4">
+                                    <div class="w-28 h-28 flex-shrink-0 rounded-md border border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center">
+                                        <img v-if="form.imagem" :src="form.imagem" alt="Prévia" class="w-full h-full object-cover">
+                                        <span v-else class="text-xs text-gray-400">Sem imagem</span>
+                                    </div>
+                                    <div class="flex-1 space-y-2">
+                                        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onFileChange" :disabled="uploading" class="block w-full text-sm text-gray-600">
+                                        <p v-if="uploading" class="text-xs text-blue-600">Enviando imagem…</p>
+                                        <p v-if="uploadError" class="text-xs text-red-600">{{ uploadError }}</p>
+                                        <input v-model="form.imagem" type="text" placeholder="ou cole uma URL/caminho" class="block w-full border border-gray-300 rounded-md p-2 text-xs">
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Descrição</label>
@@ -100,16 +119,21 @@ export default {
             items: [],
             showModal: false,
             editingId: null,
-            form: { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido' }
+            uploading: false,
+            uploadError: '',
+            form: { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
         };
     },
     mounted() {
         this.fetchItems();
     },
     methods: {
+        apiBase() {
+            return window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+        },
         async fetchItems() {
             try {
-                const response = await fetch('/api/portfolio/list.php');
+                const response = await fetch(`${this.apiBase()}/portfolio/list.php`);
                 this.items = await response.json();
             } catch (e) {
                 console.error('Erro ao carregar portfólio', e);
@@ -117,19 +141,46 @@ export default {
         },
         openModal() {
             this.editingId = null;
-            this.form = { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido' };
+            this.form = { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+            this.uploading = false;
+            this.uploadError = '';
             this.showModal = true;
         },
         editItem(item) {
             this.editingId = item.id;
             this.form = { ...item };
+            this.uploading = false;
+            this.uploadError = '';
             this.showModal = true;
         },
         closeModal() {
             this.showModal = false;
         },
+        onFileChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (file) this.uploadImage(file);
+        },
+        async uploadImage(file) {
+            this.uploading = true;
+            this.uploadError = '';
+            try {
+                const body = new FormData();
+                body.append('file', file);
+                const response = await fetch(`${this.apiBase()}/upload.php`, { method: 'POST', body });
+                const data = await response.json().catch(() => ({}));
+                if (response.ok && data.path) {
+                    this.form.imagem = data.path;
+                } else {
+                    this.uploadError = data.error || 'Falha no upload';
+                }
+            } catch (e) {
+                this.uploadError = 'Erro de conexão no upload';
+            } finally {
+                this.uploading = false;
+            }
+        },
         async saveItem() {
-            const endpoint = this.editingId ? '/api/portfolio/update.php' : '/api/portfolio/insert.php';
+            const endpoint = this.editingId ? `${this.apiBase()}/portfolio/update.php` : `${this.apiBase()}/portfolio/insert.php`;
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -147,7 +198,7 @@ export default {
         async deleteItem(id) {
             if (!confirm('Tem certeza que deseja excluir esta obra?')) return;
             try {
-                await fetch('/api/portfolio/delete.php', {
+                await fetch(`${this.apiBase()}/portfolio/delete.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ id }).toString()
@@ -158,7 +209,7 @@ export default {
             }
         },
         async handleLogout() {
-            await fetch('/api/auth/logout.php', { method: 'POST' });
+            await fetch(`${this.apiBase()}/auth/logout.php`, { method: 'POST' });
             this.$router.push('/login');
         }
     }

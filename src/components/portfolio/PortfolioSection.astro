@@ -1,6 +1,5 @@
 ---
-import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
-import { portfolio } from '../../data/portfolio'
+import { Container, Heading, Section } from 'ds-grupo-rkb'
 ---
 
 <script>
@@ -66,8 +65,66 @@ import { portfolio } from '../../data/portfolio'
     aplicar()
   }
 
-  if (document.readyState === 'complete') initPortfolio()
-  else window.addEventListener('load', initPortfolio, { once: true })
+  function esc(valor) {
+    return String(valor == null ? '' : valor).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[c]))
+  }
+
+  function itemHTML(obra) {
+    const href = '/portfolio/' + encodeURIComponent(obra.slug || obra.id)
+    const local = [obra.cidade, obra.ano].filter(Boolean).join(' · ')
+    const foto = obra.imagem
+      ? '<img src="' + esc(obra.imagem) + '" alt="' + esc(obra.titulo) + '" width="600" height="600" class="h-full w-full object-cover" loading="lazy" decoding="async" />'
+      : ''
+
+    return '' +
+      '<li data-portfolio-item class="grid items-center gap-6 md:grid-cols-[1fr_2fr_1fr] md:gap-8 md:overflow-hidden">' +
+        '<div class="flex items-center gap-4 md:min-h-0 md:flex-col md:items-end md:justify-center md:gap-3 text-right" data-portfolio-titulo>' +
+          '<h3 class="font-display text-xl leading-snug font-semibold text-ink">' + esc(obra.titulo) + '</h3>' +
+          '<span role="separator" aria-hidden="true" class="h-px flex-1 bg-border md:w-full"></span>' +
+        '</div>' +
+        '<div class="flex justify-center" data-portfolio-foto>' +
+          '<div data-portfolio-thumb class="aspect-[3/2] w-full overflow-hidden rounded-xl bg-surface-alt md:max-w-none">' +
+            foto +
+          '</div>' +
+        '</div>' +
+        '<div class="flex flex-col gap-3" data-portfolio-texto>' +
+          '<p class="font-body text-base leading-normal font-normal text-text-secondary">' + esc(obra.descricao) + '</p>' +
+          '<p class="font-body text-xs uppercase tracking-wide text-deep">' + esc(local) + '</p>' +
+          '<a href="' + href + '" class="cta-portfolio self-start mt-2 inline-flex items-center gap-2 rounded-lg bg-deep px-3 py-1.5 text-xs font-body uppercase tracking-wide text-white shadow-md hover:bg-deep/80 transition-opacity duration-400">Ver detalhes</a>' +
+        '</div>' +
+      '</li>'
+  }
+
+  const lista = document.querySelector('[data-portfolio-lista]')
+  const status = document.getElementById('portfolio-home-status')
+
+  fetch('/api/public/portfolio.php')
+    .then((response) => {
+      if (!response.ok) throw new Error('HTTP ' + response.status)
+      return response.json()
+    })
+    .then((data) => {
+      if (!Array.isArray(data)) throw new Error('Resposta inesperada da API')
+      const obras = data.slice(0, 5)
+      if (!obras.length) {
+        if (status) status.textContent = 'Nenhuma obra publicada ainda.'
+        return
+      }
+      if (lista) lista.innerHTML = obras.map(itemHTML).join('')
+      if (status) status.remove()
+      if (document.readyState === 'complete') initPortfolio()
+      else window.addEventListener('load', initPortfolio, { once: true })
+    })
+    .catch((error) => {
+      console.error(error)
+      if (status) status.textContent = 'Não foi possível carregar o portfólio.'
+    })
 </script>
 
 <Section tone="surface-brand" id="portfolio" class="bg-surface-brand py-16 md:py-0">
@@ -82,54 +139,7 @@ import { portfolio } from '../../data/portfolio'
       </div>
 
       <ul data-portfolio-lista class="flex flex-col gap-3 md:flex-1 md:justify-center">
-        {portfolio.slice(0, 5).map((obra) => (
-          <li
-            data-portfolio-item
-            class="grid items-center gap-6 md:grid-cols-[1fr_2fr_1fr] md:gap-8 md:overflow-hidden"
-          >
-            <div class="flex items-center gap-4 md:min-h-0 md:flex-col md:items-end md:justify-center md:gap-3 text-right" data-portfolio-titulo>
-              <Heading as="3" size="xl" class="text-ink">
-                {obra.titulo}
-              </Heading>
-              <span
-                role="separator"
-                aria-hidden="true"
-                class="h-px flex-1 bg-border md:w-full"
-              ></span>
-            </div>
-
-            <div class="flex justify-center" data-portfolio-foto>
-              <div
-                data-portfolio-thumb
-                class="aspect-[3/2] w-full overflow-hidden rounded-xl bg-surface-alt md:max-w-none"
-              >
-                <img
-                  src={obra.imagem}
-                  alt={obra.titulo}
-                  width="600"
-                  height="600"
-                  class="h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-3" data-portfolio-texto>
-              <Text tone="secondary">{obra.resumo}</Text>
-              <p class="font-body text-xs uppercase tracking-wide text-deep">
-                {[obra.local, obra.ano].filter(Boolean).join(' · ')}
-              </p>
-              <a
-                href="#"
-                class="cta-portfolio self-start mt-2 inline-flex items-center gap-2 rounded-lg bg-deep px-3 py-1.5 text-xs font-body uppercase tracking-wide text-white shadow-md hover:bg-deep/80 transition-opacity duration-400"
-                onclick="document.getElementById('portfolio')?.scrollIntoView({behavior:'smooth'}); return false;"
-              >
-                Ver detalhes
-              </a>
-            </div>
-          </li>
-        ))}
+        <li id="portfolio-home-status" class="py-12 text-center font-body text-deep/70">Carregando…</li>
       </ul>
     </Container>
   </div>
@@ -137,16 +147,15 @@ import { portfolio } from '../../data/portfolio'
 
   <!-- Botao flutuante de portfolio: aparece apenas durante o pin -->
   <a
-    href="#"
+    href="/portfolio"
     id="portfolio-cases-btn"
-    aria-label="Veja + cases"
+    aria-label="Veja mais cases"
     class="portfolio-cases-btn fixed bottom-8 z-[60] bg-deep text-white rounded-full shadow-xl p-4 hover:bg-deep/90 transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep cursor-pointer flex items-center justify-center right-[4rem]"
-    onclick="document.getElementById('portfolio')?.scrollIntoView({behavior:'smooth'}); return false;"
   >
     Veja + cases
   </a>
 
-<style>
+<style is:global>
   /* O estado de acordeao so vale a partir de md E quando o JS rodou. Sem isso —
      mobile, reduced-motion ou JS bloqueado — todos os itens ficam expandidos em
      fluxo normal, legiveis. */

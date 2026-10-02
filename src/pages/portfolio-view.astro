@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
+---
+
+<BaseLayout title="Obra | Camargo Gallo Engenharia" description="Detalhes da obra do portfólio da Camargo Gallo Engenharia.">
+  <Section tone="warm" class="py-20">
+    <Container size="lg">
+      <div id="portfolio-status" class="py-20 text-center text-deep/60 font-body">Carregando…</div>
+
+      <article id="portfolio-article" class="max-w-3xl mx-auto" hidden>
+        <div class="mb-12 text-center">
+          <Heading as="1" size="display" class="mb-4" id="portfolio-titulo"></Heading>
+          <div class="flex justify-center gap-4 text-sm text-deep/60 font-body">
+            <span id="portfolio-meta"></span>
+          </div>
+        </div>
+
+        <div class="mb-12" id="portfolio-imagem-wrap">
+          <img id="portfolio-imagem" src="" alt="" class="w-full h-auto max-h-[500px] object-cover rounded-2xl shadow-lg" />
+        </div>
+
+        <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body">
+          <div id="portfolio-descricao" class="whitespace-pre-wrap text-lg"></div>
+        </div>
+
+        <div class="mt-16 pt-8 border-t border-[var(--color-divider)] flex justify-between items-center">
+          <Button as="a" href="/portfolio" variant="secondary" class="font-body">← Voltar ao Portfólio</Button>
+        </div>
+      </article>
+    </Container>
+  </Section>
+
+  <script is:inline>
+    (function () {
+      var parts = window.location.pathname.replace(/\/+$/, '').split('/');
+      var slug = decodeURIComponent(parts[parts.length - 1] || '');
+
+      var statusEl = document.getElementById('portfolio-status');
+      var article = document.getElementById('portfolio-article');
+
+      function fail(message) {
+        statusEl.textContent = message;
+        statusEl.hidden = false;
+        article.hidden = true;
+      }
+
+      function meta(item) {
+        var p = [];
+        if (item.cidade) p.push(item.cidade);
+        if (item.ano) p.push(item.ano);
+        return p.join(' · ');
+      }
+
+      if (!slug) {
+        fail('Obra não encontrada.');
+        return;
+      }
+
+      fetch('/api/public/portfolio_item.php?slug=' + encodeURIComponent(slug))
+        .then(function (response) {
+          if (response.status === 404) {
+            fail('Obra não encontrada.');
+            return null;
+          }
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.json();
+        })
+        .then(function (item) {
+          if (!item) return;
+
+          document.title = item.titulo + ' | Camargo Gallo Engenharia';
+          document.getElementById('portfolio-titulo').textContent = item.titulo;
+          document.getElementById('portfolio-meta').textContent = meta(item);
+          document.getElementById('portfolio-descricao').textContent = item.descricao || '';
+
+          var img = document.getElementById('portfolio-imagem');
+          if (item.imagem) {
+            img.src = item.imagem;
+            img.alt = item.titulo;
+            img.addEventListener('error', function () {
+              document.getElementById('portfolio-imagem-wrap').hidden = true;
+            });
+          } else {
+            document.getElementById('portfolio-imagem-wrap').hidden = true;
+          }
+
+          statusEl.hidden = true;
+          article.hidden = false;
+        })
+        .catch(function (error) {
+          console.error(error);
+          fail('Não foi possível carregar a obra.');
+        });
+    })();
+  </script>
+</BaseLayout>

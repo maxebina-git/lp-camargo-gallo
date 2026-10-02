@@ -14,5 +14,10 @@ Options -Indexes
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^insights/([^/]+)/?$ insight-view/ [L]
+
+  # Idem para as obras do portfolio.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^portfolio/([^/]+)/?$ portfolio-view/ [L]
 </IfModule>
 
