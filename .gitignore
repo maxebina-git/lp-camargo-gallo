@@ -23,3 +23,6 @@ astro-dev*.log
 
 # jetbrains setting folder
 .idea/
+
+# gerador de hash bcrypt temporario (sobe por FTP, nunca commitar)
+_gen.php
