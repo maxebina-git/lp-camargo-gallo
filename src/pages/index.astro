@@ -1,5 +1,4 @@
 ---
-# TEST: FTP deploy test - UNIQUE_TITLE_20261001_01
 import BaseLayout from '../layouts/BaseLayout.astro'
 import {
   Button,
@@ -35,8 +34,8 @@ const footerCompany = {
   cnpj: '23.741.090/0001-77',
   address: 'Rua Maria Jose Rangel, 159 - Vila São Paulo, São Paulo/SP - CEP 04650-180',
   contacts: [
-    { label: '(11) 2924-8556', href: 'tel:+551129248556', icon: 'phone' as const },
-    { label: 'WhatsApp', href: 'https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas', icon: 'whatsapp' as const },
+    { label: '(11) 2924-8556', href: 'tel:+551129248556', icon: 'phone' },
+    { label: 'WhatsApp', href: 'https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas', icon: 'whatsapp' },
   ],
   legalLinks: [
     { label: 'Política de Privacidade', href: '#privacy' },
@@ -63,7 +62,6 @@ const headerNav = [
   { label: 'PORTFÓLIO', href: '#' },
   { label: 'CONTATO', href: '#contato' },
 ];
-
 ---
 
 <style>
@@ -96,7 +94,7 @@ const headerNav = [
       iconOnly
       size="lg"
       as="a"
-      href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas"
+      href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas"
       aria-label="Falar no WhatsApp"
       class="bg-[#25D366]! text-white! hover:bg-[#128C7E]!"
     >
@@ -109,8 +107,6 @@ const headerNav = [
   <AboutSection />
 
   <Section tone="surface-alt" id="servicos" class="py-16">
-
-
     <Container size="lg">
       <Reveal client:visible>
         <div class="flex flex-col items-center text-center mb-12 gap-3">
@@ -149,11 +145,8 @@ const headerNav = [
       </div>
     </Container>
   </Section>
-
-  
   
   <PortfolioSection />
-
 
   <Section tone="warm" id="insights" class="py-16">
     <Container size="lg">
@@ -165,7 +158,7 @@ const headerNav = [
         </div>
       </Reveal>
       <div class="relative">
-        <div id="insights-container" class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Serviços cópia">
+        <div id="insights-container" class="servicos-slider flex gap-6 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="region" aria-label="Insights">
           <div class="servicos-track flex gap-6" data-servicos-track>
             <!-- Renderizado dinamicamente via JS -->
           </div>
@@ -193,7 +186,6 @@ const headerNav = [
 
   <script is:inline>
     (function () {
-      // Helper to create InsightCard HTML (matching InsightCard.astro)
       function createInsightHTML(item) {
         return `
           <div class="servico-item servico-reveal shrink-0 snap-start">
@@ -223,8 +215,6 @@ const headerNav = [
           const data = await response.json();
           
           track.innerHTML = data.map(item => createInsightHTML(item)).join('');
-          
-          // Re-initialize slider after content is loaded
           initSliders();
         } catch (e) {
           console.error('Erro ao carregar insights dinâmicos:', e);
@@ -414,7 +404,6 @@ const headerNav = [
         });
       }
 
-      // Init
       initSliders();
       loadInsights();
     })();
@@ -427,16 +416,16 @@ const headerNav = [
           <Heading as="2" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
           <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
           <div class="flex flex-wrap items-center justify-center gap-3">
-            <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink">
-              (11) 2924-8556
+            <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
+              📞 (11) 2924-8556
             </a>
             <span class="opacity-50">|</span>
-            <a href="https://wa.me/551129248556?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20recupera%C3%A7%C3%A3o%20de%20fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink">
-              <BrandIcon name="whatsapp" class="h-4 w-4" /> WhatsApp
+            <a href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
+              💬 WhatsApp
             </a>
             <span class="opacity-50">|</span>
-            <a href="mailto:atendimento@camargogallo.com.br" onclick="gtag('event', 'lp_email_click', { 'event_category': 'contato', 'event_label': 'email_lp' });" class="flex items-center gap-2 font-body text-ink">
-              <LucideMail class="w-4 h-4" /> atendimento@camargogallo.com.br
+            <a href="mailto:atendimento@camargogallo.com.br" onclick="gtag('event', 'lp_email_click', { 'event_category': 'contato', 'event_label': 'email_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
+              ✉️ atendimento@camargogallo.com.br
             </a>
           </div>
         </div>
@@ -460,7 +449,9 @@ const headerNav = [
             </FormField>
             <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
             <div class="flex items-center gap-4">
-              <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center"><LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" />Enviar mensagem</Button>
+              <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center justify-center">
+                <LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" /> Enviar mensagem
+              </Button>
             </div>
           </form>
         </Card>
@@ -500,46 +491,54 @@ const headerNav = [
       const target = el.getBoundingClientRect().top + window.scrollY - 20;
       gsap.to({ y: window.scrollY }, {
         y: target,
-        duration: 4,
-        ease: "power5.out",
+        duration: 1.5,
+        ease: "power3.out",
         onUpdate: function () {
           window.scrollTo(0, this.targets()[0].y);
         }
       });
     }
+    
     function formatarTelefone(inp) {
       let v = inp.value.replace(/\D/g, '').slice(0, 11);
       if (v.length > 7) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
       else if (v.length > 2) v = v.replace(/(\d{2})(\d+)/, '($1) $2');
       inp.value = v;
     }
-    function formatarEmail(inp) {
-      inp.value = inp.value.replace(/[^a-zA-Z0-9.@]/g, '');
-    }
+    
     function submeterForm(e) {
       e.preventDefault();
       document.getElementById('erro-nome').classList.add('hidden');
       document.getElementById('erro-whatsapp').classList.add('hidden');
       document.getElementById('erro-email').classList.add('hidden');
       document.getElementById('erro-mensagem').classList.add('hidden');
+      
       const wh = document.getElementById('whatsapp').value.replace(/\D/g, '');
       const em = document.getElementById('email').value.trim();
       let ok = true;
+      
       if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
       if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(em)) { document.getElementById('erro-email').classList.remove('hidden'); ok = false; }
+      
       const nome = document.getElementById('nome').value.trim();
       if (nome.length === 0 || nome.length < 3) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
+      
       const msg = document.getElementById('mensagem').value.trim();
       if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
+      
       if (!ok) return;
+      
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
-      btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>Enviando <span class="dots">● ● ●</span>';
+      btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> Enviando...';
+      
       document.getElementById('form-feedback').classList.add('hidden');
       document.getElementById('form-feedback').classList.remove('text-error-500');
       document.getElementById('form-feedback').classList.remove('text-green-600');
+      
       const form = document.getElementById('contato-form');
       const formData = new FormData(form);
+      
       fetch('/lp-camargo-gallo/send-email.php', { method: 'POST', body: formData })
         .then(r => r.text())
         .then(text => {
@@ -551,29 +550,15 @@ const headerNav = [
             document.getElementById('erro-whatsapp').classList.add('hidden');
             document.getElementById('erro-email').classList.add('hidden');
             document.getElementById('erro-mensagem').classList.add('hidden');
+            
             const btn = document.getElementById('submit-btn');
             btn.disabled = false;
-            btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>Enviar mensagem';
+            btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> Enviar mensagem';
           }
         })
         .catch(() => {
           // erro silencioso; validações individuais já mostram problemas nos inputs
         });
-    }
-    function validarFormulario(e) {
-      document.getElementById('erro-nome').classList.add('hidden');
-      document.getElementById('erro-whatsapp').classList.add('hidden');
-      document.getElementById('erro-email').classList.add('hidden');
-      document.getElementById('erro-mensagem').classList.add('hidden');
-      const wh = document.getElementById('whatsapp').value.replace(/\D/g, '');
-      const em = document.getElementById('email').value.trim();
-      let ok = true;
-      if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
-      const nome = document.getElementById('nome').value.trim();
-      if (nome.length === 0 || nome.length < 3) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
-      const msg = document.getElementById('mensagem').value.trim();
-      if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
-      if (!ok) { e.preventDefault(); }
     }
   </script>
 
