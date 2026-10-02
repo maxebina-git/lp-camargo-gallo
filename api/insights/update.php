@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../db_config.php';
+require_once '../slug.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -38,10 +39,13 @@ if (!isset($input['id'], $input['titulo'], $input['resumo'], $input['conteudo'],
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->prepare("UPDATE insights SET titulo = :titulo, resumo = :resumo, conteudo = :conteudo, data = :data, categoria = :categoria, imagem = :imagem WHERE id = :id");
+    $slug = cg_unique_slug($db, $input['slug'] ?? $input['titulo'], (int) $input['id']);
+
+    $stmt = $db->prepare("UPDATE insights SET titulo = :titulo, slug = :slug, resumo = :resumo, conteudo = :conteudo, data = :data, categoria = :categoria, imagem = :imagem WHERE id = :id");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
+        'slug'      => $slug,
         'resumo'    => $input['resumo'],
         'conteudo'  => $input['conteudo'],
         'data'      => $input['data'],
@@ -50,7 +54,7 @@ try {
         'id'        => $input['id']
     ]);
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'slug' => $slug]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);

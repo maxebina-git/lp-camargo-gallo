@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../db_config.php';
+require_once '../slug.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -38,10 +39,13 @@ if (!isset($input['titulo'], $input['resumo'], $input['conteudo'], $input['data'
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->prepare("INSERT INTO insights (titulo, resumo, conteudo, data, categoria, imagem, user_id) VALUES (:titulo, :resumo, :conteudo, :data, :categoria, :imagem, :user_id)");
+    $slug = cg_unique_slug($db, $input['slug'] ?? $input['titulo']);
+
+    $stmt = $db->prepare("INSERT INTO insights (titulo, slug, resumo, conteudo, data, categoria, imagem, user_id) VALUES (:titulo, :slug, :resumo, :conteudo, :data, :categoria, :imagem, :user_id)");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
+        'slug'      => $slug,
         'resumo'    => $input['resumo'],
         'conteudo'  => $input['conteudo'],
         'data'      => $input['data'],
@@ -50,7 +54,7 @@ try {
         'user_id'   => $_SESSION['user_id']
     ]);
 
-    echo json_encode(['success' => true, 'id' => $db->lastInsertId()]);
+    echo json_encode(['success' => true, 'id' => $db->lastInsertId(), 'slug' => $slug]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);

@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
+---
+
+<BaseLayout title="Insight | Camargo Gallo Engenharia" description="Artigo técnico da Camargo Gallo Engenharia.">
+  <Section tone="warm" class="py-20">
+    <Container size="lg">
+      <div id="insight-status" class="py-20 text-center text-deep/60 font-body">Carregando…</div>
+
+      <article id="insight-article" class="max-w-3xl mx-auto" hidden>
+        <div class="mb-12 text-center">
+          <span id="insight-categoria" class="text-xs uppercase tracking-widest font-bold text-deep px-3 py-1 rounded bg-deep/5 border border-deep/10 inline-block mb-6"></span>
+          <Heading as="1" size="display" class="mb-4" id="insight-titulo"></Heading>
+          <div class="flex justify-center gap-4 text-sm text-deep/60 font-body">
+            <span id="insight-data"></span>
+          </div>
+        </div>
+
+        <div class="mb-12" id="insight-imagem-wrap">
+          <img id="insight-imagem" src="" alt="" class="w-full h-auto max-h-[500px] object-cover rounded-2xl shadow-lg" />
+        </div>
+
+        <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body">
+          <p id="insight-resumo" class="text-xl text-deep/80 italic mb-8 border-l-4 border-[var(--color-divider)] pl-6"></p>
+          <div id="insight-conteudo" class="whitespace-pre-wrap text-lg"></div>
+        </div>
+
+        <div class="mt-16 pt-8 border-t border-[var(--color-divider)] flex justify-between items-center">
+          <Button as="a" href="/insights" variant="secondary" class="font-body">← Voltar aos Insights</Button>
+        </div>
+      </article>
+    </Container>
+  </Section>
+
+  <script is:inline>
+    (function () {
+      var parts = window.location.pathname.replace(/\/+$/, '').split('/');
+      var slug = decodeURIComponent(parts[parts.length - 1] || '');
+
+      var statusEl = document.getElementById('insight-status');
+      var article = document.getElementById('insight-article');
+
+      function fail(message) {
+        statusEl.textContent = message;
+        statusEl.hidden = false;
+        article.hidden = true;
+      }
+
+      function formatDateBR(value) {
+        var p = String(value || '').split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : String(value || '');
+      }
+
+      if (!slug) {
+        fail('Artigo não encontrado.');
+        return;
+      }
+
+      fetch('/api/public/insight.php?slug=' + encodeURIComponent(slug))
+        .then(function (response) {
+          if (response.status === 404) {
+            fail('Artigo não encontrado.');
+            return null;
+          }
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.json();
+        })
+        .then(function (item) {
+          if (!item) return;
+
+          document.title = item.titulo + ' | Camargo Gallo Engenharia';
+          document.getElementById('insight-categoria').textContent = item.categoria || 'Geral';
+          document.getElementById('insight-titulo').textContent = item.titulo;
+          document.getElementById('insight-data').textContent = 'Publicado em ' + formatDateBR(item.data);
+          document.getElementById('insight-resumo').textContent = item.resumo;
+          document.getElementById('insight-conteudo').textContent = item.conteudo;
+
+          var img = document.getElementById('insight-imagem');
+          if (item.imagem) {
+            img.src = item.imagem;
+            img.alt = item.titulo;
+            img.addEventListener('error', function () {
+              document.getElementById('insight-imagem-wrap').hidden = true;
+            });
+          } else {
+            document.getElementById('insight-imagem-wrap').hidden = true;
+          }
+
+          statusEl.hidden = true;
+          article.hidden = false;
+        })
+        .catch(function (error) {
+          console.error(error);
+          fail('Não foi possível carregar o artigo.');
+        });
+    })();
+  </script>
+</BaseLayout>
