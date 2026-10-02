@@ -102,7 +102,8 @@ export default {
     methods: {
         async fetchItems() {
             try {
-                const response = await fetch('/api/insights/list.php');
+                const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+                const response = await fetch(`${apiBase}/insights/list.php`);
                 this.items = await response.json();
             } catch (e) {
                 console.error('Erro ao carregar insights', e);
@@ -122,7 +123,8 @@ export default {
             this.showModal = false;
         },
         async saveItem() {
-            const endpoint = this.editingId ? '/api/insights/update.php' : '/api/insights/insert.php';
+            const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+            const endpoint = this.editingId ? `${apiBase}/insights/update.php` : `${apiBase}/insights/insert.php`;
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -140,7 +142,8 @@ export default {
         async deleteItem(id) {
             if (!confirm('Tem certeza que deseja excluir este artigo?')) return;
             try {
-                await fetch('/api/insights/delete.php', {
+                const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+                await fetch(`${apiBase}/insights/delete.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ id }).toString()
@@ -151,7 +154,8 @@ export default {
             }
         },
         async handleLogout() {
-            await fetch('/api/auth/logout.php', { method: 'POST' });
+            const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+            await fetch(`${apiBase}/auth/logout.php`, { method: 'POST' });
             this.$router.push('/login');
         }
     }

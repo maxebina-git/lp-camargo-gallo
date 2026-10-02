@@ -39,7 +39,8 @@ export default {
             this.loading = true;
             this.error = '';
             try {
-                const url = new URL('/api/auth/login.php', window.location.origin);
+                const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+                const url = new URL(`${apiBase}/auth/login.php`, window.location.origin);
                 url.searchParams.append('username', this.form.username);
                 url.searchParams.append('password', this.form.password);
                 const response = await fetch(url.toString(), {

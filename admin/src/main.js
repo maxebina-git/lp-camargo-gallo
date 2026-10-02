@@ -18,14 +18,15 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory('/admin/'),
+    history: createWebHistory(window.location.pathname.includes('/admin/') ? '/admin/' : '/staging/admin/'),
     routes,
 });
 
 router.beforeEach(async (to, from, next) => {
     if (to.meta.requiresAuth) {
         try {
-            const response = await fetch('/api/auth/check_session.php');
+            const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+            const response = await fetch(`${apiBase}/auth/check_session.php`);
             if (!response.ok) throw new Error('Unauthorized');
             next();
         } catch (e) {
@@ -34,7 +35,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
         next();
     }
-});
+};
 
 const app = createApp({
     template: '<router-view/>'
