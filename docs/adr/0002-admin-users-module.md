@@ -22,6 +22,7 @@ A autenticação já existe (`api/auth/login.php`, `check_session.php`, `logout.
 - Manter: `id`, `password` (hash bcrypt), `email` (único, agora é o login), `role` `enum('admin','editor')` DEFAULT `'editor'`, `created_at`.
 - As FKs `user_id` de `insights` e `portfolio` (`database.sql:44,66`) permanecem inalteradas.
 - Migration: novo arquivo `migrate-users-nome-telefone.sql` (ALTER TABLE + backfill do e-mail do admin atual, se necessário).
+- Migration de correção: `migrate-users-username-nullable.sql` — torna `username` nullable e remove a constraint UNIQUE (o campo foi descontinuado em favor do `email`; sem isso, inserts falham com `Duplicate entry '' for key 'username'`).
 
 ### 3. API `api/users/` (nova)
 Endpoints com checagem de sessão e de perfil no servidor (nunca confiar só no front):
