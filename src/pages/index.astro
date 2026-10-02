@@ -206,14 +206,14 @@ const headerNav = [
 
         return `
           <div class="servico-item servico-reveal shrink-0 snap-start">
-            <a href="${href}" class="block group">
-              <div class="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-alt mb-4">
+            <a href="${href}" class="block group w-[300px] h-[400px] flex flex-col">
+              <div class="relative h-[240px] overflow-hidden rounded-xl bg-surface-alt mb-4">
                 ${thumb}
                 <div class="absolute top-3 left-3">
                   <span class="bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-ink shadow-sm">${esc(item.categoria || 'Geral')}</span>
                 </div>
               </div>
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 flex-1 min-h-0">
                 <span class="text-xs font-body text-deep/60">${esc(formatDateBR(item.data))}</span>
                 <h3 class="text-lg font-bold text-ink group-hover:text-primary transition-colors">${esc(item.titulo)}</h3>
                 <p class="text-sm font-body text-deep/80 line-clamp-2">${esc(item.resumo)}</p>
