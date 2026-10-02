@@ -25,27 +25,54 @@ export default {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
                     <h3 class="text-gray-500 text-sm font-medium">Insights</h3>
-                    <p class="text-2xl font-bold text-gray-800">Gerenciar Artigos</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ insightsCount }} Artigos Publicados</p>
                     <router-link to="/insights" class="text-blue-600 text-sm hover:underline">Acessar →</router-link>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
                     <h3 class="text-gray-500 text-sm font-medium">Portfólio</h3>
-                    <p class="text-2xl font-bold text-gray-800">Gerenciar Obras</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ portfolioCount }} Cases</p>
                     <router-link to="/portfolio" class="text-green-600 text-sm hover:underline">Acessar →</router-link>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow border-l-4 border-purple-500">
-                    <h3 class="text-gray-500 text-sm font-medium">Status</h3>
-                    <p class="text-2xl font-bold text-gray-800">Operacional</p>
-                    <span class="text-green-500 text-sm">● Online</span>
+                    <h3 class="text-gray-500 text-sm font-medium">Usuários</h3>
+                    <p class="text-2xl font-bold text-gray-800">{{ usersCount }} Usuários</p>
+                    <router-link to="/users" class="text-purple-600 text-sm hover:underline">Acessar →</router-link>
                 </div>
             </div>
         </main>
     </div>
     `,
+    data() {
+        return {
+            insightsCount: 0,
+            portfolioCount: 0,
+            usersCount: 0
+        };
+    },
+    mounted() {
+        this.fetchCounts();
+    },
     methods: {
+        apiBase() {
+            return window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+        },
+        async fetchCounts() {
+            try {
+                const [insights, portfolio, users] = await Promise.all([
+                    fetch(`${this.apiBase()}/insights/list.php`).then(r => r.json()),
+                    fetch(`${this.apiBase()}/portfolio/list.php`).then(r => r.json()),
+                    fetch(`${this.apiBase()}/users/list.php`).then(r => r.json())
+                ]);
+                this.insightsCount = Array.isArray(insights) ? insights.length : 0;
+                this.portfolioCount = Array.isArray(portfolio) ? portfolio.length : 0;
+                this.usersCount = Array.isArray(users) ? users.length : 0;
+            } catch (e) {
+                console.error('Erro ao carregar contagens', e);
+            }
+        },
         async handleLogout() {
             try {
-                await fetch('/api/auth/logout.php', { method: 'POST' });
+                await fetch(`${this.apiBase()}/auth/logout.php`, { method: 'POST' });
                 this.$router.push('/login');
             } catch (e) {
                 console.error('Erro ao sair', e);
