@@ -9,5 +9,13 @@
     Require all denied
 </FilesMatch>
 
+# Estes arquivos foram removidos do repositorio, mas o deploy nao apaga
+# arquivos remotos (deleteRemote esta desligado), entao ainda existem no
+# servidor. Sao negados aqui ate que sejam apagados via FTP.
+# register.php permitia criar uma conta 'editor' sem autenticacao.
+<FilesMatch "^(register|debug|debug2|test_db)\.php$">
+    Require all denied
+</FilesMatch>
+
 # Impede listagem de diretorio da API.
 Options -Indexes
