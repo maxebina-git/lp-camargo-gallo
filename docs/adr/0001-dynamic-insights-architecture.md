@@ -22,7 +22,7 @@ Será desenvolvido um painel administrativo dedicado:
 - **Escopo**:
     - **Módulo de Insights**: CRUD completo de artigos (Título, Resumo, Conteúdo, Data, Categoria, Imagem de Destaque).
     - **Módulo de Portfólio**: CRUD completo de obras/cases (Título, Descrição, Imagem, Categoria, Data).
-    - **Módulo de Usuários**: Gestão de acessos (Login, Cadastro e Edição de administradores/editores).
+    - **Módulo de Usuários**: Gestão de acessos (Login, Cadastro e Edição de administradores/editores). Detalhado no ADR 002 (`0002-admin-users-module.md`).
 - **UX**: Dashboard centralizado com tabelas de resultados e botões de inserção rápida para cada módulo.
 
 ### 3. Consumo no Front-end (Astro)
