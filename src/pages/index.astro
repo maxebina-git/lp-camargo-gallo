@@ -10,7 +10,7 @@ import {
   BackToTop,
   Header,
   BrandIcon,
-  Footer,
+  FooterBanner,
 } from 'ds-grupo-rkb'
 import LegalDrawer from '../components/legal/LegalDrawer.vue'
 import WhatsappButton from '../components/WhatsappButton.vue'
@@ -435,8 +435,15 @@ const headerNav = [
 
   <FaqSection client:load />
 
-  <Footer
-    companyInfo={footerCompany}
+  <FooterBanner
+    bannerImage="/assets/logo-camargo-gallo.png"
+    bannerImageAlt="Logo Camargo Gallo"
+    bannerTitle="Pronto para começar?"
+    bannerDescription="Recuperação e impermeabilização de fachadas com retorno em até 24h."
+    bannerCta={{ label: 'Solicite um orçamento', href: '/contato' }}
+    companyDescription="Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo."
+    contacts={footerCompany.contacts}
+    legalLinks={footerCompany.legalLinks}
     copyright="© 2026 Camargo Gallo Engenharia. Todos os direitos reservados."
     size="lg"
     padding="md"
