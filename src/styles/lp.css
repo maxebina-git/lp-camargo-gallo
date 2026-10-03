@@ -258,15 +258,18 @@ img[alt="Logo Camargo Gallo"] {
   }
 }
 
-/* A barra do header mantem o vidro fosco do DS (bg-surface/60 + backdrop-blur-md)
-   em toda pagina: fundo opaco nao deixa nada desfocar atras. So a superficie
-   brand fica opaca e sem blur, e nesse caso o spacer do SiteHeader sai pintado
-   com a mesma cor, para a faixa de 76px e a barra nao mostrarem emenda.
-   --page-surface vem publicado pelo proprio SiteHeader/SiteFooter. O rodapé
+/* Barra do header nas paginas com spacer (data-glass, todas menos a home):
+   no topo ela fica limpa e, quando o header gruda no scroll (data-scrolled,
+   threshold 10 igual ao do DS), nenhuma regra nossa vale e valem as classes
+   do DS — bg-surface/60 backdrop-blur-md com a propria transicao
+   transition-[background-color,backdrop-filter]. Assim o vidro vale para
+   todas, inclusive /portfolio (brand): la a barra transparente no topo deixa
+   ver o spacer pintado com --page-surface, que bate com a section azul.
+   --page-surface vem publicado pelo proprio SiteHeader/SiteFooter. O rodape
    (raiz do FooterBanner, bg-surface-alt) continua sendo pintado na cor da
    section em todas as paginas. */
-.site-header[data-surface='brand'] > div:first-child {
-  background-color: var(--page-surface) !important;
+.site-header[data-glass]:not([data-scrolled]) > div:first-child {
+  background-color: transparent !important;
   backdrop-filter: none !important;
 }
 
