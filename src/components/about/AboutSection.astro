@@ -36,10 +36,127 @@ import AboutBadges from './AboutBadges.vue'
     })
   }
 
+  // Icones dos badges: cada sub-forma e medida (getTotalLength) e fica escondida
+  // no dash; quando a grade entra na viewport a timeline do GSAP roda em loop
+  // desenha (1,15s) -> 2s na forma final -> recolhe (1,15s) -> 1s vazio, com
+  // 0,5s de defasagem por card. A timeline pausa quando a grade sai da tela.
+  // Tudo client-side (os icones continuam sendo componentes do @lucide/vue).
+  function initIconDraw() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const gsap = window.gsap
+    const grid = document.querySelector('.about-badges')
+    // Sem gsap nao esconde nada: o icone simplesmente fica inteiro.
+    if (!gsap || !grid) return
+
+    const DRAW = 1.15
+    const HOLD = 2
+    const EXIT = 1.15
+    const REST = 1
+    const MICRO = 1 // abaixo disso a forma e um ponto (cap redondo), nao um traco
+
+    // O GSAP reescreve stroke-dashoffset com 4 casas decimais e o
+    // getTotalLength() do JS SUBESTIMA formas curvas (rect/circle) uns 3%
+    // em relacao ao motor do traco: dash menor que o path real deixa um resido
+    // no fim e o stroke-linecap: round pinta um pontinho no icone escondido.
+    // Por isso a folga de 3% (arredondada para cima, na precisao do GSAP) e o
+    // dasharray de dois valores (traco + folga gigante): no repouso o padrao
+    // nao da a volta no path, entao nao sobra nada pintado. O dash tambem e
+    // arredondado para 4 casas, igual o GSAP grava o offset: os dois valores
+    // ficam identicos e nao sobra nem um residuo de arredondamento.
+    const MARGIN = 1.03
+    const GAP = 1000
+    const dashOf = (len) => {
+      const magnitude = 10 ** (5 - Math.floor(Math.log10(len * MARGIN)))
+      const raw = Math.ceil(len * MARGIN * magnitude) / magnitude
+      return Math.round(raw * 10000) / 10000
+    }
+
+    const ends = new Map()
+    const groups = [...grid.querySelectorAll('.about-badge__icon')].flatMap((span, i) => {
+      const svg = span.querySelector('svg')
+      if (!svg) return []
+      const dashed = []
+      const faded = []
+      const shapes = svg.querySelectorAll('path, circle, line, polyline, polygon, rect, ellipse')
+      shapes.forEach((shape) => {
+        const len = typeof shape.getTotalLength === 'function' ? shape.getTotalLength() : 0
+        if (!len || len < MICRO) {
+          // Pontinhos (os bullets do clipboard-list) e formas sem comprimento
+          // nao desenham: entram e saem por opacity, no ritmo do traco.
+          shape.style.opacity = '0'
+          faded.push(shape)
+          return
+        }
+        const dash = dashOf(len)
+        shape.style.strokeDasharray = `${dash} ${GAP}`
+        shape.style.strokeDashoffset = `${dash}`
+        ends.set(shape, dash)
+        dashed.push(shape)
+      })
+      if (!dashed.length && !faded.length) return []
+      span.classList.add('is-drawable')
+      return [{ dashed, faded, delay: 0.25 + i * 0.5 }]
+    })
+    if (!groups.length) return
+
+    const icons = [...grid.querySelectorAll('.about-badge__icon')]
+    let timelines = []
+
+    const start = () => {
+      groups.forEach(({ dashed, faded, delay }) => {
+        const tl = gsap.timeline({ repeat: -1, delay })
+        if (dashed.length) {
+          tl.to(dashed, { strokeDashoffset: 0, duration: DRAW, ease: 'expo.out' }, 0)
+          tl.to(
+            dashed,
+            {
+              strokeDashoffset: (index, shape) => ends.get(shape),
+              duration: EXIT,
+              ease: 'expo.in',
+            },
+            DRAW + HOLD,
+          )
+        }
+        if (faded.length) {
+          tl.to(faded, { opacity: 1, duration: 0.4, ease: 'back.out(2)' }, DRAW * 0.5)
+          tl.to(faded, { opacity: 0, duration: 0.3, ease: 'power2.in' }, DRAW + HOLD)
+        }
+        tl.to({}, { duration: REST }, DRAW + HOLD + EXIT)
+        timelines.push(tl)
+      })
+      icons.forEach((span) => span.classList.add('is-drawn'))
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          if (timelines.length) timelines.forEach((tl) => tl.resume())
+          else start()
+        } else if (timelines.length) {
+          timelines.forEach((tl) => tl.pause())
+        }
+      },
+      { threshold: 0.25 },
+    )
+    io.observe(grid)
+  }
+
   // O window.gsap e definido pelo BaseLayout; ambos sao modulos bundlados, entao
   // esperar o load evita depender da ordem de execucao entre eles.
-  if (document.readyState === 'complete') initParalax()
-  else window.addEventListener('load', initParalax, { once: true })
+  if (document.readyState === 'complete') {
+    initParalax()
+    initIconDraw()
+  } else {
+    window.addEventListener(
+      'load',
+      () => {
+        initParalax()
+        initIconDraw()
+      },
+      { once: true },
+    )
+  }
 </script>
 
 <Section tone="warm" size="lg" class="py-16">

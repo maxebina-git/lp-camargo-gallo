@@ -18,8 +18,8 @@ const delay = ['-1.2s', '-3.4s', '-2.1s', '-0.4s', '-4.6s']
     >
       <template #title>
         <div class="flex flex-col items-center gap-2">
-          <span class="text-ink">
-            <component :is="b.icone" :size="26" />
+          <span class="about-badge__icon">
+            <component :is="b.icone" :size="36" />
           </span>
         </div>
       </template>

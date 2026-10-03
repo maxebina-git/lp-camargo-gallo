@@ -190,9 +190,39 @@ body {
   }
 }
 
+/* Icones dos cards: o traço se desenha pelo path, fica 2s na forma final e
+   recolhe pelo caminho inverso, em loop. A timeline fica no script do
+   AboutSection (GSAP), que mede cada sub-forma com getTotalLength e aplica o
+   dash inline; o escalonamento de 0,5s por card tambem e do script. Sem GSAP
+   ou com movimento reduzido o icone aparece inteiro e parado. O card mantem o
+   float e o lift do FeatureCard; so o icone se mexe. */
+.about-badge__icon {
+  display: grid;
+  place-items: center;
+  color: var(--color-primary-500);
+  transition:
+    transform var(--duration-250) var(--ease-out),
+    color var(--duration-250) var(--ease-out);
+}
+
+.about-badge:hover .about-badge__icon {
+  color: var(--color-azure-700);
+  transform: scale(1.12);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .about-badge {
     animation: none;
+  }
+
+  /* Volta o icone para desenhado de verdade (o JS deixa o dash inline). */
+  .about-badge__icon svg > * {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .about-badge__icon {
+    transition: none;
   }
 }
 
