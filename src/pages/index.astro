@@ -3,14 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import {
   Button,
   Container,
-  FormField,
-  Input,
-  Textarea,
   Heading,
-  Text,
   Section,
   Reveal,
-  Card,
   IconSet,
   BackToTop,
   Header,
@@ -23,9 +18,10 @@ import HeroSlider from '../components/hero/HeroSlider.vue'
 import AboutSection from '../components/about/AboutSection.astro'
 import PortfolioSection from '../components/portfolio/PortfolioSection.astro'
 import ServiceCard from '../components/services/ServiceCard.vue'
+import FaqSection from '../components/faq/FaqSection.vue'
 import { servicos } from '../data/servicos'
 import lucide from '@lucide/vue'
-const { LucideMail, ChevronUp } = lucide
+const { ChevronUp } = lucide
 
 const footerCompany = {
   companyName: 'CAMARGO GALLO ENGENHARIA LTDA',
@@ -58,7 +54,7 @@ const headerNav = [
   { label: 'SEGURANÇA', href: '#' },
   { label: 'PARCEIROS', href: '#' },
   { label: 'PORTFÓLIO', href: '#' },
-  { label: 'CONTATO', href: '#contato' },
+  { label: 'CONTATO', href: '/contato' },
 ];
 ---
 
@@ -437,55 +433,7 @@ const headerNav = [
     })();
   </script>
 
-  <section id="contato" class="bg-surface text-ink py-16">
-    <Container>
-      <div class="max-w-3xl mx-auto">
-        <div class="flex flex-col gap-4 items-center text-center mb-12">
-          <Heading as="2" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
-          <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
-          <div class="flex flex-wrap items-center justify-center gap-3">
-            <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              📞 (11) 2924-8556
-            </a>
-            <span class="opacity-50">|</span>
-            <a href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              💬 WhatsApp
-            </a>
-            <span class="opacity-50">|</span>
-            <a href="mailto:atendimento@camargogallo.com.br" onclick="gtag('event', 'lp_email_click', { 'event_category': 'contato', 'event_label': 'email_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              ✉️ atendimento@camargogallo.com.br
-            </a>
-          </div>
-        </div>
-        <Card>
-          <form id="contato-form" class="flex flex-col gap-4" action="/lp-camargo-gallo/send-email.php" method="post" onsubmit="submeterForm(event)" novalidate>
-            <FormField label="Nome" id="nome">
-              <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>=3) document.getElementById('erro-nome').classList.add('hidden')" />
-              <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
-            </FormField>
-            <FormField label="WhatsApp" id="whatsapp">
-              <Input id="whatsapp" name="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this); if(/^\d{11}$/.test(this.value.replace(/\D/g,''))) document.getElementById('erro-whatsapp').classList.add('hidden')" />
-              <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
-            </FormField>
-            <FormField label="Email" id="email">
-              <Input id="email" name="email" type="email" placeholder="seu@email.com.br" oninput="if(this.value.trim()){ if(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden'); else document.getElementById('erro-email').classList.remove('hidden'); } else { document.getElementById('erro-email').classList.remove('hidden'); }" />
-              <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Informe um email válido.</p>
-            </FormField>
-            <FormField label="Mensagem" id="mensagem">
-              <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>=10) document.getElementById('erro-mensagem').classList.add('hidden')" />
-              <p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
-            </FormField>
-            <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
-            <div class="flex items-center gap-4">
-              <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center justify-center">
-                <LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" /> Enviar mensagem
-              </Button>
-            </div>
-          </form>
-        </Card>
-      </div>
-    </Container>
-  </section>
+  <FaqSection client:load />
 
   <Footer
     companyInfo={footerCompany}
@@ -510,84 +458,6 @@ const headerNav = [
         }
       }
     });
-  </script>
-
-  <script is:inline>
-    function animarScroll() {
-      const el = document.getElementById('titulo-orcamento');
-      if (!el) return;
-      const target = el.getBoundingClientRect().top + window.scrollY - 20;
-      gsap.to({ y: window.scrollY }, {
-        y: target,
-        duration: 1.5,
-        ease: "power3.out",
-        onUpdate: function () {
-          window.scrollTo(0, this.targets()[0].y);
-        }
-      });
-    }
-    
-    function formatarTelefone(inp) {
-      let v = inp.value.replace(/\D/g, '').slice(0, 11);
-      if (v.length > 7) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-      else if (v.length > 2) v = v.replace(/(\d{2})(\d+)/, '($1) $2');
-      inp.value = v;
-    }
-    
-    function submeterForm(e) {
-      e.preventDefault();
-      document.getElementById('erro-nome').classList.add('hidden');
-      document.getElementById('erro-whatsapp').classList.add('hidden');
-      document.getElementById('erro-email').classList.add('hidden');
-      document.getElementById('erro-mensagem').classList.add('hidden');
-      
-      const wh = document.getElementById('whatsapp').value.replace(/\D/g, '');
-      const em = document.getElementById('email').value.trim();
-      let ok = true;
-      
-      if (wh.length !== 11) { document.getElementById('erro-whatsapp').classList.remove('hidden'); ok = false; }
-      if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(em)) { document.getElementById('erro-email').classList.remove('hidden'); ok = false; }
-      
-      const nome = document.getElementById('nome').value.trim();
-      if (nome.length === 0 || nome.length < 3) { document.getElementById('erro-nome').classList.remove('hidden'); ok = false; }
-      
-      const msg = document.getElementById('mensagem').value.trim();
-      if (msg.length === 0 || msg.length < 10) { document.getElementById('erro-mensagem').classList.remove('hidden'); ok = false; }
-      
-      if (!ok) return;
-      
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> Enviando...';
-      
-      document.getElementById('form-feedback').classList.add('hidden');
-      document.getElementById('form-feedback').classList.remove('text-error-500');
-      document.getElementById('form-feedback').classList.remove('text-green-600');
-      
-      const form = document.getElementById('contato-form');
-      const formData = new FormData(form);
-      
-      fetch('/lp-camargo-gallo/send-email.php', { method: 'POST', body: formData })
-        .then(r => r.text())
-        .then(text => {
-          if (text.trim() === 'OK') {
-            gtag('event', 'lp_form_submit', { 'event_category': 'contato', 'event_label': 'form_lp' });
-            document.getElementById('form-feedback').classList.remove('hidden');
-            form.reset();
-            document.getElementById('erro-nome').classList.add('hidden');
-            document.getElementById('erro-whatsapp').classList.add('hidden');
-            document.getElementById('erro-email').classList.add('hidden');
-            document.getElementById('erro-mensagem').classList.add('hidden');
-            
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = false;
-            btn.innerHTML = '<span class="inline w-4 h-4 mr-2"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> Enviar mensagem';
-          }
-        })
-        .catch(() => {
-          // erro silencioso; validações individuais já mostram problemas nos inputs
-        });
-    }
   </script>
 
   <BackToTop client:load>
