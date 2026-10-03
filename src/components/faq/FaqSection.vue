@@ -49,6 +49,7 @@ onMounted(() => {
         trigger: '#faq',
         start: 'top top',
         end,
+        pin: true,
         scrub: 1,
         onUpdate: (self: { progress: number }) => set(self.progress),
       } as unknown as ScrollTrigger,
@@ -63,8 +64,8 @@ onMounted(() => {
     }
   }
 
-  mm.add('(min-width: 768px)', () => create('+=250%'))
-  mm.add('(max-width: 767px)', () => create('+=180%'))
+  mm.add('(min-width: 768px)', () => create('+=500%'))
+  mm.add('(max-width: 767px)', () => create('+=500%'))
 })
 
 onBeforeUnmount(() => {
@@ -79,7 +80,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Section tone="surface-alt" size="none" id="faq" class="py-16">
+  <Section tone="surface-alt" size="none" id="faq" class="h-[100dvh] flex flex-col justify-center">
     <Container>
       <div class="max-w-3xl mx-auto">
         <div class="flex flex-col items-center text-center gap-4 mb-10">
