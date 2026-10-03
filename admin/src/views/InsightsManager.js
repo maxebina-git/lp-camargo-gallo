@@ -1,3 +1,11 @@
+const MIN_LOADING_MS = 600;
+
+function ensureMinDuration(startedAt, ms) {
+    const remaining = ms - (Date.now() - startedAt);
+    if (remaining <= 0) return Promise.resolve();
+    return new Promise((resolve) => setTimeout(resolve, remaining));
+}
+
 export default {
     template: `
     <div class="min-h-screen flex">
@@ -162,26 +170,35 @@ export default {
             const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
             this.uploading = true;
             this.uploadError = '';
+            const startedAt = Date.now();
+            let path = '';
+            let failure = '';
             try {
                 const body = new FormData();
                 body.append('file', file);
                 const response = await fetch(`${apiBase}/upload.php`, { method: 'POST', body });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.path) {
-                    this.form.imagem = data.path;
+                    path = data.path;
                 } else {
-                    this.uploadError = data.error || 'Falha no upload';
+                    failure = data.error || 'Falha no upload';
                 }
             } catch (e) {
-                this.uploadError = 'Erro de conexão no upload';
+                failure = 'Erro de conexão no upload';
             } finally {
+                await ensureMinDuration(startedAt, MIN_LOADING_MS);
                 this.uploading = false;
             }
+            if (path) this.form.imagem = path;
+            if (failure) this.uploadError = failure;
         },
         async saveItem() {
             const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
             const endpoint = this.editingId ? `${apiBase}/insights/update.php` : `${apiBase}/insights/insert.php`;
             this.saving = true;
+            const startedAt = Date.now();
+            let saved = false;
+            let failure = '';
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -190,15 +207,23 @@ export default {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok) {
-                    this.closeModal();
-                    this.fetchItems();
+                    saved = true;
                 } else {
-                    alert(data.error || 'Erro ao salvar artigo');
+                    failure = data.error || 'Erro ao salvar artigo';
                 }
             } catch (e) {
-                alert('Erro ao salvar artigo');
+                failure = 'Erro ao salvar artigo';
             } finally {
+                await ensureMinDuration(startedAt, MIN_LOADING_MS);
                 this.saving = false;
+            }
+            if (failure) {
+                alert(failure);
+                return;
+            }
+            if (saved) {
+                this.closeModal();
+                this.fetchItems();
             }
         },
         async deleteItem(id) {

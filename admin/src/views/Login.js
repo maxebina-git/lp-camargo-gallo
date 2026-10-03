@@ -1,3 +1,11 @@
+const MIN_LOADING_MS = 800;
+
+function ensureMinDuration(startedAt, ms) {
+    const remaining = ms - (Date.now() - startedAt);
+    if (remaining <= 0) return Promise.resolve();
+    return new Promise((resolve) => setTimeout(resolve, remaining));
+}
+
 export default {
     template: `
     <div class="min-h-screen flex items-center justify-center bg-gray-900 px-4">
@@ -39,6 +47,8 @@ export default {
         async handleLogin() {
             this.loading = true;
             this.error = '';
+            const startedAt = Date.now();
+            let authenticated = false;
             try {
                 const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
                 const response = await fetch(`${apiBase}/auth/login.php`, {
@@ -51,15 +61,17 @@ export default {
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    this.$router.push('/dashboard');
+                    authenticated = true;
                 } else {
                     this.error = data.error || 'Erro ao fazer login';
                 }
             } catch (e) {
                 this.error = 'Erro de conexão com o servidor';
             } finally {
-                this.loading = false;
+                await ensureMinDuration(startedAt, MIN_LOADING_MS);
             }
+            if (authenticated) await this.$router.push('/dashboard').catch(() => {});
+            this.loading = false;
         }
     }
 };

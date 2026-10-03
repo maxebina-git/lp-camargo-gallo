@@ -1,3 +1,11 @@
+const MIN_LOADING_MS = 600;
+
+function ensureMinDuration(startedAt, ms) {
+    const remaining = ms - (Date.now() - startedAt);
+    if (remaining <= 0) return Promise.resolve();
+    return new Promise((resolve) => setTimeout(resolve, remaining));
+}
+
 export default {
     template: `
     <div class="min-h-screen flex">
@@ -162,6 +170,9 @@ export default {
         async saveItem() {
             const endpoint = this.editingId ? `${this.apiBase()}/users/update.php` : `${this.apiBase()}/users/insert.php`;
             this.saving = true;
+            const startedAt = Date.now();
+            let saved = false;
+            let failure = '';
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -170,15 +181,23 @@ export default {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok) {
-                    this.closeModal();
-                    this.fetchItems();
+                    saved = true;
                 } else {
-                    alert(data.error || 'Erro ao salvar usuário');
+                    failure = data.error || 'Erro ao salvar usuário';
                 }
             } catch (e) {
-                alert('Erro ao salvar usuário');
+                failure = 'Erro ao salvar usuário';
             } finally {
+                await ensureMinDuration(startedAt, MIN_LOADING_MS);
                 this.saving = false;
+            }
+            if (failure) {
+                alert(failure);
+                return;
+            }
+            if (saved) {
+                this.closeModal();
+                this.fetchItems();
             }
         },
         async deleteItem(id) {
