@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { Container, Heading, Section } from 'ds-grupo-rkb'
+import SiteHeader from '../components/layout/SiteHeader.astro'
+import SiteFooter from '../components/layout/SiteFooter.astro'
+---
+
+<BaseLayout
+  title="Serviços | Camargo Gallo Engenharia"
+  description="Recuperação de fachadas, impermeabilização, pintura predial e engenharia diagnóstica pela Camargo Gallo."
+>
+
+  <SiteHeader />
+
+  <Section tone="surface" class="py-20">
+    <Container size="lg">
+      <div class="flex flex-col items-center text-center gap-4">
+        <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-divider"></div>
+        <Heading as="1" size="display" class="section-title">Serviços</Heading>
+      </div>
+    </Container>
+  </Section>
+
+  <SiteFooter />
+
+</BaseLayout>

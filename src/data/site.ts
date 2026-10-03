@@ -42,44 +42,40 @@ export const footerCompany: FooterCompany = {
   ],
 }
 
-/* Nav da home: âncoras locais das seções */
 export const headerNavHome: NavLink[] = [
-  { label: 'EMPRESA', href: '#' },
-  { label: 'SERVIÇOS', href: '#servicos' },
+  { label: 'EMPRESA', href: '/empresa' },
+  { label: 'SERVIÇOS', href: '/servicos' },
   {
     label: 'ESTUDOS DE CASO',
-    href: '#estudo-de-caso',
+    href: '/estudos-de-caso',
     parentLink: true,
     dropdown: [
-      { label: 'Revitalização de fachadas e áreas comuns', href: '#estudo-de-caso' },
-      { label: 'Retrofit de fachadas e áreas comuns', href: '#estudo-de-caso' },
-      { label: 'Pintura de fachadas e áreas comuns', href: '#estudo-de-caso' },
-      { label: 'Impermeabilização de lajes de cobertura', href: '#estudo-de-caso' },
+      { label: 'Revitalização de fachadas e áreas comuns', href: '/estudos-de-caso' },
+      { label: 'Retrofit de fachadas e áreas comuns', href: '/estudos-de-caso' },
+      { label: 'Pintura de fachadas e áreas comuns', href: '/estudos-de-caso' },
+      { label: 'Impermeabilização de lajes de cobertura', href: '/estudos-de-caso' },
     ],
   },
-  { label: 'SEGURANÇA', href: '#' },
-  { label: 'PARCEIROS', href: '#' },
-  { label: 'PORTFÓLIO', href: '#' },
+  { label: 'SEGURANÇA', href: '/seguranca' },
+  { label: 'PORTFÓLIO', href: '/portfolio' },
   { label: 'CONTATO', href: '/contato' },
 ]
 
-/* Nav das páginas internas: âncoras absolutas para voltar à home */
 export const headerNavSite: NavLink[] = [
-  { label: 'EMPRESA', href: '/' },
-  { label: 'SERVIÇOS', href: '/#servicos' },
+  { label: 'EMPRESA', href: '/empresa' },
+  { label: 'SERVIÇOS', href: '/servicos' },
   {
     label: 'ESTUDOS DE CASO',
-    href: '/#estudo-de-caso',
+    href: '/estudos-de-caso',
     parentLink: true,
     dropdown: [
-      { label: 'Revitalização de fachadas e áreas comuns', href: '/#estudo-de-caso' },
-      { label: 'Retrofit de fachadas e áreas comuns', href: '/#estudo-de-caso' },
-      { label: 'Pintura de fachadas e áreas comuns', href: '/#estudo-de-caso' },
-      { label: 'Impermeabilização de lajes de cobertura', href: '/#estudo-de-caso' },
+      { label: 'Revitalização de fachadas e áreas comuns', href: '/estudos-de-caso' },
+      { label: 'Retrofit de fachadas e áreas comuns', href: '/estudos-de-caso' },
+      { label: 'Pintura de fachadas e áreas comuns', href: '/estudos-de-caso' },
+      { label: 'Impermeabilização de lajes de cobertura', href: '/estudos-de-caso' },
     ],
   },
-  { label: 'SEGURANÇA', href: '/' },
-  { label: 'PARCEIROS', href: '/' },
+  { label: 'SEGURANÇA', href: '/seguranca' },
   { label: 'PORTFÓLIO', href: '/portfolio' },
   { label: 'CONTATO', href: '/contato' },
 ]
