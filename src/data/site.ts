@@ -16,6 +16,21 @@ export interface NavLink {
   dropdown?: NavLink[]
 }
 
+export type SurfaceToken = 'surface' | 'surface-alt' | 'deep' | 'brand' | 'warm'
+
+export type Surface = SurfaceToken | (string & {})
+
+export const surfaceColors: Record<SurfaceToken, string> = {
+  surface: 'var(--color-surface)',
+  'surface-alt': 'var(--color-surface-alt)',
+  deep: 'var(--color-deep)',
+  brand: 'var(--color-surface-brand)',
+  warm: 'var(--color-surface-warm)',
+}
+
+export const surfaceColor = (surface: Surface): string =>
+  surfaceColors[surface as SurfaceToken] ?? String(surface)
+
 export interface FooterCompany {
   companyName: string
   cnpj: string

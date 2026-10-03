@@ -1,22 +1,28 @@
 ---
 import { Button, Header, BrandIcon } from 'ds-grupo-rkb'
-import { headerNavSite, whatsappHref } from '../../data/site'
+import { headerNavSite, surfaceColor, whatsappHref, type Surface } from '../../data/site'
 
 interface Props {
   nav?: typeof headerNavSite
   spacer?: boolean
-  surface?: 'surface' | 'surface-brand'
+  surface?: Surface
 }
 
 const { nav = headerNavSite, spacer = true, surface = 'surface' } = Astro.props
 
-const surfaceClass = {
-  'surface': '',
-  'surface-brand': 'bg-surface-brand',
-}[surface]
+const color = surfaceColor(surface)
 ---
 
-<Header client:load boxed size="lg" position="fixed" nav={nav} class="site-header" data-surface={surface}>
+<Header
+  client:load
+  boxed
+  size="lg"
+  position="fixed"
+  nav={nav}
+  class="site-header"
+  data-surface={surface}
+  style={`--page-surface: ${color}`}
+>
   <Button
     slot="aside"
     iconOnly
@@ -30,4 +36,4 @@ const surfaceClass = {
   </Button>
 </Header>
 
-{spacer && <div aria-hidden="true" class={`h-[4.75rem] ${surfaceClass}`}></div>}
+{spacer && <div aria-hidden="true" class="h-[4.75rem]" style={`background-color: ${color}`}></div>}

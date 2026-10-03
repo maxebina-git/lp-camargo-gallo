@@ -1,18 +1,21 @@
 ---
 import { FooterBanner } from 'ds-grupo-rkb'
 import LegalDrawer from '../legal/LegalDrawer.vue'
-import { footerCompany } from '../../data/site'
+import { footerCompany, surfaceColor, type Surface } from '../../data/site'
 
 interface Props {
-  surface?: 'surface' | 'surface-brand'
+  surface?: Surface
 }
 
 const { surface = 'surface' } = Astro.props
+
+const color = surfaceColor(surface)
 ---
 
 <FooterBanner
   class="site-footer"
   data-surface={surface}
+  style={`--page-surface: ${color}`}
   bannerImage="/assets/logo-camargo-gallo.png"
   bannerImageAlt="Logo Camargo Gallo"
   bannerTitle="Pronto para começar?"
