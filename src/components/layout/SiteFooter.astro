@@ -2,9 +2,17 @@
 import { FooterBanner } from 'ds-grupo-rkb'
 import LegalDrawer from '../legal/LegalDrawer.vue'
 import { footerCompany } from '../../data/site'
+
+interface Props {
+  surface?: 'surface' | 'surface-brand'
+}
+
+const { surface = 'surface' } = Astro.props
 ---
 
 <FooterBanner
+  class="site-footer"
+  data-surface={surface}
   bannerImage="/assets/logo-camargo-gallo.png"
   bannerImageAlt="Logo Camargo Gallo"
   bannerTitle="Pronto para começar?"

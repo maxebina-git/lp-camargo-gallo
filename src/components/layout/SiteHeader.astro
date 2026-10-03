@@ -5,12 +5,18 @@ import { headerNavSite, whatsappHref } from '../../data/site'
 interface Props {
   nav?: typeof headerNavSite
   spacer?: boolean
+  surface?: 'surface' | 'surface-brand'
 }
 
-const { nav = headerNavSite, spacer = true } = Astro.props
+const { nav = headerNavSite, spacer = true, surface = 'surface' } = Astro.props
+
+const surfaceClass = {
+  'surface': '',
+  'surface-brand': 'bg-surface-brand',
+}[surface]
 ---
 
-<Header client:load boxed size="lg" position="fixed" nav={nav}>
+<Header client:load boxed size="lg" position="fixed" nav={nav} class="site-header" data-surface={surface}>
   <Button
     slot="aside"
     iconOnly
@@ -24,4 +30,4 @@ const { nav = headerNavSite, spacer = true } = Astro.props
   </Button>
 </Header>
 
-{spacer && <div aria-hidden="true" class="h-[4.75rem]"></div>}
+{spacer && <div aria-hidden="true" class={`h-[4.75rem] ${surfaceClass}`}></div>}

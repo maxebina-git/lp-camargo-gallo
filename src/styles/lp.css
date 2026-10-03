@@ -257,3 +257,21 @@ img[alt="Logo Camargo Gallo"] {
     gap: 0.75rem;
   }
 }
+
+/* Em /portfolio/ a pagina inteira e --color-surface-brand (#ecf5ff). O Header
+   (ds-grupo-rkb) aplica bg-surface/60 backdrop-blur-md no div interno e o spacer
+   do SiteHeader e transparente, entao o branco do body aparecia no topo e sumia
+   ao rolar, quando a section azul passava por tras da barra. O data-surface
+   pinta a barra com a cor da pagina; nas demais paginas a regra nao casa e o
+   branco translucido atual permanece. */
+.site-header[data-surface='surface-brand'] > div:first-child {
+  background-color: var(--color-surface-brand) !important;
+  backdrop-filter: none !important;
+}
+
+/* Mesma leitura do header: a raiz do FooterBanner usa bg-surface-alt
+   (#f3f4f6) e encostava na pagina azul, mostrando uma costura cinza no fim.
+   O card do CTA (bg-surface) segue branco por ser o bloco de destaque. */
+.site-footer[data-surface='surface-brand'] {
+  background-color: var(--color-surface-brand) !important;
+}
