@@ -11,6 +11,11 @@ interface Props {
 const { nav = headerNavSite, spacer = true, surface = 'surface' } = Astro.props
 
 const color = surfaceColor(surface)
+
+/* Só a superfície brand tem a barra opaca (lp.css); as demais ficam com o
+   vidro fosco do DS, então o spacer precisa ser transparente para a faixa de
+   76px bater com a barra. */
+const spacerColor = surface === 'brand' ? color : undefined
 ---
 
 <Header
@@ -36,4 +41,4 @@ const color = surfaceColor(surface)
   </Button>
 </Header>
 
-{spacer && <div aria-hidden="true" class="h-[4.75rem]" style={`background-color: ${color}`}></div>}
+{spacer && <div aria-hidden="true" class="h-[4.75rem]" style={spacerColor ? `background-color: ${spacerColor}` : undefined}></div>}

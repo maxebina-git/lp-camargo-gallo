@@ -258,12 +258,14 @@ img[alt="Logo Camargo Gallo"] {
   }
 }
 
-/* A pagina inteira leva a cor da section: SiteHeader e SiteFooter publicam
-   --page-surface (o spacer ja sai pintado pelo proprio componente). O Header
-   (ds-grupo-rkb) aplica bg-surface/60 backdrop-blur-md no div interno e a raiz
-   do FooterBanner usa bg-surface-alt; estas regras trocam os dois pela cor da
-   pagina para nao aparecer emenda no topo nem no fim. */
-.site-header[data-surface] > div:first-child {
+/* A barra do header mantem o vidro fosco do DS (bg-surface/60 + backdrop-blur-md)
+   em toda pagina: fundo opaco nao deixa nada desfocar atras. So a superficie
+   brand fica opaca e sem blur, e nesse caso o spacer do SiteHeader sai pintado
+   com a mesma cor, para a faixa de 76px e a barra nao mostrarem emenda.
+   --page-surface vem publicado pelo proprio SiteHeader/SiteFooter. O rodapé
+   (raiz do FooterBanner, bg-surface-alt) continua sendo pintado na cor da
+   section em todas as paginas. */
+.site-header[data-surface='brand'] > div:first-child {
   background-color: var(--page-surface) !important;
   backdrop-filter: none !important;
 }
