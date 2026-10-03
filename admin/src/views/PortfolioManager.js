@@ -124,7 +124,9 @@ export default {
                                     </div>
                                     <div class="flex-1 space-y-2">
                                         <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onFileChange" :disabled="uploading" class="block w-full text-sm text-gray-600">
-                                        <p v-if="uploading" class="text-xs text-blue-600">Enviando imagem…</p>
+                                        <p v-if="uploading" class="text-xs text-blue-600 inline-flex items-center gap-0.5">
+                                            Enviando imagem<span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:0ms"></span><span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:150ms"></span><span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:300ms"></span>
+                                        </p>
                                         <p v-if="uploadError" class="text-xs text-red-600">{{ uploadError }}</p>
                                         <input v-model="form.imagem" type="text" placeholder="ou cole uma URL/caminho" class="block w-full border border-gray-300 rounded-md p-2 text-xs">
                                     </div>
@@ -136,8 +138,11 @@ export default {
                             </div>
                         </div>
                         <div class="flex justify-end space-x-3 mt-6">
-                            <button type="button" @click="closeModal" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Salvar</button>
+                            <button type="button" @click="closeModal" :disabled="saving" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed">Cancelar</button>
+                            <button type="submit" :disabled="saving" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                <svg v-if="saving" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 animate-spin" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                                <span>{{ saving ? 'Salvando...' : 'Salvar' }}</span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -155,6 +160,7 @@ export default {
             dragIndex: null,
             dragOverIndex: null,
             savingOrder: false,
+            saving: false,
             form: { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
         };
     },
@@ -220,6 +226,7 @@ export default {
             this.form = { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
             this.uploading = false;
             this.uploadError = '';
+            this.saving = false;
             this.showModal = true;
         },
         editItem(item) {
@@ -227,6 +234,7 @@ export default {
             this.form = { ...item };
             this.uploading = false;
             this.uploadError = '';
+            this.saving = false;
             this.showModal = true;
         },
         closeModal() {
@@ -257,18 +265,24 @@ export default {
         },
         async saveItem() {
             const endpoint = this.editingId ? `${this.apiBase()}/portfolio/update.php` : `${this.apiBase()}/portfolio/insert.php`;
+            this.saving = true;
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ ...this.form, id: this.editingId }).toString()
                 });
+                const data = await response.json().catch(() => ({}));
                 if (response.ok) {
                     this.closeModal();
                     this.fetchItems();
+                } else {
+                    alert(data.error || 'Erro ao salvar obra');
                 }
             } catch (e) {
                 alert('Erro ao salvar obra');
+            } finally {
+                this.saving = false;
             }
         },
         async deleteItem(id) {

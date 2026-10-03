@@ -87,8 +87,11 @@ export default {
                             </select>
                         </div>
                         <div class="flex justify-end space-x-3 mt-6">
-                            <button type="button" @click="closeModal" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar</button>
+                            <button type="button" @click="closeModal" :disabled="saving" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed">Cancelar</button>
+                            <button type="submit" :disabled="saving" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                <svg v-if="saving" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 animate-spin" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                                <span>{{ saving ? 'Salvando...' : 'Salvar' }}</span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -102,6 +105,7 @@ export default {
             currentUser: null,
             showModal: false,
             editingId: null,
+            saving: false,
             form: { nome: '', email: '', telefone: '', password: '', role: 'editor' }
         };
     },
@@ -143,11 +147,13 @@ export default {
         openModal() {
             this.editingId = null;
             this.form = { nome: '', email: '', telefone: '', password: '', role: 'editor' };
+            this.saving = false;
             this.showModal = true;
         },
         editItem(item) {
             this.editingId = item.id;
             this.form = { nome: item.nome, email: item.email, telefone: item.telefone || '', password: '', role: item.role };
+            this.saving = false;
             this.showModal = true;
         },
         closeModal() {
@@ -155,6 +161,7 @@ export default {
         },
         async saveItem() {
             const endpoint = this.editingId ? `${this.apiBase()}/users/update.php` : `${this.apiBase()}/users/insert.php`;
+            this.saving = true;
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -170,6 +177,8 @@ export default {
                 }
             } catch (e) {
                 alert('Erro ao salvar usuário');
+            } finally {
+                this.saving = false;
             }
         },
         async deleteItem(id) {
