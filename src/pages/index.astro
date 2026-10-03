@@ -18,7 +18,6 @@ import HeroSlider from '../components/hero/HeroSlider.vue'
 import AboutSection from '../components/about/AboutSection.astro'
 import PortfolioSection from '../components/portfolio/PortfolioSection.astro'
 import ServiceCard from '../components/services/ServiceCard.vue'
-import FaqSection from '../components/faq/FaqSection.vue'
 import { servicos } from '../data/servicos'
 import lucide from '@lucide/vue'
 const { ChevronUp } = lucide
@@ -432,8 +431,6 @@ const headerNav = [
       loadInsights();
     })();
   </script>
-
-  <FaqSection client:load />
 
   <Footer
     companyInfo={footerCompany}
