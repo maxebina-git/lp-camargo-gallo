@@ -12,10 +12,11 @@ const { nav = headerNavSite, spacer = true, surface = 'surface' } = Astro.props
 
 const color = surfaceColor(surface)
 
-/* No topo a barra fica transparente (lp.css), então o spacer só sai pintado
-   na superfície brand: sem isso a faixa de 76px apareceria branca sobre a
-   section azul de /portfolio. */
-const spacerColor = surface === 'brand' ? color : undefined
+/* No topo a barra fica transparente (lp.css), então o spacer leva a cor da
+   superfície quando ela não é o branco padrão: sem isso a faixa de 76px nasce
+   branca e emenda com a section colorida logo abaixo (insights em warm,
+   /portfolio em brand). */
+const spacerColor = surface === 'surface' ? undefined : color
 
 /* data-glass marca as páginas com spacer (todas menos a home): nelas a barra
    fica limpa no topo e ganha o vidro do DS quando o header gruda. */
