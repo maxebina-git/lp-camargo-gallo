@@ -73,6 +73,7 @@ export const headerNavHome: NavLink[] = [
   },
   { label: 'SEGURANÇA', href: '/seguranca' },
   { label: 'PORTFÓLIO', href: '/portfolio' },
+  { label: 'INSIGHTS', href: '/insights' },
   { label: 'CONTATO', href: '/contato' },
 ]
 
@@ -92,6 +93,7 @@ export const headerNavSite: NavLink[] = [
   },
   { label: 'SEGURANÇA', href: '/seguranca' },
   { label: 'PORTFÓLIO', href: '/portfolio' },
+  { label: 'INSIGHTS', href: '/insights' },
   { label: 'CONTATO', href: '/contato' },
 ]
 
