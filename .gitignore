@@ -26,3 +26,6 @@ astro-dev*.log
 
 # gerador de hash bcrypt temporario (sobe por FTP, nunca commitar)
 _gen.php
+
+# config local do agente qwen code (fica na maquina, fora do versionamento)
+.qwen/
