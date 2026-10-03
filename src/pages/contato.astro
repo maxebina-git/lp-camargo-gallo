@@ -10,11 +10,16 @@ import {
   Text,
   Card,
 } from 'ds-grupo-rkb'
+import SiteHeader from '../components/layout/SiteHeader.astro'
+import SiteFooter from '../components/layout/SiteFooter.astro'
 import lucide from '@lucide/vue'
 const { LucideMail } = lucide
 ---
 
 <BaseLayout title="Contato | Camargo Gallo Engenharia" description="Solicite um orçamento para recuperação de fachadas, impermeabilização e pintura predial.">
+
+  <SiteHeader />
+
   <section id="contato" class="bg-surface text-ink py-16">
     <Container>
       <div class="max-w-3xl mx-auto">
@@ -64,6 +69,8 @@ const { LucideMail } = lucide
       </div>
     </Container>
   </section>
+
+  <SiteFooter />
 
   <script is:inline>
     function formatarTelefone(inp) {

@@ -2,9 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
 import { ChevronLeft } from '@lucide/vue';
+import SiteHeader from '../components/layout/SiteHeader.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
 ---
 
 <BaseLayout title="Insights & Conhecimento | Camargo Gallo Engenharia" description="Artigos técnicos sobre recuperação de fachadas, normas de segurança e manutenção predial.">
+
+  <SiteHeader />
 
   <Section tone="warm" class="py-20">
     <Container size="lg">
@@ -95,5 +99,7 @@ import { ChevronLeft } from '@lucide/vue';
         });
     })();
   </script>
+
+  <SiteFooter />
 
 </BaseLayout>

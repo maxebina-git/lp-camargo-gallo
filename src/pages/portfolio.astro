@@ -2,9 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
 import { ChevronLeft } from '@lucide/vue';
+import SiteHeader from '../components/layout/SiteHeader.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
 ---
 
 <BaseLayout title="Portfólio | Camargo Gallo Engenharia" description="Obras e cases de recuperação de fachadas, impermeabilização e engenharia diagnóstica.">
+
+  <SiteHeader />
 
   <Section tone="surface-brand" class="bg-surface-brand py-20">
     <Container size="lg">
@@ -99,5 +103,7 @@ import { ChevronLeft } from '@lucide/vue';
         });
     })();
   </script>
+
+  <SiteFooter />
 
 </BaseLayout>

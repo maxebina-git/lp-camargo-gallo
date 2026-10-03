@@ -1,9 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
+import SiteHeader from '../components/layout/SiteHeader.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
 ---
 
 <BaseLayout title="Obra | Camargo Gallo Engenharia" description="Detalhes da obra do portfólio da Camargo Gallo Engenharia.">
+
+  <SiteHeader />
+
   <Section tone="warm" class="py-20">
     <Container size="lg">
       <div id="portfolio-status" class="py-20 text-center text-deep/60 font-body">Carregando…</div>
@@ -94,4 +99,6 @@ import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
         });
     })();
   </script>
+
+  <SiteFooter />
 </BaseLayout>

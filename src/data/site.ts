@@ -1,0 +1,99 @@
+export interface SiteContact {
+  label: string
+  href: string
+  icon: string
+}
+
+export interface SiteLink {
+  label: string
+  href: string
+}
+
+export interface NavLink {
+  label: string
+  href: string
+  parentLink?: boolean
+  dropdown?: NavLink[]
+}
+
+export interface FooterCompany {
+  companyName: string
+  cnpj: string
+  address: string
+  contacts: SiteContact[]
+  legalLinks: SiteLink[]
+}
+
+export const footerCompany: FooterCompany = {
+  companyName: 'CAMARGO GALLO ENGENHARIA LTDA',
+  cnpj: '23.741.090/0001-77',
+  address: 'Rua Maria Jose Rangel, 159 - Vila São Paulo, São Paulo/SP - CEP 04650-180',
+  contacts: [
+    { label: '(11) 2924-8556', href: 'tel:+551129248556', icon: 'phone' },
+    {
+      label: 'WhatsApp',
+      href: 'https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas',
+      icon: 'whatsapp',
+    },
+  ],
+  legalLinks: [
+    { label: 'Política de Privacidade', href: '#privacy' },
+    { label: 'Termos de Uso', href: '#terms' },
+  ],
+}
+
+/* Nav da home: âncoras locais das seções */
+export const headerNavHome: NavLink[] = [
+  { label: 'EMPRESA', href: '#' },
+  { label: 'SERVIÇOS', href: '#servicos' },
+  {
+    label: 'ESTUDOS DE CASO',
+    href: '#estudo-de-caso',
+    parentLink: true,
+    dropdown: [
+      { label: 'Revitalização de fachadas e áreas comuns', href: '#estudo-de-caso' },
+      { label: 'Retrofit de fachadas e áreas comuns', href: '#estudo-de-caso' },
+      { label: 'Pintura de fachadas e áreas comuns', href: '#estudo-de-caso' },
+      { label: 'Impermeabilização de lajes de cobertura', href: '#estudo-de-caso' },
+    ],
+  },
+  { label: 'SEGURANÇA', href: '#' },
+  { label: 'PARCEIROS', href: '#' },
+  { label: 'PORTFÓLIO', href: '#' },
+  { label: 'CONTATO', href: '/contato' },
+]
+
+/* Nav das páginas internas: âncoras absolutas para voltar à home */
+export const headerNavSite: NavLink[] = [
+  { label: 'EMPRESA', href: '/' },
+  { label: 'SERVIÇOS', href: '/#servicos' },
+  {
+    label: 'ESTUDOS DE CASO',
+    href: '/#estudo-de-caso',
+    parentLink: true,
+    dropdown: [
+      { label: 'Revitalização de fachadas e áreas comuns', href: '/#estudo-de-caso' },
+      { label: 'Retrofit de fachadas e áreas comuns', href: '/#estudo-de-caso' },
+      { label: 'Pintura de fachadas e áreas comuns', href: '/#estudo-de-caso' },
+      { label: 'Impermeabilização de lajes de cobertura', href: '/#estudo-de-caso' },
+    ],
+  },
+  { label: 'SEGURANÇA', href: '/' },
+  { label: 'PARCEIROS', href: '/' },
+  { label: 'PORTFÓLIO', href: '/portfolio' },
+  { label: 'CONTATO', href: '/contato' },
+]
+
+export const bannerProps = {
+  bannerImage: '/assets/logo-camargo-gallo.png',
+  bannerImageAlt: 'Logo Camargo Gallo',
+  bannerTitle: 'Pronto para começar?',
+  bannerDescription: 'Recuperação e impermeabilização de fachadas com retorno em até 24h.',
+  companyDescription: 'Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo.',
+  copyright: '© 2026 Camargo Gallo Engenharia. Todos os direitos reservados.',
+  size: 'lg' as const,
+  padding: 'md' as const,
+}
+
+export const whatsappHref =
+  'https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas'

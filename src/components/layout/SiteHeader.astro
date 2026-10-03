@@ -1,0 +1,27 @@
+---
+import { Button, Header, BrandIcon } from 'ds-grupo-rkb'
+import { headerNavSite, whatsappHref } from '../../data/site'
+
+interface Props {
+  nav?: typeof headerNavSite
+  spacer?: boolean
+}
+
+const { nav = headerNavSite, spacer = true } = Astro.props
+---
+
+<Header client:load boxed size="lg" position="fixed" nav={nav}>
+  <Button
+    slot="aside"
+    iconOnly
+    size="lg"
+    as="a"
+    href={whatsappHref}
+    aria-label="Falar no WhatsApp"
+    class="bg-[#25D366]! text-white! hover:bg-[#128C7E]!"
+  >
+    <BrandIcon name="whatsapp" class="h-5 w-5" />
+  </Button>
+</Header>
+
+{spacer && <div aria-hidden="true" class="h-[4.75rem]"></div>}

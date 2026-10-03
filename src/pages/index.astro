@@ -8,11 +8,10 @@ import {
   Reveal,
   IconSet,
   BackToTop,
-  Header,
   BrandIcon,
-  FooterBanner,
 } from 'ds-grupo-rkb'
-import LegalDrawer from '../components/legal/LegalDrawer.vue'
+import SiteHeader from '../components/layout/SiteHeader.astro'
+import SiteFooter from '../components/layout/SiteFooter.astro'
 import WhatsappButton from '../components/WhatsappButton.vue'
 import HeroSlider from '../components/hero/HeroSlider.vue'
 import AboutSection from '../components/about/AboutSection.astro'
@@ -20,42 +19,9 @@ import PortfolioSection from '../components/portfolio/PortfolioSection.astro'
 import ServiceCard from '../components/services/ServiceCard.vue'
 import FaqSection from '../components/faq/FaqSection.vue'
 import { servicos } from '../data/servicos'
+import { headerNavHome } from '../data/site'
 import lucide from '@lucide/vue'
 const { ChevronUp } = lucide
-
-const footerCompany = {
-  companyName: 'CAMARGO GALLO ENGENHARIA LTDA',
-  cnpj: '23.741.090/0001-77',
-  address: 'Rua Maria Jose Rangel, 159 - Vila São Paulo, São Paulo/SP - CEP 04650-180',
-  contacts: [
-    { label: '(11) 2924-8556', href: 'tel:+551129248556', icon: 'phone' },
-    { label: 'WhatsApp', href: 'https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas', icon: 'whatsapp' },
-  ],
-  legalLinks: [
-    { label: 'Política de Privacidade', href: '#privacy' },
-    { label: 'Termos de Uso', href: '#terms' },
-  ],
-}
-
-const headerNav = [
-  { label: 'EMPRESA', href: '#' },
-  { label: 'SERVIÇOS', href: '#servicos' },
-  {
-    label: 'ESTUDOS DE CASO',
-    href: '#estudo-de-caso',
-    parentLink: true,
-    dropdown: [
-      { label: 'Revitalização de fachadas e áreas comuns', href: '#estudo-de-caso' },
-      { label: 'Retrofit de fachadas e áreas comuns', href: '#estudo-de-caso' },
-      { label: 'Pintura de fachadas e áreas comuns', href: '#estudo-de-caso' },
-      { label: 'Impermeabilização de lajes de cobertura', href: '#estudo-de-caso' },
-    ],
-  },
-  { label: 'SEGURANÇA', href: '#' },
-  { label: 'PARCEIROS', href: '#' },
-  { label: 'PORTFÓLIO', href: '#' },
-  { label: 'CONTATO', href: '/contato' },
-];
 ---
 
 <style>
@@ -82,19 +48,7 @@ const headerNav = [
 
 <BaseLayout title="Restauração de Fachadas e Pintura Predial em SP | Camargo Gallo Engenharia" description="Especialistas em reforma de fachadas, impermeabilização e pintura predial em São Paulo. Solicite um orçamento com a Camargo Gallo Engenharia e garanta a valorização do seu patrimônio.">
 
-  <Header client:load boxed size="lg" position="fixed" nav={headerNav}>
-    <Button
-      slot="aside"
-      iconOnly
-      size="lg"
-      as="a"
-      href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas"
-      aria-label="Falar no WhatsApp"
-      class="bg-[#25D366]! text-white! hover:bg-[#128C7E]!"
-    >
-      <BrandIcon name="whatsapp" class="h-5 w-5" />
-    </Button>
-  </Header>
+  <SiteHeader nav={headerNavHome} spacer={false} />
 
   <HeroSlider client:load />
 
@@ -435,37 +389,7 @@ const headerNav = [
 
   <FaqSection client:load />
 
-  <FooterBanner
-    bannerImage="/assets/logo-camargo-gallo.png"
-    bannerImageAlt="Logo Camargo Gallo"
-    bannerTitle="Pronto para começar?"
-    bannerDescription="Recuperação e impermeabilização de fachadas com retorno em até 24h."
-    bannerCta={{ label: 'Solicite um orçamento', href: '/contato' }}
-    companyDescription="Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo."
-    contacts={footerCompany.contacts}
-    legalLinks={footerCompany.legalLinks}
-    copyright="© 2026 Camargo Gallo Engenharia. Todos os direitos reservados."
-    size="lg"
-    padding="md"
-  />
-
-  <LegalDrawer client:load />
-
-  <script is:inline>
-    document.addEventListener('click', function (event) {
-      var anchor = event.target.closest('a[href="#privacy"], a[href="#terms"]');
-      if (!anchor) return;
-      event.preventDefault();
-      var target = anchor.getAttribute('href');
-      if (target === '#privacy' || target === '#terms') {
-        if (location.hash === target) {
-          history.replaceState(null, '', location.pathname + location.search);
-        } else {
-          location.hash = target;
-        }
-      }
-    });
-  </script>
+  <SiteFooter />
 
   <BackToTop client:load>
     <IconSet size="24"><ChevronUp /></IconSet>
