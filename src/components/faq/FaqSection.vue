@@ -34,8 +34,6 @@ onMounted(() => {
   const groupEl = groupRef.value as unknown as { setActive: (id: string) => void } | null
   if (!groupEl) return
 
-  section.style.minHeight = section.offsetHeight + 'px'
-
   const set = (p: number) => {
     const idx = Math.min(ids.length - 1, Math.max(0, Math.round(p * (ids.length - 1))))
     groupEl.setActive(ids[idx])
@@ -51,9 +49,7 @@ onMounted(() => {
         trigger: '#faq',
         start: 'top top',
         end,
-        pin: true,
         scrub: 1,
-        anticipatePin: 1,
         onUpdate: (self: { progress: number }) => set(self.progress),
       } as unknown as ScrollTrigger,
     })
