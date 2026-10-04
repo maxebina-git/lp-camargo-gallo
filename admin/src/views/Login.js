@@ -11,8 +11,7 @@ export default {
     <div class="min-h-screen flex items-center justify-center bg-gray-900 px-4">
         <div class="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800">Admin Login</h1>
-                <p class="text-gray-500">Camargo Gallo Engenharia</p>
+                <img src="./assets/logo-camargo-gallo.png" alt="Camargo Gallo Engenharia" class="mx-auto h-32 w-auto" />
             </div>
             <form @submit.prevent="handleLogin" class="space-y-6">
                 <div>
