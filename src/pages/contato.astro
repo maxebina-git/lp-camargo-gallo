@@ -9,11 +9,11 @@ import {
   Heading,
   Text,
   Card,
+  BrandIcon,
 } from 'ds-grupo-rkb'
 import SiteHeader from '../components/layout/SiteHeader.astro'
 import SiteFooter from '../components/layout/SiteFooter.astro'
-import lucide from '@lucide/vue'
-const { LucideMail } = lucide
+import { Mail, Phone } from '@lucide/vue'
 ---
 
 <BaseLayout title="Contato | Camargo Gallo Engenharia" description="Solicite um orçamento para recuperação de fachadas, impermeabilização e pintura predial.">
@@ -28,15 +28,15 @@ const { LucideMail } = lucide
           <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
           <div class="flex flex-wrap items-center justify-center gap-3">
             <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              📞 (11) 2924-8556
+              <Phone class="h-4 w-4" aria-hidden="true" /> (11) 2924-8556
             </a>
             <span class="opacity-50">|</span>
             <a href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              💬 WhatsApp
+              <BrandIcon name="whatsapp" class="h-4 w-4" aria-hidden="true" /> WhatsApp
             </a>
             <span class="opacity-50">|</span>
             <a href="mailto:atendimento@camargogallo.com.br" onclick="gtag('event', 'lp_email_click', { 'event_category': 'contato', 'event_label': 'email_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              ✉️ atendimento@camargogallo.com.br
+              <Mail class="h-4 w-4" aria-hidden="true" /> atendimento@camargogallo.com.br
             </a>
           </div>
         </div>
@@ -61,7 +61,7 @@ const { LucideMail } = lucide
             <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
             <div class="flex items-center gap-4">
               <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center justify-center">
-                <LucideMail id="submit-icon" class="inline w-4 h-4 mr-2" /> Enviar mensagem
+                <Mail id="submit-icon" class="inline w-4 h-4 mr-2" /> Enviar mensagem
               </Button>
             </div>
           </form>
