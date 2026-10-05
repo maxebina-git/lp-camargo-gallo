@@ -20,6 +20,112 @@ import { ChevronRight } from '@lucide/vue'
     if (!gsap || !ScrollTrigger) return
     gsap.registerPlugin(ScrollTrigger)
 
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 47.99rem)').matches
+    
+    if (isMobile) {
+      setupMobileSlider(raiz, gsap, ScrollTrigger)
+    } else {
+      setupDesktopAccordion(raiz, gsap, ScrollTrigger)
+    }
+  }
+
+  function setupMobileSlider(raiz, gsap, ScrollTrigger) {
+    const itens = Array.from(raiz.querySelectorAll('[data-portfolio-item]'))
+    const total = itens.length
+    if (total < 2) return
+
+    let indice = 0
+    raiz.classList.add('is-acordeao')
+
+    function aplicar() {
+      itens.forEach((item, i) => {
+        item.classList.toggle('is-ativo', i === indice)
+        item.classList.toggle('is-recolhida', i !== indice)
+      })
+      raiz.dataset.ativo = String(indice)
+    }
+
+    const btnCases = document.getElementById('portfolio-cases-btn')
+    const mostrarBtn = () => btnCases?.classList.add('is-visible')
+    const ocultarBtn = () => btnCases?.classList.remove('is-visible')
+
+    ScrollTrigger.create({
+      trigger: raiz,
+      start: 'top top',
+      end: () => '+=' + (raiz.scrollWidth - raiz.clientWidth),
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      onEnter: mostrarBtn,
+      onLeave: ocultarBtn,
+      onEnterBack: mostrarBtn,
+      onLeaveBack: ocultarBtn,
+      onUpdate: (self) => {
+        // Calculate progress (0 to 1)
+        const maxScroll = raiz.scrollWidth - raiz.clientWidth
+        if (maxScroll <= 0) {
+          indice = 0
+          aplicar()
+          return
+        }
+        
+        const progress = raiz.scrollLeft / maxScroll
+        const targetIndex = Math.round(progress * (total - 1))
+        const closestIndex = Math.max(0, Math.min(total - 1, targetIndex))
+        
+        if (closestIndex !== indice) {
+          indice = closestIndex
+          aplicar()
+        }
+        
+        // Animate items based on their position
+        itens.forEach((item, i) => {
+          // Calculate item's relative position in the scroll container
+          const itemLeft = item.offsetLeft
+          const itemRight = itemLeft + item.offsetWidth
+          const containerLeft = raiz.scrollLeft
+          const containerRight = containerLeft + raiz.clientWidth
+          
+          // Calculate overlap (0 to 1)
+          const overlapLeft = Math.max(itemLeft, containerLeft)
+          const overlapRight = Math.min(itemRight, containerRight)
+          const overlap = Math.max(0, overlapRight - overlapLeft)
+          const itemWidth = item.offsetWidth
+          
+          const visibility = overlap / itemWidth // 0 = fully hidden, 1 = fully visible
+          
+          // Map visibility to transform and opacity
+          // When fully visible (centered): x=0, opacity=1
+          // When fully hidden: x=±20, opacity=0.6
+          const visibilityClamped = Math.max(0, Math.min(1, visibility))
+          
+          // Calculate how far the item is from center (-1 to 1)
+          const itemCenter = itemLeft + (itemWidth / 2)
+          const containerCenter = containerLeft + (raiz.clientWidth / 2)
+          const offsetFromCenter = (itemCenter - containerCenter) / (raiz.clientWidth / 2)
+          const offsetClamped = Math.max(-1, Math.min(1, offsetFromCenter))
+          
+          // Target values
+          const targetX = -offsetClamped * 20 // Move opposite to offset
+          const targetOpacity = 0.6 + (0.4 * visibilityClamped) // More visible = more opaque
+          
+          gsap.to(item, {
+            x: targetX,
+            opacity: targetOpacity,
+            duration: 0.6,
+            ease: "power3.out",
+            overwrite: true
+          })
+        })
+      },
+      onRefresh: aplicar,
+    })
+
+    aplicar()
+  }
+
+  function setupDesktopAccordion(raiz, gsap, ScrollTrigger) {
     const itens = Array.from(raiz.querySelectorAll('[data-portfolio-item]'))
     const total = itens.length
     if (total < 2) return
@@ -306,7 +412,45 @@ import { ChevronRight } from '@lucide/vue'
     .portfolio-cases-btn.is-visible {
       transition: none;
       opacity: 1;
-    right: 13rem;
+      right: 13rem;
+    }
+  }
+
+  /* Mobile-specific styles for horizontal slider */
+  @media (max-width: 47.99rem) {
+    /* Make portfolio items display horizontally */
+    [data-portfolio-lista] {
+      display: flex !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory !important;
+      scroll-behavior: smooth !important;
+      -webkit-overflow-scrolling: touch !important;
+      gap: 0 !important; /* Remove gap for seamless sliding */
+    }
+    
+    [data-portfolio-item] {
+      flex: 0 0 100% !important; /* Each item takes full viewport width */
+      width: 100vw !important; /* Use viewport width for consistent sizing */
+      max-width: 100vw !important;
+      scroll-snap-align: start !important;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      /* Keep height transition for other effects if needed */
+    }
+    
+    /* Hide scrollbar but keep functionality */
+    [data-portfolio-lista]::-webkit-scrollbar {
+      display: none;
+    }
+    
+    [data-portfolio-lista] {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    
+    /* Override any grid styles that might interfere */
+    [data-portfolio-item] {
+      grid-column: unset !important;
+      grid-row: unset !important;
     }
   }
 </style>
