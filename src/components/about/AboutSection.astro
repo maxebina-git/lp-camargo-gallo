@@ -37,17 +37,26 @@ import AboutBadges from './AboutBadges.vue'
   }
 
   // Icones dos badges: cada sub-forma e medida (getTotalLength) e fica escondida
-  // no dash; quando a grade entra na viewport a timeline do GSAP roda em loop
+  // no dash; quando a fileira entra na viewport a timeline do GSAP roda em loop
   // desenha (1,15s) -> 2s na forma final -> recolhe (1,15s) -> 1s vazio, com
-  // 0,5s de defasagem por card. A timeline pausa quando a grade sai da tela.
+  // 0,5s de defasagem por card. A timeline pausa quando a fileira sai da tela.
   // Tudo client-side (os icones continuam sendo componentes do @lucide/vue).
   function initIconDraw() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // Corta em dois casos, e nos dois os icones ja saem inteiros e parados (o
+    // dash nunca e aplicado): movimento reduzido por preferencia do usuario, e
+    // o mobile — onde o card ja se move na horizontal e o traco dos 10 icones
+    // (5 cards x 2, por causa do marquee) seria ruido e trabalho inutil.
+    if (window.matchMedia('(prefers-reduced-motion: reduce), (width < 40rem)').matches) return
 
     const gsap = window.gsap
     const grid = document.querySelector('.about-badges')
     // Sem gsap nao esconde nada: o icone simplesmente fica inteiro.
     if (!gsap || !grid) return
+
+    // O observer ve o CLIP, nao a grade: no mobile a trilha e um marquee largo
+    // (width: max-content, ~5x a viewport), entao a razao de interseção da
+    // propria trilha nunca alcança o threshold e os icones nunca desenhariam.
+    const clip = document.querySelector('.about-badges-clip') ?? grid
 
     const DRAW = 1.15
     const HOLD = 2
@@ -96,7 +105,11 @@ import AboutBadges from './AboutBadges.vue'
       })
       if (!dashed.length && !faded.length) return []
       span.classList.add('is-drawable')
-      return [{ dashed, faded, delay: 0.25 + i * 0.5 }]
+      // A defasagem vem do data-badge-index do card, nao da posicao na lista:
+      // no mobile a fileira e duplicada para o marquee, e os 10 icones em fila
+      // desescalariam os gemees (o par nao desenharia junto, o que aparece).
+      const idx = Number(span.closest('[data-badge-index]')?.dataset.badgeIndex ?? i)
+      return [{ dashed, faded, delay: 0.25 + idx * 0.5 }]
     })
     if (!groups.length) return
 
@@ -139,7 +152,26 @@ import AboutBadges from './AboutBadges.vue'
       },
       { threshold: 0.25 },
     )
-    io.observe(grid)
+    io.observe(clip)
+  }
+
+  // Marquee dos badges (so no mobile): enquanto a secao Sobre esta na tela a
+  // animacao CSS corre; quando ela sai, a classe is-marquee-paused manda o CSS
+  // aplicar animation-play-state: paused. Nao e preciso reiniciar nem recalcular
+  // nada: o loop retoma do ponto exato em que parou.
+  function initAboutMarquee() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const clip = document.querySelector('.about-badges-clip')
+    if (!clip) return
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        clip.classList.toggle('is-marquee-paused', !entries.some((e) => e.isIntersecting))
+      },
+      { threshold: 0 },
+    )
+    io.observe(clip)
   }
 
   // O window.gsap e definido pelo BaseLayout; ambos sao modulos bundlados, entao
@@ -147,12 +179,14 @@ import AboutBadges from './AboutBadges.vue'
   if (document.readyState === 'complete') {
     initParalax()
     initIconDraw()
+    initAboutMarquee()
   } else {
     window.addEventListener(
       'load',
       () => {
         initParalax()
         initIconDraw()
+        initAboutMarquee()
       },
       { once: true },
     )

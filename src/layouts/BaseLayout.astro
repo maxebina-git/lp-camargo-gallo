@@ -35,6 +35,13 @@ const { title, description } = Astro.props
     <meta property="og:image" content="https://staging.camargogallo.com.br/og-image.jpg" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <noscript>
+      <style>
+        .hero-underline-s1,
+        .hero-underline-s2,
+        .hero-underline-s3 { stroke-dashoffset: 0 !important; }
+      </style>
+    </noscript>
     <script>
       import { gsap } from 'gsap'
       import { ScrollTrigger } from 'gsap/ScrollTrigger'

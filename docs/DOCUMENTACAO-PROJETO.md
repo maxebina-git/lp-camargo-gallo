@@ -152,7 +152,6 @@ lp-camargo-gallo/
 ├── public/
 │   ├── assets/
 │   │   ├── hero-slide/         # 12 .webp — 2 em uso, 10 órfãos
-│   │   ├── decorative-underline.png
 │   │   └── logo-camargo-gallo.png
 │   ├── favicon.ico
 │   ├── favicon.svg
@@ -249,20 +248,36 @@ Seção `.astro` com parallax na imagem, posicionada logo após o hero. Duas col
 **Badges** (`AboutBadges.vue` + `src/data/about-badges.ts`):
 
 - 5 `FeatureCard tone="surface-alt"` (card claro `#fafafa` com borda `border-border` e texto/ícone `text-ink` escuros — visual de "etiqueta", diferente dos trust cards escuros do hero), **em fluxo normal dentro do `<Container>` da seção, em fileira abaixo do grid foto/texto** (`class="mt-10"`)
-- **Grid responsivo**: classe **`.about-badges` definida em `lp.css`** (não tailwind `sm:/md:/xl:`) — mobile 1 coluna, `@media (width>=40rem)` 2 colunas, `>=48rem` 3, **`>=80rem` 5 lado a lado**; largura esticada (`w-full`, sem largura fixa) com `justify-center` interno (alturas iguais por linha, conteúdo verticalmente centralizado)
+- **Grid responsivo**: classe **`.about-badges` definida em `lp.css`** (não tailwind `sm:/md:/xl:`) — **`@media (width>=40rem)` 2 colunas, `>=48rem` 3, `>=80rem` 5 lado a lado**; abaixo de 640px é o **marquee** (ver abaixo). Largura esticada (`w-full`, sem largura fixa) com `justify-center` interno (alturas iguais por linha, conteúdo verticalmente centralizado)
   - **Por que não tailwind**: o `ds-grupo-rkb` embute um Tailwind compilado próprio; em dev o `.sm\:grid-cols-2` da DS aparece **depois** das utilities do app e, por igual especificidade, venceria o `md:grid-cols-3`/`xl:grid-cols-5` (fixando em 2 colunas). Com media queries explícitas no `lp.css` o comportamento fica idêntico em dev e build
 - Padding compacto **`!p-2`** (8px)
 - Diagrama do card: **ícone (26px) no slot `#title` → `divider="3/4"` do own DS → título no slot `#description`** (text-sm font-bold). Ou seja, o separador "Three Quarters" (`h-2 rounded-full bg-divider w-3/4`, centralizado via `[&_[role=separator]]:mx-auto`) fica **entre o ícone e o título**
 - Ícones (`@lucide/vue`): `HardHat` (Segurança do Trabalho), `BadgeCheck` (Qualidade Técnica Comprovada), `CalendarClock` (Respeito aos Prazos), `Scale` (Preço Justo), `ClipboardList` (Orçamentos por Eng. Civis)
-- **Movimento**: keyframes CSS `badgeFloat` (`lp.css`) com `translateY(-14px)` alternado, **duração/atraso por card via inline style** (4,8s–7s, delays negativos) para efeito orgânico; `will-change: transform`; `gap-6` (24px) > amplitude (14px) → linhas adjacentes nunca colidem
+- **Movimento**: keyframes CSS `badgeFloat` (`lp.css`) com `translateY(-14px)` alternado, **duração/atraso por card via inline style** (4,8s–7s, delays negativos) para efeito orgânico; `will-change: transform`; `gap-6` (24px) > amplitude (14px) → linhas adjacentes nunca colidem. **A flutuação só vale a partir de 640px** (ver marquee)
 - Conteúdo acessível (não é `aria-hidden`) pois carrega claims dos diferenciais
-- `prefers-reduced-motion: reduce` → animação desligada (`.about-badge { animation: none }`)
+- **Marquee no mobile** (`@media (width < 40rem) and (prefers-reduced-motion: no-preference)`): a fileira vira uma faixa que rola da **direita para a esquerda**, ciclo de 28s linear. É a **única animação da seção no mobile**
+  - A fileira é renderizada **duas vezes** (5 originais + 5 cópias). Sem a cópia sobra um vão vazio à esquerda no fim do trajeto: com 5 cards a trilha ocupa ~40% da largura da viewport, então o loop recomeça antes de a última linha ter saido
+  - A cópia é `aria-hidden` + `about-badge--clone` (`display: none` a partir de 640px, então o grid acima nunca a recebe) e repete o par `duration`/`delay` do original, de modo que os gêmeos flutuam em fase
+  - Cards a `flex: 0 0 45vw` (~2,2 visíveis) e a trilha com `width: max-content`; o transform é `translate3d(calc(-50% - var(--about-badge-gap) / 2))` — a trilha tem 10 cards e 9 gaps, então uma "unidade" (5 cards + 5 gaps) é exatamente `50%` + metade do gap, e sem esse `+gap/2` a emenda abre ~1px
+  - `initAboutMarquee` (`AboutSection.astro`) alterna `is-marquee-paused` via `IntersectionObserver`: fora da tela o CSS aplica `animation-play-state: paused` e o loop retoma do ponto exato
+  - **No mobile caem também a flutuação e o traço dos ícones** (o card já se move na horizontal, então os dois viram ruído):
+    - flutuação → `.about-badge { animation: none }` dentro do bloco do marquee (o shorthand zera os `animation-*` da regra base, que vem antes no arquivo)
+    - traço dos ícones → guarda `(prefers-reduced-motion: reduce), (width < 40rem)` no `initIconDraw`: retornando antes, nenhum `stroke-dasharray` inline é aplicado e o ícone já sai inteiro (mesmo caminho do fallback "sem GSAP"), poupando 10 timelines do GSAP em loop (5 cards × 2 pela duplicação)
+    - **Ressalva**: as duas guardas são avaliadas uma vez, no load. Girar o celular de retrato (375px) para deitado (852px) tira o marquee e vira grid de 2 colunas, mas a flutuação e o traço **não voltam** naquela sessão — só na próxima carga
+  - O `translateX` fica na trilha e o `badgeFloat` no card: elementos aninhados, não disputam o mesmo `transform`
+  - **Hover do ícone dentro de `@media (hover: hover)`**: no touch o `:hover` gruba depois do toque e deixaria o ícone ampliado (e parado) até o próximo toque; o `feature-hover` do próprio `FeatureCard` (na DS) segue fora
+  - **Verificado** (headless Chrome, 375px): cards 168,75px, gap 24px, trilho 1903,5px; posições em 0s e 28s idênticas (delta-x 0 em todos os 10 cards); varrendo o ciclo de 100ms em 100ms a maior faixa sem card dentro do clip é de **24px** (= o gap), ou seja, nenhum vão; card com `animationName: none`, 0 animations, `transform: none`, 0 shapes com dash inline; a 1440px volta `badgeFloat` com os 10 ícones desenhando e o hover ativo
+- `prefers-reduced-motion: reduce` → animação desligada (`.about-badge { animation: none }`) e **sem marquee**: o bloco do marquee exige `no-preference`, então o mobile volta ao grid de 1 coluna de sempre, sem cópias
 
 ### 4.3 Serviços (`#servicos`)
 
-- 11 `FeatureCard` em grid `md:grid-cols-2 xl:grid-cols-3`
+- 11 `FeatureCard` num carrossel horizontal nativo (`.servicos-slider` com `overflow-x-auto snap-x snap-mandatory`), não em grid
+- Mesma estrutura em `#insights`, que reaproveita a classe `.servicos-slider`
 - `<Tag>` com `{servicos.length} Serviços` — **derivado do array**, nunca literal
 - Sem `id` por serviço, então não há deep-link individual
+- Loop infinito por clones (`.servico-clone`) + `settle()` no `scrollend`; é por isso que o carrossel nunca chega ao fim
+- Abaixo de 640px, `touch-action: pan-x` (`lp.css`): como `overflow-x: auto` faz `overflow-y` computar como `auto`, o navegador tratava o elemento como scroller nos dois eixos e o scroll chain rolava a página junto — arrastar em cima de um card movia a home inteira. O `pan-x` libera só o pan horizontal (de que o snap precisa) e descarta o eixo Y do gesto
+- Custo aceito: a faixa de 440px do carrossel (54% de uma tela de 812px) deixa de rolar a página — para descer, o dedo precisa sair de cima dela
 
 ### 4.4 FAQ (`#faq`)
 
@@ -353,6 +368,7 @@ Botão flutuante verde (canto inferior direito). Detecta a visibilidade do `Back
 | Bloco                                | Linhas | Função                                              |
 | ------------------------------------ | ------ | --------------------------------------------------- |
 | `body { overflow-x: clip }`          | 1–3    | Evita scroll horizontal **sem** criar scroll container |
+| `.servicos-slider` + `@media (width < 40rem)` | 18–45 | Bleed e padding dos dois carrosséis da home; abaixo de 640px, `touch-action: pan-x` trava o eixo Y para o gesto que nasce no carrossel não puxar a página |
 | `:where([id]) { scroll-margin-top }` | 5–7    | Compensa o header fixo de 64px nos links internos   |
 | `.hero-title`                        | 9–12   | `clamp(1.75rem, 7.6vw, 2.5rem)`                    |
 | `.hero-copy`                         | 14–17  | Tamanho mobile-first                                |
@@ -363,8 +379,9 @@ Botão flutuante verde (canto inferior direito). Detecta a visibilidade do `Back
 | `.accordion-item ...`                | 99–105 | `cursor: pointer` nos triggers                     |
 | `.dots`                              | 107    | Estilo de dots do DS                               |
 | `.trust-icon`                        | 116    | Alinha o ícone do trust card                        |
-| `.about-badges` (grid explicito)     | 122–150 | Grade da fileira de badges via media queries próprias (1/2/3/5 col), independente das utilities Tailwind da DS |
-| `.about-badge` + `@keyframes badgeFloat` | 152–171 | Flutuação `translateY(-14px)` dos badges do Sobre; `animation: none` com reduced-motion |
+| `.about-badges` (grid explicito)     | 201–223 | Grade da fileira de badges via media queries próprias (2/3/5 col a partir de 40/48/80rem), independente das utilities Tailwind da DS |
+| `.about-badge` + `@keyframes badgeFloat` | 227–239 | Flutuação `translateY(-14px)` dos badges do Sobre; `animation: none` com reduced-motion |
+| `.about-badges--clone` + bloco `@media (width < 40rem)` + `@keyframes aboutMarquee` | 241–292 | Marquee da fileira de badges só no mobile: esconde a cópia duplicada fora do mobile e liga o `aboutMarquee` de 28s (`translate3d(-50% - gap/2)`, cards a 45vw); exige `prefers-reduced-motion: no-preference` |
 
 O reveal do arco usa `data-reveal`: `slide` (400ms de delay, 1ª entrada) e `swap` (120ms, visitas seguintes), com `prefers-reduced-motion` zerando os delays.
 
@@ -375,7 +392,7 @@ O reveal do arco usa `data-reveal`: `slide` (400ms de delay, 1ª entrada) e `swa
 | Caminho                                     | Conteúdo                                    |
 | ------------------------------------------- | ------------------------------------------- |
 | `public/assets/hero-slide/`                 | 12 `.webp` — **2 em uso**, 10 órfãos (1,1 MB) |
-| `public/assets/decorative-underline.png`    | Sublinhado decorativo do h1                 |
+| —                                            | Sublinhado decorativo do h1: SVG **inline** em `HeroTextColumn.vue` (trace do antigo `decorative-underline.png`, com `<mask>` de 3 passes que desenha o pincel) |
 | `public/assets/logo-camargo-gallo.png`      | Logo (166×232)                              |
 | `public/about-image.png`                    | Imagem da seção Sobre (1201×718, 1,5 MB) — parallax GSAP |
 | `public/favicon.ico` / `favicon.svg`        | Favicons                                    |

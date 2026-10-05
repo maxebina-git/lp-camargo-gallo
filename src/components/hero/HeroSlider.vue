@@ -133,7 +133,7 @@ const slideClass =
     >
       <CarouselSlide :class="slideClass">
         <Container size="lg" class="flex w-full flex-1 flex-row py-0 max-lg:flex-col">
-          <HeroTextColumn />
+          <HeroTextColumn :ativo="index === 0" />
           <HeroSlideIndicator
             :atual="index"
             :total="TOTAL_SLIDES"
@@ -182,7 +182,7 @@ const slideClass =
 
       <CarouselSlide :class="slideClass">
         <Container size="lg" class="flex w-full flex-1 flex-row py-0 max-lg:flex-col">
-          <HeroTextColumn />
+          <HeroTextColumn :ativo="index === 1" />
           <HeroSlideIndicator
             :atual="index"
             :total="TOTAL_SLIDES"
