@@ -515,29 +515,29 @@ img[alt="Logo Camargo Gallo"] {
   }
 }
 
-/* Utility classes for visibility control */
-.show-on-mobile-only {
+/* Utility classes for visibility control - increased specificity */
+.portfolio-cases-btn.show-on-mobile-only {
   display: none; /* hidden by default, shown on mobile via media query */
 }
 
-.show-on-desktop-only {
+.portfolio-cases-btn.show-on-desktop-only {
   display: none; /* hidden by default, shown on desktop via media query */
 }
 
 @media (width < 48rem) {
-  .show-on-mobile-only {
+  .portfolio-cases-btn.show-on-mobile-only {
     display: block !important;
   }
-  .show-on-desktop-only {
+  .portfolio-cases-btn.show-on-desktop-only {
     display: none !important;
   }
 }
 
 @media (width >= 48rem) {
-  .show-on-mobile-only {
+  .portfolio-cases-btn.show-on-mobile-only {
     display: none !important;
   }
-  .show-on-desktop-only {
+  .portfolio-cases-btn.show-on-desktop-only {
     display: block !important;
   }
 }
