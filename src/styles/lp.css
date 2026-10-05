@@ -481,7 +481,7 @@ img[alt="Logo Camargo Gallo"] {
   }
 
   /* Botão de CTA do FooterBanner: largura 100% e correção de transbordamento de texto */
-  .site-footer a[href='/contato'], 
+  .site-footer a[href='/contato'],
   .site-footer .banner-cta {
     width: 100% !important;
     max-width: 100% !important;
@@ -495,7 +495,7 @@ img[alt="Logo Camargo Gallo"] {
   }
 
   /* Botões de CTA das seções About, Serviços e Insights: largura total no mobile */
-  .site-footer a[href='/contato'], 
+  .site-footer a[href='/contato'],
   .site-footer .banner-cta,
   a[href='/servicos'],
   a[href='/insights'],
@@ -512,5 +512,32 @@ img[alt="Logo Camargo Gallo"] {
     justify-content: center;
     align-items: center;
     text-align: center;
+  }
+}
+
+/* Utility classes for visibility control */
+.show-on-mobile-only {
+  display: none; /* hidden by default, shown on mobile via media query */
+}
+
+.show-on-desktop-only {
+  display: none; /* hidden by default, shown on desktop via media query */
+}
+
+@media (width < 48rem) {
+  .show-on-mobile-only {
+    display: block !important;
+  }
+  .show-on-desktop-only {
+    display: none !important;
+  }
+}
+
+@media (width >= 48rem) {
+  .show-on-mobile-only {
+    display: none !important;
+  }
+  .show-on-desktop-only {
+    display: block !important;
   }
 }

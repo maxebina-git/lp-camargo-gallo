@@ -142,7 +142,7 @@ import { ChevronRight } from '@lucide/vue'
         <li id="portfolio-home-status" class="py-12 text-center font-body text-deep/70">Carregando…</li>
       </ul>
 
-      <div class="flex justify-center mt-12 md:hidden">
+      <div class="flex justify-center mt-12 show-on-mobile-only">
         <Button as="a" href="/portfolio" variant="primary" size="lg">Veja + cases</Button>
       </div>
     </Container>
@@ -158,7 +158,7 @@ import { ChevronRight } from '@lucide/vue'
     trailingIcon={ChevronRight}
     id="portfolio-cases-btn"
     aria-label="Veja mais cases"
-    class="portfolio-cases-btn fixed bottom-8 z-[60] hidden md:block"
+    class="portfolio-cases-btn fixed bottom-8 z-[60] show-on-desktop-only"
   >
     Veja + cases
   </Button>
