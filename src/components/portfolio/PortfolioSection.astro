@@ -171,7 +171,17 @@ import { ChevronRight } from '@lucide/vue'
   /* O item contrai pela altura; a transicao fica no proprio elemento para o
      mobile nunca animar nada. */
   [data-portfolio-item] {
-    transition: height 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-portfolio].is-acordeao [data-portfolio-item] {
+    max-height: 4.5rem;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  [data-portfolio].is-acordeao [data-portfolio-item].is-ativo {
+    max-height: 1000px;
   }
 
   [data-portfolio-item] [data-portfolio-titulo],
@@ -209,7 +219,7 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item] {
-      height: 4.5rem;
+      max-height: 4.5rem;
       /* A linha precisa ter a altura do item: sem isso o grid usa a altura do
          conteudo (titulo e descricao continuam ocupando espaco mesmo com
          opacity 0) e o align-items:center empurra a foto para fora da caixa,
@@ -218,7 +228,7 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-ativo {
-      height: 20rem;
+      max-height: 20rem;
     }
 
     /* min() impede a foto de estourar a coluna em telas estreitas de desktop;
