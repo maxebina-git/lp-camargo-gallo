@@ -14,7 +14,6 @@ import { ChevronRight } from '@lucide/vue'
     const raiz = document.querySelector('[data-portfolio]')
     if (!raiz) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    if (window.matchMedia('(max-width: 767px)').matches) return
 
     const gsap = window.gsap
     const ScrollTrigger = window.ScrollTrigger
@@ -129,7 +128,7 @@ import { ChevronRight } from '@lucide/vue'
 </script>
 
 <Section tone="brand" id="portfolio" class="py-16 md:py-0">
-  <div data-portfolio class="md:h-[100dvh] md:overflow-hidden">
+  <div data-portfolio class="h-[100dvh] md:overflow-hidden">
     <Container size="lg" class="py-16 md:flex md:h-full md:flex-col md:justify-center">
       <div class="mb-10 flex flex-col items-center gap-4 text-center md:mb-6">
         <div role="separator" aria-hidden="true" class="h-4 w-[75%] rounded-full bg-deep"></div>
@@ -142,6 +141,10 @@ import { ChevronRight } from '@lucide/vue'
       <ul data-portfolio-lista class="flex flex-col gap-3 md:flex-1 md:justify-center">
         <li id="portfolio-home-status" class="py-12 text-center font-body text-deep/70">Carregando…</li>
       </ul>
+
+      <div class="flex justify-center mt-12 md:hidden">
+        <Button as="a" href="/portfolio" variant="primary" size="lg">Veja + cases</Button>
+      </div>
     </Container>
   </div>
   </Section>

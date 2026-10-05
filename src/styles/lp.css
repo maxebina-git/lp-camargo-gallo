@@ -28,6 +28,22 @@ body {
   scroll-padding-left: 0.75rem;
 }
 
+/* Gesto vertical que comeca no slider nao deve rolar a pagina. O slider e um
+   scroller nativo (overflow-x:auto), e por isso o overflow-y computa como auto
+   tambem (ver o comentario acima): o navegador trata o elemento como scroller
+   nos dois eixos e o scroll chain levava a home junto — arrastar para cima/baixo
+   em cima de um card rolava a pagina inteira. touch-action: pan-x declara que
+   daqui so o pan horizontal e permitido, que e o que o snap-x precisa; o
+   componente vertical do gesto e descartado pelo navegador antes de qualquer
+   rolagem. Vale so abaixo de 640px porque e onde o carrossel ocupa a largura da
+   tela; com mouse nao muda nada (touch-action so vale para toque/caneta).
+   Cobre os dois sliders da home (servicos e insights): mesma classe. */
+@media (width < 40rem) {
+  .servicos-slider {
+    touch-action: pan-x;
+  }
+}
+
 :where([id]) {
   scroll-margin-top: 5.5rem;
 }
@@ -45,6 +61,68 @@ body {
 
 .hero-content {
   gap: 1rem;
+}
+
+/* Sublinhado do h1 (SVG inline em HeroTextColumn). A arte veio de um trace do
+   PNG antigo, entao ela e um fill: nao existe stroke no desenho para animar.
+   A revelacao acontece dentro do <mask>, com tres paths que seguem o caminho
+   real do pincel, cada um cobrindo um movimento do pincel:
+   s1 - traco principal, da esquerda para a direita (x 0 -> 648, sw 16);
+   s2 - traco diagonal, da direita para a esquerda (x 356 -> 236, sw 14), comecando
+        no pico vertical do retorno (x 356, y 11.5), que o traco anterior nao alcanca;
+   s3 - linha de baixo, da esquerda para a direita (x 262 -> 342, sw 10).
+   Cada path tem dashoffset proprio com atraso proprio: o pincel so muda de
+   direcao quando o traco anterior termina. O offset inicial e dasharray +
+   metade da stroke-width, porque o round linecap avanca stroke-width/2 alem
+   do fim do dash. Para o traco inteiro ficar escondido isso nao basta: o dash
+   seguinte ja comeca em 2x o dasharray, entao o array precisa ser maior que o
+   comprimento do caminho mais as duas pontas, senao a ponta final do traco
+   aparece antes da hora (com o array curto, 1,6% da tinta ficava vazando no
+   comeco). Os arrays seguem essa conta: 670 = 648,84 + 2x8; 140 = 122,34 +
+   2x7; 100 = 80 + 2x5. No estado final (offset 0) o dash cobre o traco todo.
+   Por que as larguras sao generosas: a mascara e a intersecao da arte com os
+   tracos, entao vazar nao tem custo visual nenhum — um traco largo so revela
+   mais tinta da propria arte, nunca tinta fora dela. A restricao real e nao
+   roubar a revelacao dos tracos seguintes, e por isso que os tres caminhos se
+   sobrepoem de proposito nas pontas de ligacao, e nao o contrario.
+   As medidas sao fechadas por medicao, nao por olho: rasterizando a mascara
+   de producao no proprio engine e comparando com a arte pura, os tres tracos
+   juntos revelam 100% da tinta, sem buraco e sem pixel faltando, nos tamanhos
+   em que o SVG realmente aparece (628px, 311px e 256px de largura) e tambem
+   no tamanho nativo do viewBox, a 1x, 2x e 4x. O s1 precisa chegar ate x 648
+   porque a arte vai ate x 652 na flick da ponta: sem esse trecho o underline
+   terminava cortado. Com movimento reduzido os tres tracos nascem desenhados. */
+.hero-underline-s1 {
+  stroke-dasharray: 670;
+  stroke-dashoffset: 678;
+  transition: stroke-dashoffset 950ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-underline-s2 {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 147;
+  transition: stroke-dashoffset 260ms cubic-bezier(0.4, 0, 0.2, 1) 1050ms;
+}
+
+.hero-underline-s3 {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 105;
+  transition: stroke-dashoffset 200ms cubic-bezier(0.4, 0, 0.2, 1) 1360ms;
+}
+
+.hero-underline.is-drawn .hero-underline-s1,
+.hero-underline.is-drawn .hero-underline-s2,
+.hero-underline.is-drawn .hero-underline-s3 {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-underline-s1,
+  .hero-underline-s2,
+  .hero-underline-s3 {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
 }
 
 .hero-arch-slide {
@@ -82,9 +160,7 @@ body {
   object-position: center bottom;
   opacity: 0;
   transform: translateY(100%);
-  transition:
-    opacity var(--duration-500) var(--ease-out),
-    transform var(--duration-500) var(--ease-out);
+  transition:    opacity var(--duration-500) var(--ease-out),    transform var(--duration-500) var(--ease-out);
 }
 
 .hero-arch-slot .hero-arch-media.is-in {
@@ -152,8 +228,9 @@ body {
    venceria o md:grid-cols-3/xl:grid-cols-5 (fixando 2 colunas). Em build a
    ordem ja e correta; estas regras garantem o mesmo comportamento nos dois. */
 .about-badges {
+  --about-badge-gap: 1.5rem;
   display: grid;
-  gap: 1.5rem; /* gap-6 */
+  gap: var(--about-badge-gap);
   text-align: center;
 }
 
@@ -190,6 +267,68 @@ body {
   }
 }
 
+/* Marquee dos badges no mobile (abaixo de 640px, onde a grade seria de 1 coluna).
+   O ciclo precisa das DUAS copias da fileira: com so os 5 cards a trilha ocupa
+   uns 40% da largura da viewport, entao no fim do trajeto sobra um vao vazio a
+   esquerda antes de o loop recomecar. A segunda copia e aria-hidden (leitor de
+   tela nao le) e fica display:none a partir de 640px, entao o grid de 2/3/5
+   colunas continua recebendo apenas os 5 cards originais.
+   O seletor precisa de 2 classes: a raiz do FeatureCard ja tem `flex` do
+   Tailwind da DS, que em dev vem DEPOIS das utilities do app e, por igual
+   especificidade, venceria o display:none (mesma armadilha do grid acima). */
+.about-badges .about-badge--clone {
+  display: none;
+}
+
+/* O bloco inteiro so existe com movimento liberado: quem tem prefers-reduced-
+   motion cai no grid de 1 coluna de sempre, sem copies e sem animacao. */
+@media (width < 40rem) and (prefers-reduced-motion: no-preference) {
+  .about-badges-clip {
+    overflow: hidden;
+  }
+
+  .about-badges {
+    display: flex;
+    width: max-content;
+    animation: aboutMarquee 28s linear infinite;
+    will-change: transform;
+  }
+
+  /* 45vw: o w-full do componente nao serve aqui, e a regra de 2 classes ganha
+     do w-full (1 classe) sem depender da ordem de importacao das folhas. */
+  .about-badges .about-badge {
+    flex: 0 0 45vw;
+    width: 45vw;
+  }
+
+  .about-badges .about-badge--clone {
+    display: flex;
+  }
+
+  .about-badges-clip.is-marquee-paused .about-badges {
+    animation-play-state: paused;
+  }
+
+  /* No mobile o card ja se mexe na horizontal: a flutuacao por cima vira ruido.
+     O shorthand `none` zera os animation-* da regra base do .about-badge
+     (linha 227), que vem antes no arquivo. O translateX do marquee esta na
+     trilha, no card nao ha transform para disputar. */
+  .about-badge {
+    animation: none;
+  }
+}
+
+/* A trilha tem 10 cards e 9 gaps. Uma "unidade" (5 cards + 5 gaps, a distancia
+   entre um card e seu gemeu) e 50% da trilha + metade do gap: sem esse +gap/2 a
+   emenda abre ~1px a cada volta. O -50% e do box da propria trilha, entao o
+   valor continua certo se a largura do card mudar. O transform fica na trilha
+   e o float no card: sao elementos aninhados, nao disputam o mesmo transform. */
+@keyframes aboutMarquee {
+  to {
+    transform: translate3d(calc(-50% - var(--about-badge-gap) / 2), 0, 0);
+  }
+}
+
 /* Icones dos cards: o traço se desenha pelo path, fica 2s na forma final e
    recolhe pelo caminho inverso, em loop. A timeline fica no script do
    AboutSection (GSAP), que mede cada sub-forma com getTotalLength e aplica o
@@ -200,14 +339,17 @@ body {
   display: grid;
   place-items: center;
   color: var(--color-primary-500);
-  transition:
-    transform var(--duration-250) var(--ease-out),
-    color var(--duration-250) var(--ease-out);
+  transition:    transform var(--duration-250) var(--ease-out),    color var(--duration-250) var(--ease-out);
 }
 
-.about-badge:hover .about-badge__icon {
-  color: var(--color-azure-700);
-  transform: scale(1.12);
+/* O hover so vale onde existe hover de verdade: no touch o :hover gruda depois
+   do toque e deixaria o icone ampliado (e parado, ja que no mobile nao ha
+   animacao) ate o proximo toque em outro lugar. */
+@media (hover: hover) {
+  .about-badge:hover .about-badge__icon {
+    color: var(--color-azure-700);
+    transform: scale(1.12);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -281,10 +423,23 @@ img[alt="Logo Camargo Gallo"] {
     padding: 2rem 0;
   }
 
+  /* Telefone e WhatsApp lado a lado e no centro, no mesmo esquema dos links
+     legais (que ja vem do DS com flex-wrap + justify-center). O space-y-1 do
+     DS e Tailwind v4 e aplica margin-block-end no primeiro li, entao sem o
+     neutralizador abaixo o telefone sobe 4px em relacao ao WhatsApp. O
+     align-self e aqui, e nao align-items no pai, porque o pai tambem
+     posiciona a descricao da empresa. */
   .lg\:grid-cols-12 > .lg\:col-span-4 > ul {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    gap: 1rem;
+  }
+
+  .lg\:grid-cols-12 > .lg\:col-span-4 > ul > li {
+    margin-block: 0 !important;
   }
 }
 
@@ -305,4 +460,57 @@ img[alt="Logo Camargo Gallo"] {
 
 .site-footer[data-surface] {
   background-color: var(--page-surface) !important;
+}
+
+/* Rodape, so no mobile: a descricao da empresa e o copyright ficam no meio.
+   Os dois sao props do FooterBanner (SiteFooter.astro:24 e :27) e o DS entrega
+   os dois com text-align:start, entao no celular eles ficam colados na
+   esquerda. Nao ha display:none aqui — os dois textos aparecem no mobile.
+   No desktop nenhuma regra nossa vale (o media query e max-width), entao
+   continua o alinhado a esquerda original. */
+@media (width < 40rem) {
+  /* descricao da empresa: <p class="mb-4 max-w-xs text-sm text-ink"> */
+  .site-footer p.mb-4.max-w-xs {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  /* copyright: o unico <p> do rodape que o DS entrega sem classe */
+  .site-footer p:not([class]) {
+    text-align: center;
+  }
+
+  /* Botão de CTA do FooterBanner: largura 100% e correção de transbordamento de texto */
+  .site-footer a[href='/contato'], 
+  .site-footer .banner-cta {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    height: auto !important;
+    min-height: 3rem;
+    padding-block: 0.75rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Botões de CTA das seções About, Serviços e Insights: largura total no mobile */
+  .site-footer a[href='/contato'], 
+  .site-footer .banner-cta,
+  a[href='/servicos'],
+  a[href='/insights'],
+  a[href='/empresa'],
+  a[href='/portfolio'],
+  .about-section a,
+  .about-section .button,
+  [id='servicos'] .button,
+  [id='insights'] .button,
+  [id='portfolio'] .button {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
 }
