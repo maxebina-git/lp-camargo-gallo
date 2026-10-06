@@ -63,19 +63,14 @@ import { ChevronRight } from '@lucide/vue'
     raiz.classList.remove('is-acordeao')
     raiz.classList.add('is-horizontal')
 
-    // Delocamento total da faixa: conteudo menos a janela visivel. Funcao para
-    // o invalidateOnRefresh reavaliar depois das imagens/fontes carregarem.
+    // Delocamento total da faixa: a distancia entre a borda esquerda da janela
+    // visivel e a borda esquerda do ultimo card. Medir por offsetLeft em vez de
+    // scrollWidth e offsetWidth: ja desconta o padding-inline da faixa, nao
+    // depende de todas as cards terem a mesma largura e nao acumula o
+    // arredondamento inteiro de offsetWidth a cada degrau.
     const distancia = () => {
-      const inner = faixa.scrollWidth - raiz.clientWidth
-      const totalItens = itens.length
-      if (totalItens < 2) return Math.max(0, inner)
-      const gap = parseFloat(getComputedStyle(faixa).gap || '0') || 0
-      const step = itens[0].offsetWidth + gap
-      const alvo = step * (totalItens - 1)
-      // Garante que o ultimo card chegue no inicio da janela visivel (snap
-      // cai exatamente em cada passo). Se faltar um pequeno delta (padding/
-      // arredondamento), soma o minimo necessario para bater no ultimo passo.
-      return Math.max(0, Math.max(inner, alvo))
+      if (itens.length < 2) return 0
+      return Math.max(0, itens[itens.length - 1].offsetLeft - faixa.offsetLeft)
     }
 
     // Acima de 1 a faixa anda mais devagar que o dedo, o que da tempo de ler a
@@ -98,6 +93,8 @@ import { ChevronRight } from '@lucide/vue'
         // tween, entao 1/(total-1) cai exatamente no inicio de cada card.
         snap: {
           snapTo: 1 / (total - 1),
+          directional: false,
+          inertia: false,
           duration: { min: 0.15, max: 0.4 },
           delay: 0.03,
           ease: 'power2.inOut',
@@ -105,10 +102,42 @@ import { ChevronRight } from '@lucide/vue'
       },
     })
 
-    // O aspect-ratio do thumb ja fixa a altura antes do byte da imagem chegar,
-    // entao a faixa nao muda de tamanho no load. Ainda assim, um refresh depois
-    // do decode evita que o pin fique com a altura errada em fontes web.
-    if (document.fonts?.ready) document.fonts.ready.then(() => ScrollTrigger.refresh())
+    // Recalcular o end depois que o layout assenta. Espera fontes e todas as
+    // imagens da faixa (lazy pode atrasar scrollWidth/offsetLeft no celular).
+    const reagir = () => ScrollTrigger.refresh()
+    if (document.fonts?.ready) document.fonts.ready.then(reagir)
+
+    const fotos = Array.from(faixa.querySelectorAll('img'))
+    const pendentes = fotos.filter((img) => !img.complete)
+    if (pendentes.length) {
+      let restantes = pendentes.length
+      const umaVez = () => {
+        if (--restantes <= 0) reagir()
+      }
+      pendentes.forEach((img) => {
+        img.addEventListener('load', umaVez, { once: true })
+        img.addEventListener('error', umaVez, { once: true })
+      })
+    } else if (fotos.length) {
+      reagir()
+    }
+
+    // matchMedia revert chama a funcao de cleanup devolvida aqui.
+    let ro = null
+    if (window.ResizeObserver) {
+      let w = faixa.offsetWidth
+      let h = document.documentElement.clientHeight
+      ro = new ResizeObserver(() => {
+        const nw = faixa.offsetWidth
+        const nh = document.documentElement.clientHeight
+        if (nw === w && nh === h) return
+        w = nw
+        h = nh
+        reagir()
+      })
+      ro.observe(faixa)
+      ro.observe(document.documentElement)
+    }
 
     // Parallax da foto, preso ao movimento do track. O alvo e o <img> dentro do
     // thumb, nunca o thumb: o container tem overflow:hidden e translada-lo
@@ -133,6 +162,10 @@ import { ChevronRight } from '@lucide/vue'
         }
       )
     })
+
+    return () => {
+      if (ro) ro.disconnect()
+    }
   }
 
   function setupDesktopAccordion(raiz, gsap, ScrollTrigger) {
