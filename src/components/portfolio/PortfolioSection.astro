@@ -267,7 +267,7 @@ import { ChevronRight } from '@lucide/vue'
   function ctaHTML() {
     const chevron = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
     return '' +
-      '<li data-portfolio-cta class="items-center justify-center rounded-xl border border-border bg-surface p-6 shadow-sm min-h-40">' +
+      '<li data-portfolio-cta class="items-center justify-center">' +
         '<a href="/portfolio" aria-label="Veja mais cases" class="inline-flex h-10 select-none items-center justify-center gap-2 rounded-md bg-primary-500 px-5 text-sm font-medium text-on-primary transition duration-500 ease-out cursor-pointer hover:-translate-y-0.5 hover:bg-primary-700 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Veja + cases ' + chevron + '</a>' +
       '</li>'
   }
@@ -524,7 +524,11 @@ import { ChevronRight } from '@lucide/vue'
       display: flex;
       flex-direction: column;
       flex: 0 0 84vw;
-      gap: 0.75rem;
+      /* Distribuicao vertical: titulo no topo, foto no meio, descricao (e o
+         CTA) no pe. O espaco que a foto nao usa vira ar entre os blocos, e o
+         gap e o piso quando nao sobra nada. */
+      justify-content: space-between;
+      gap: 1rem;
       width: auto;
       max-width: none;
       max-height: none;
@@ -541,6 +545,19 @@ import { ChevronRight } from '@lucide/vue'
     [data-portfolio].is-horizontal [data-portfolio-foto] {
       flex: 1 1 auto;
       min-height: 0;
+      /* A foto nao absorve a altura toda (era ~68% do card): cresce ate 50% e
+         para, e o resto do espaco e repartido pelo space-between do card. O
+         teto e percentual da altura do card, que o stretch do track torna
+         definida. */
+      max-height: 50%;
+    }
+
+    /* CTA "Ver detalhes" em largura total: o self-start/h-8 do markup deixava o
+       botao miudo no card estreito, colado na borda de baixo. */
+    [data-portfolio] .cta-portfolio {
+      align-self: stretch;
+      width: 100%;
+      height: 2.5rem;
     }
 
     [data-portfolio].is-horizontal [data-portfolio-thumb] {
