@@ -515,28 +515,14 @@ img[alt="Logo Camargo Gallo"] {
   }
 }
 
-/* Utility classes for visibility control - increased specificity */
-.portfolio-cases-btn.show-on-mobile-only {
-  display: none; /* hidden by default, shown on mobile via media query */
-}
-
+/* Botao flutuante de portfolio: existe so no desktop, durante o pin do acordeao.
+   No mobile a faixa horizontal nao tem CTA — o unico show-on-mobile-only da
+   codebase foi removido junto com o botao inline da home. */
 .portfolio-cases-btn.show-on-desktop-only {
   display: none; /* hidden by default, shown on desktop via media query */
 }
 
-@media (width < 48rem) {
-  .portfolio-cases-btn.show-on-mobile-only {
-    display: block !important;
-  }
-  .portfolio-cases-btn.show-on-desktop-only {
-    display: none !important;
-  }
-}
-
 @media (width >= 48rem) {
-  .portfolio-cases-btn.show-on-mobile-only {
-    display: none !important;
-  }
   .portfolio-cases-btn.show-on-desktop-only {
     display: block !important;
   }

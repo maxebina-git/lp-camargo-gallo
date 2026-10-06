@@ -4,13 +4,24 @@ import { ChevronRight } from '@lucide/vue'
 ---
 
 <script>
-  // Acordeao vertical comandado pelo scroll: uma obra expandida por vez, na
-  // ordem em que aparecem na lista. O ScrollTrigger cuida so do pin; o indice e
-  // derivado do progresso, o que torna a troca bidirecional — rolar para cima
-  // refaz o mesmo caminho ao contrario.
+  // Duas leituras da mesma lista, escolhidas por gsap.matchMedia() para que a
+  // troca de layout acompanhe resize e rotacao (o if/else avaliado uma unica vez
+  // no load deixava a pagina travada no modo anterior ao virar o celular).
+  // Cada contexto cuida do seu trigger e do que escreve no DOM; ao sair do
+  // breakpoint o matchMedia reverte tudo — inclusive o transform inline da faixa.
+  //
+  // - desktop: acordeao vertical. Uma obra expandida por vez, na ordem da lista.
+  //   O ScrollTrigger cuida so do pin; o indice sai do progresso, o que torna a
+  //   troca bidirecional — rolar para cima refaz o caminho ao contrario.
+  // - mobile: faixa horizontal. Todos os itens ficam expandidos ("ativos"), sem
+  //   is-acordeao; o scroll vertical da pagina vira o avanco da faixa em X.
+  //
   // O window.gsap/ScrollTrigger sao definidos pelo BaseLayout (modulos bundlados),
   // entao init so roda depois do load para nao depender da ordem de execucao.
+  let inicializado = false
+
   function initPortfolio() {
+    if (inicializado) return
     const raiz = document.querySelector('[data-portfolio]')
     if (!raiz) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -20,109 +31,97 @@ import { ChevronRight } from '@lucide/vue'
     if (!gsap || !ScrollTrigger) return
     gsap.registerPlugin(ScrollTrigger)
 
-    // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 47.99rem)').matches
-    
-    if (isMobile) {
-      setupMobileSlider(raiz, gsap, ScrollTrigger)
-    } else {
+    inicializado = true
+
+    const mm = gsap.matchMedia()
+
+    mm.add('(min-width: 48rem)', () => {
       setupDesktopAccordion(raiz, gsap, ScrollTrigger)
-    }
+    })
+
+    mm.add('(max-width: 47.99rem)', () => {
+      setupMobileHorizontal(raiz, gsap, ScrollTrigger)
+    })
   }
 
-  function setupMobileSlider(raiz, gsap, ScrollTrigger) {
-    const itens = Array.from(raiz.querySelectorAll('[data-portfolio-item]'))
+  // Faixa horizontal movida pelo scroll vertical. A lista NAO e um scroll
+  // container: e um track de width:max-content que o GSAP translada em X. Medir
+  // o elemento certo importa — o wrapper [data-portfolio] nunca rola na
+  // horizontal, entao medir ele dava scrollLeft sempre 0 e end '+0'.
+  function setupMobileHorizontal(raiz, gsap, ScrollTrigger) {
+    const faixa = raiz.querySelector('[data-portfolio-lista]')
+    if (!faixa) return
+    const itens = gsap.utils.toArray('[data-portfolio-item]', faixa)
     const total = itens.length
     if (total < 2) return
 
-    let indice = 0
-    raiz.classList.add('is-acordeao')
+    // O layout do track so vale com JS rodando: sem ele (reduced-motion, script
+    // bloqueado) a lista precisa continuar como pilha vertical legivel. E o
+    // is-acordeao do desktop e removido aqui porque o revert do matchMedia nao
+    // desfaz classe adicionada na mao — sem isso, redimensionar de desktop para
+    // mobile deixaria os cards colapsados em 4.5rem dentro da faixa.
+    raiz.classList.remove('is-acordeao')
+    raiz.classList.add('is-horizontal')
 
-    function aplicar() {
-      itens.forEach((item, i) => {
-        item.classList.toggle('is-ativo', i === indice)
-        item.classList.toggle('is-recolhida', i !== indice)
-      })
-      raiz.dataset.ativo = String(indice)
-    }
+    // Delocamento total da faixa: conteudo menos a janela visivel. Funcao para
+    // o invalidateOnRefresh reavaliar depois das imagens/fontes carregarem.
+    const distancia = () => Math.max(0, faixa.scrollWidth - raiz.clientWidth)
 
-    const btnCases = document.getElementById('portfolio-cases-btn')
-    const mostrarBtn = () => btnCases?.classList.add('is-visible')
-    const ocultarBtn = () => btnCases?.classList.remove('is-visible')
+    // Acima de 1 a faixa anda mais devagar que o dedo, o que da tempo de ler a
+    // obra antes da proxima entrar. Em 5 cards isso passa de 3 telas de scroll.
+    const ritmo = 1.15
 
-    ScrollTrigger.create({
-      trigger: raiz,
-      start: 'top top',
-      end: () => '+=' + (raiz.scrollWidth - raiz.clientWidth),
-      pin: true,
-      pinSpacing: true,
-      anticipatePin: 1,
-      onEnter: mostrarBtn,
-      onLeave: ocultarBtn,
-      onEnterBack: mostrarBtn,
-      onLeaveBack: ocultarBtn,
-      onUpdate: (self) => {
-        // Calculate progress (0 to 1)
-        const maxScroll = raiz.scrollWidth - raiz.clientWidth
-        if (maxScroll <= 0) {
-          indice = 0
-          aplicar()
-          return
-        }
-        
-        const progress = raiz.scrollLeft / maxScroll
-        const targetIndex = Math.round(progress * (total - 1))
-        const closestIndex = Math.max(0, Math.min(total - 1, targetIndex))
-        
-        if (closestIndex !== indice) {
-          indice = closestIndex
-          aplicar()
-        }
-        
-        // Animate items based on their position
-        itens.forEach((item, i) => {
-          // Calculate item's relative position in the scroll container
-          const itemLeft = item.offsetLeft
-          const itemRight = itemLeft + item.offsetWidth
-          const containerLeft = raiz.scrollLeft
-          const containerRight = containerLeft + raiz.clientWidth
-          
-          // Calculate overlap (0 to 1)
-          const overlapLeft = Math.max(itemLeft, containerLeft)
-          const overlapRight = Math.min(itemRight, containerRight)
-          const overlap = Math.max(0, overlapRight - overlapLeft)
-          const itemWidth = item.offsetWidth
-          
-          const visibility = overlap / itemWidth // 0 = fully hidden, 1 = fully visible
-          
-          // Map visibility to transform and opacity
-          // When fully visible (centered): x=0, opacity=1
-          // When fully hidden: x=±20, opacity=0.6
-          const visibilityClamped = Math.max(0, Math.min(1, visibility))
-          
-          // Calculate how far the item is from center (-1 to 1)
-          const itemCenter = itemLeft + (itemWidth / 2)
-          const containerCenter = containerLeft + (raiz.clientWidth / 2)
-          const offsetFromCenter = (itemCenter - containerCenter) / (raiz.clientWidth / 2)
-          const offsetClamped = Math.max(-1, Math.min(1, offsetFromCenter))
-          
-          // Target values
-          const targetX = -offsetClamped * 20 // Move opposite to offset
-          const targetOpacity = 0.6 + (0.4 * visibilityClamped) // More visible = more opaque
-          
-          gsap.to(item, {
-            x: targetX,
-            opacity: targetOpacity,
-            duration: 0.6,
-            ease: "power3.out",
-            overwrite: true
-          })
-        })
+    const trilha = gsap.to(faixa, {
+      x: () => -distancia(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: raiz,
+        start: 'top top',
+        end: () => '+=' + distancia() * ritmo,
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        scrub: 0.4,
+        invalidateOnRefresh: true,
+        // Um case por degrau, como no desktop. progress e o avanco linear do
+        // tween, entao 1/(total-1) cai exatamente no inicio de cada card.
+        snap: {
+          snapTo: 1 / (total - 1),
+          duration: { min: 0.15, max: 0.4 },
+          delay: 0.03,
+          ease: 'power2.inOut',
+        },
       },
-      onRefresh: aplicar,
     })
 
-    aplicar()
+    // O aspect-ratio do thumb ja fixa a altura antes do byte da imagem chegar,
+    // entao a faixa nao muda de tamanho no load. Ainda assim, um refresh depois
+    // do decode evita que o pin fique com a altura errada em fontes web.
+    if (document.fonts?.ready) document.fonts.ready.then(() => ScrollTrigger.refresh())
+
+    // Parallax da foto, preso ao movimento do track. O alvo e o <img> dentro do
+    // thumb, nunca o thumb: o container tem overflow:hidden e translada-lo
+    // mostraria o fundo da caixa nas pontas.
+    itens.forEach((item) => {
+      const img = item.querySelector('[data-portfolio-thumb] img')
+      if (!img) return
+      gsap.fromTo(
+        img,
+        { xPercent: 4 },
+        {
+          xPercent: -4,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: item,
+            containerAnimation: trilha,
+            start: 'left right',
+            end: 'right left',
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        }
+      )
+    })
   }
 
   function setupDesktopAccordion(raiz, gsap, ScrollTrigger) {
@@ -133,6 +132,10 @@ import { ChevronRight } from '@lucide/vue'
     const passos = total - 1
     let indice = 0
 
+    // Simetria com o mobile: as duas classes sao mutuamente exclusivas e cada
+    // setup limpa a marca da outra, porque o revert do matchMedia so desfaz o
+    // que o GSAP criou, nao o que a mao adicionou.
+    raiz.classList.remove('is-horizontal')
     raiz.classList.add('is-acordeao')
 
     function aplicar() {
@@ -140,7 +143,6 @@ import { ChevronRight } from '@lucide/vue'
         item.classList.toggle('is-ativo', i === indice)
         item.classList.toggle('is-recolhida', i !== indice)
       })
-      raiz.dataset.ativo = String(indice)
     }
 
     const btnCases = document.getElementById('portfolio-cases-btn')
@@ -234,9 +236,9 @@ import { ChevronRight } from '@lucide/vue'
 </script>
 
 <Section tone="brand" id="portfolio" class="py-16 md:py-0">
-  <div data-portfolio class="h-[100dvh] md:overflow-hidden">
-    <Container size="lg" class="py-16 md:flex md:h-full md:flex-col md:justify-center">
-      <div class="mb-10 flex flex-col items-center gap-4 text-center md:mb-6">
+  <div data-portfolio class="h-[100dvh] overflow-hidden">
+    <Container size="lg" class="flex flex-col py-10 md:h-full md:justify-center md:py-16">
+      <div class="mb-6 flex flex-col items-center gap-4 text-center md:mb-6">
         <div role="separator" aria-hidden="true" class="h-4 w-[75%] rounded-full bg-deep"></div>
         <Heading as="2" size="display" class="section-title">Portfólio</Heading>
         <Heading as="3" size="xl" class="text-deep">
@@ -244,13 +246,9 @@ import { ChevronRight } from '@lucide/vue'
         </Heading>
       </div>
 
-      <ul data-portfolio-lista class="flex flex-col gap-3 md:flex-1 md:justify-center">
+      <ul data-portfolio-lista class="flex-1 md:justify-center">
         <li id="portfolio-home-status" class="py-12 text-center font-body text-deep/70">Carregando…</li>
       </ul>
-
-      <div class="flex justify-center mt-12 show-on-mobile-only">
-        <Button as="a" href="/portfolio" variant="primary" size="lg">Veja + cases</Button>
-      </div>
     </Container>
   </div>
   </Section>
@@ -264,7 +262,7 @@ import { ChevronRight } from '@lucide/vue'
     trailingIcon={ChevronRight}
     id="portfolio-cases-btn"
     aria-label="Veja mais cases"
-    class="portfolio-cases-btn fixed bottom-8 z-[60] show-on-desktop-only"
+    class="portfolio-cases-btn fixed bottom-8 z-[60] show-on-desktop-only inline-flex items-center justify-center gap-2"
   >
     Veja + cases
   </Button>
@@ -277,7 +275,7 @@ import { ChevronRight } from '@lucide/vue'
   /* O item contrai pela altura; a transicao fica no proprio elemento para o
      mobile nunca animar nada. */
   [data-portfolio-item] {
-    transition: max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: height 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   [data-portfolio].is-acordeao [data-portfolio-item] {
@@ -325,7 +323,7 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item] {
-      max-height: 4.5rem;
+      height: 4.5rem;
       /* A linha precisa ter a altura do item: sem isso o grid usa a altura do
          conteudo (titulo e descricao continuam ocupando espaco mesmo com
          opacity 0) e o align-items:center empurra a foto para fora da caixa,
@@ -334,7 +332,7 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-ativo {
-      max-height: 20rem;
+      height: 20rem;
     }
 
     /* min() impede a foto de estourar a coluna em telas estreitas de desktop;
@@ -416,41 +414,73 @@ import { ChevronRight } from '@lucide/vue'
     }
   }
 
-  /* Mobile-specific styles for horizontal slider */
+  /* Mobile: faixa horizontal. A lista deixa de ser um scroll container (nao tem
+     mais overflow-x nem scroll-snap) e vira um track de width:max-content que o
+     GSAP translada em X. O clip fica no [data-portfolio], que tem overflow:hidden
+     em todos os breakpoints e por isso recorta o transbordo do track.
+
+     Tudo e prefixado com .is-horizontal, que so o setupMobileHorizontal adiciona:
+     sem GSAP nao existe quem mova o track, e um width:max-content parado
+     mostraria apenas o primeiro card. Fora desse estado (reduced-motion, JS
+     bloqueado, erro na API) a lista volta a ser a pilha vertical legivel. */
   @media (max-width: 47.99rem) {
-    /* Make portfolio items display horizontally */
-    [data-portfolio-lista] {
-      display: flex !important;
-      overflow-x: auto !important;
-      scroll-snap-type: x mandatory !important;
-      scroll-behavior: smooth !important;
-      -webkit-overflow-scrolling: touch !important;
-      gap: 0 !important; /* Remove gap for seamless sliding */
+    [data-portfolio].is-horizontal [data-portfolio-lista] {
+      display: flex;
+      width: max-content;
+      align-items: stretch;
+      gap: 0.75rem;
+      padding-inline: 1rem;
+      will-change: transform;
     }
-    
-    [data-portfolio-item] {
-      flex: 0 0 100% !important; /* Each item takes full viewport width */
-      width: 100vw !important; /* Use viewport width for consistent sizing */
-      max-width: 100vw !important;
-      scroll-snap-align: start !important;
-      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) !important;
-      /* Keep height transition for other effects if needed */
+
+    /* 84vw deixa o peek do vizinho aparecer na direita. A foto e quem cresce
+       para completar a altura do card (flex:1 abaixo), e assim todos os cards
+       ficam com a mesma altura, independente do tamanho da descricao. O
+       aspect-ratio do utilitario precisa ser zerado porque ele brigaria com a
+       altura flexivel. */
+    [data-portfolio].is-horizontal [data-portfolio-item] {
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 84vw;
+      gap: 0.75rem;
+      width: auto;
+      max-width: none;
+      max-height: none;
+      transition: none;
     }
-    
-    /* Hide scrollbar but keep functionality */
-    [data-portfolio-lista]::-webkit-scrollbar {
-      display: none;
+
+    /* Titulo e descricao nao encolhem: se faltarem espaco, e a foto que cede
+       (ela tem min-height e overflow na thumb). */
+    [data-portfolio].is-horizontal [data-portfolio-titulo],
+    [data-portfolio].is-horizontal [data-portfolio-texto] {
+      flex: 0 0 auto;
     }
-    
-    [data-portfolio-lista] {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+
+    [data-portfolio].is-horizontal [data-portfolio-foto] {
+      flex: 1 1 auto;
+      min-height: 0;
     }
-    
-    /* Override any grid styles that might interfere */
-    [data-portfolio-item] {
-      grid-column: unset !important;
-      grid-row: unset !important;
+
+    [data-portfolio].is-horizontal [data-portfolio-thumb] {
+      height: 100%;
+      min-height: 8rem;
+      aspect-ratio: auto;
+    }
+
+    /* Parallax: a imagem e 18% mais larga que o corte e nasce 9% fora de cada
+       borda. O xPercent de +-4 (4% de 118% = 4,7%) mantem as duas pontas sempre
+       cobertas — sobra folga de ~4,3% de um lado e do outro. */
+    [data-portfolio].is-horizontal [data-portfolio-thumb] img {
+      position: relative;
+      left: -9%;
+      width: 118%;
+      max-width: none;
+    }
+
+    /* Estado de carregamento/erro da API: um item solto encolheria para o texto
+       e ficaria grudado na esquerda dentro de um track que agora e max-content. */
+    [data-portfolio].is-horizontal [data-portfolio-lista] > li:not([data-portfolio-item]) {
+      flex: 0 0 100vw;
     }
   }
 </style>
