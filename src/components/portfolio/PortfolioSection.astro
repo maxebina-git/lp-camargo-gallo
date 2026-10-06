@@ -236,7 +236,6 @@ import { ChevronRight } from '@lucide/vue'
 
   function itemHTML(obra) {
     const href = '/portfolio/' + encodeURIComponent(obra.slug || obra.id)
-    const local = [obra.cidade, obra.ano].filter(Boolean).join(' · ')
     const foto = obra.imagem
       ? '<img src="' + esc(obra.imagem) + '" alt="' + esc(obra.titulo) + '" width="600" height="600" class="h-full w-full object-cover" loading="lazy" decoding="async" />'
       : ''
@@ -254,7 +253,6 @@ import { ChevronRight } from '@lucide/vue'
         '</div>' +
         '<div class="flex flex-col gap-3" data-portfolio-texto>' +
           '<p class="font-body text-base leading-normal font-normal text-text-secondary">' + esc(obra.descricao) + '</p>' +
-          '<p class="font-body text-xs uppercase tracking-wide text-deep">' + esc(local) + '</p>' +
           '<a href="' + href + '" class="cta-portfolio self-start mt-2 inline-flex items-center justify-center gap-2 select-none rounded-md font-medium transition duration-500 ease-out cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 bg-primary-500 text-on-primary hover:bg-primary-700 active:bg-primary-700 h-8 px-3 text-sm">Ver detalhes <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>' +
         '</div>' +
       '</li>'
@@ -300,7 +298,7 @@ import { ChevronRight } from '@lucide/vue'
 
 <Section tone="brand" id="portfolio" class="py-16 md:py-0">
   <div data-portfolio class="h-[100dvh] overflow-hidden">
-    <Container size="lg" class="flex flex-col py-10 md:h-full md:justify-center md:py-16">
+    <Container size="lg" class="flex h-full flex-col py-10 md:justify-center md:py-16">
       <div class="mb-6 flex flex-col items-center gap-4 text-center md:mb-6">
         <div role="separator" aria-hidden="true" class="h-4 w-[75%] rounded-full bg-deep"></div>
         <Heading as="2" size="display" class="section-title">Portfólio</Heading>
@@ -517,6 +515,15 @@ import { ChevronRight } from '@lucide/vue'
     [data-portfolio].is-horizontal [data-portfolio-lista] {
       display: flex;
       width: max-content;
+      /* O track preenche a altura que sobra da coluna (100dvh menos cabecalho):
+         o card nao cresce com o conteudo e o CTA, ancorado embaixo pelo
+         margin-top:auto do texto, nunca sai da tela — em telas baixas e a foto
+         (flexgrow/encolhe) que cede mediante a altura fixa do bloco. */
+      height: 100%;
+      /* min-height:0 deixa o ul (flex-1 da coluna) encolher abaixo do minimo
+         natural do track; sem isso, o card crescia com o conteudo e o CTA
+         passava da borda da tela em aparelhos baixos. */
+      min-height: 0;
       align-items: stretch;
       gap: 1rem;
       padding-inline: 1rem;
@@ -541,15 +548,25 @@ import { ChevronRight } from '@lucide/vue'
       display: flex;
       flex-direction: column;
       flex: 0 0 84vw;
-      /* Distribuicao vertical: titulo no topo, foto no meio, descricao (e o
-         CTA) no pe. O espaco que a foto nao usa vira ar entre os blocos, e o
-         gap e o piso quando nao sobra nada. */
-      justify-content: space-between;
-      gap: 1rem;
+      /* Titulo no topo (bloco de altura fixa) e texto com o CTA ancorado
+         embaixo (margin-top:auto no texto); a foto cresce no espaco do meio
+         ate 50% do card. O gap curto (0.75rem) mantem titulo e foto proximos,
+         e o ar que sobra quando a foto atinge o teto fica entre foto e texto,
+         nunca entre titulo e foto. */
+      gap: 0.75rem;
       width: auto;
       max-width: none;
       max-height: none;
       transition: none;
+    }
+
+    /* Titulo com a altura fixa de 3 linhas do h3 (1rem / leading-snug = 22px):
+       o bloco e identico em todos os cards, entao a foto comeca sempre no mesmo
+       lugar; com 1, 2 ou 3 linhas o texto fica centralizado verticalmente. */
+    [data-portfolio].is-horizontal [data-portfolio-titulo] {
+      height: 4.125rem;
+      align-items: center;
+      justify-content: center;
     }
 
     /* Titulo e descricao nao encolhem: se faltarem espaco, e a foto que cede
@@ -559,14 +576,27 @@ import { ChevronRight } from '@lucide/vue'
       flex: 0 0 auto;
     }
 
+    [data-portfolio].is-horizontal [data-portfolio-texto] {
+      margin-top: auto;
+    }
+
     [data-portfolio].is-horizontal [data-portfolio-foto] {
       flex: 1 1 auto;
       min-height: 0;
       /* A foto nao absorve a altura toda (era ~68% do card): cresce ate 50% e
-         para, e o resto do espaco e repartido pelo space-between do card. O
-         teto e percentual da altura do card, que o stretch do track torna
-         definida. */
+         para; o espaco restante e empurrado para baixo do texto (auto margin) e
+         nao interfere na proximidade titulo/foto. */
       max-height: 50%;
+    }
+
+    /* Descricao travada em 3 linhas com reticencias no mobile (no desktop o
+       accordion mostra o texto inteiro). O bloco acompanha a altura real do
+       texto; o CTA embaixo e garantido pelo margin-top:auto acima. */
+    [data-portfolio] [data-portfolio-texto] p:first-child {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
     }
 
     /* CTA "Ver detalhes" em largura total: o self-start/h-8 do markup deixava o
@@ -579,7 +609,9 @@ import { ChevronRight } from '@lucide/vue'
 
     [data-portfolio].is-horizontal [data-portfolio-thumb] {
       height: 100%;
-      min-height: 8rem;
+      /* Piso de presenca da imagem; alto demais (8rem) fazia a thumb vazar por
+         cima da descricao em telas baixas, onde a foto fica com ~4rem sobra. */
+      min-height: 4rem;
       aspect-ratio: auto;
     }
 
