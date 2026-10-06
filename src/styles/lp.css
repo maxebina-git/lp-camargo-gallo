@@ -548,13 +548,12 @@ img[alt="Logo Camargo Gallo"] {
   }
 }
 
-/* Menu mobile do Header: todo item do nav fica com o texto colado a esquerda.
-   O alvo "a.block" e exatamente a branch de link simples do DS; o submenu com
-   setinha (button justify-between) e a linha parentLink (a.flex-1) ja nascem
-   alinhados a esquerda, entao nao mexo nelas — senao o chevron perderia a
-   posicao a direita. */
-nav[aria-label="Navegação móvel"] a.block {
+/* Menu mobile do Header: itens de link simples alinhados a esquerda.
+   Alvo pelo id do painel (estavel, sem depender de aria-label com acento).
+   O submenu ESTUDOS DE CASO (button justify-between + a.flex-1) e o botao
+   de dropdown ja nascem alinhados; o chevron a direita permanece. */
+div[id$="-mobile-menu"] nav a.block {
   display: block;
   width: 100%;
-  text-align: left;
+  text-align: left !important;
 }
