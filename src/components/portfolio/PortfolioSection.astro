@@ -52,6 +52,10 @@ import { ChevronRight } from '@lucide/vue'
     const faixa = raiz.querySelector('[data-portfolio-lista]')
     if (!faixa) return
     const itens = gsap.utils.toArray('[data-portfolio-item]', faixa)
+    // Cases + o card final de CTA. E quem define o tamanho da faixa e o numero
+    // de degraus do snap; o card nao tem data-portfolio-item, entao o acordeao
+    // do desktop nao o enxerga.
+    const cartoes = gsap.utils.toArray('[data-portfolio-item], [data-portfolio-cta]', faixa)
     const total = itens.length
     if (total < 2) return
 
@@ -64,17 +68,19 @@ import { ChevronRight } from '@lucide/vue'
     raiz.classList.add('is-horizontal')
 
     // Delocamento total da faixa: a distancia entre a borda esquerda da janela
-    // visivel e a borda esquerda do ultimo card. Medir por offsetLeft em vez de
-    // scrollWidth e offsetWidth: ja desconta o padding-inline da faixa, nao
-    // depende de todas as cards terem a mesma largura e nao acumula o
-    // arredondamento inteiro de offsetWidth a cada degrau.
+    // visivel e a borda esquerda do ultimo card (o de CTA, quando existe) — e
+    // ele que segura o pin: o end so bate quando ele chega na posicao de descanso.
+    // Medir por offsetLeft em vez de scrollWidth e offsetWidth: ja desconta o
+    // padding-inline da faixa, nao depende de todas as cards terem a mesma
+    // largura e nao acumula o arredondamento inteiro de offsetWidth a cada degrau.
     const distancia = () => {
-      if (itens.length < 2) return 0
-      return Math.max(0, itens[itens.length - 1].offsetLeft - faixa.offsetLeft)
+      const ultimo = cartoes[cartoes.length - 1]
+      if (!ultimo) return 0
+      return Math.max(0, ultimo.offsetLeft - faixa.offsetLeft)
     }
 
     // Acima de 1 a faixa anda mais devagar que o dedo, o que da tempo de ler a
-    // obra antes da proxima entrar. Em 5 cards isso passa de 3 telas de scroll.
+    // obra antes da proxima entrar. Em 6 cards isso passa de 3 telas de scroll.
     const ritmo = 1.15
 
     const trilha = gsap.to(faixa, {
@@ -89,10 +95,11 @@ import { ChevronRight } from '@lucide/vue'
         anticipatePin: 1,
         scrub: 0.4,
         invalidateOnRefresh: true,
-        // Um case por degrau, como no desktop. progress e o avanco linear do
-        // tween, entao 1/(total-1) cai exatamente no inicio de cada card.
+        // Um passo por card (5 cases + o de CTA), como no desktop. progress e o
+        // avanco linear do tween, e como todas as cards tem a mesma largura os
+        // offsets sao uniformes: 1/(n-1) cai exatamente no inicio de cada uma.
         snap: {
-          snapTo: 1 / (total - 1),
+          snapTo: 1 / (cartoes.length - 1),
           directional: false,
           inertia: false,
           duration: { min: 0.15, max: 0.4 },
@@ -253,6 +260,18 @@ import { ChevronRight } from '@lucide/vue'
       '</li>'
   }
 
+  // Card final da faixa mobile: nao e um case, e a saida para /portfolio, com o
+  // mesmo botao primario do botao flutuante do desktop. Precisa ter a mesma
+  // largura dos cases (84vw, ver .is-horizontal) para os offsets ficarem
+  // uniformes e o snap de 1/(n-1) cair em cada card.
+  function ctaHTML() {
+    const chevron = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
+    return '' +
+      '<li data-portfolio-cta class="items-center justify-center rounded-xl border border-border bg-surface p-6 shadow-sm min-h-40">' +
+        '<a href="/portfolio" aria-label="Veja mais cases" class="inline-flex h-10 select-none items-center justify-center gap-2 rounded-md bg-primary-500 px-5 text-sm font-medium text-on-primary transition duration-500 ease-out cursor-pointer hover:-translate-y-0.5 hover:bg-primary-700 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Veja + cases ' + chevron + '</a>' +
+      '</li>'
+  }
+
   const lista = document.querySelector('[data-portfolio-lista]')
   const status = document.getElementById('portfolio-home-status')
 
@@ -268,7 +287,7 @@ import { ChevronRight } from '@lucide/vue'
         if (status) status.textContent = 'Nenhuma obra publicada ainda.'
         return
       }
-      if (lista) lista.innerHTML = obras.map(itemHTML).join('')
+      if (lista) lista.innerHTML = obras.map(itemHTML).join('') + ctaHTML()
       if (status) status.remove()
       if (document.readyState === 'complete') initPortfolio()
       else window.addEventListener('load', initPortfolio, { once: true })
@@ -285,7 +304,7 @@ import { ChevronRight } from '@lucide/vue'
       <div class="mb-6 flex flex-col items-center gap-4 text-center md:mb-6">
         <div role="separator" aria-hidden="true" class="h-4 w-[75%] rounded-full bg-deep"></div>
         <Heading as="2" size="display" class="section-title">Portfólio</Heading>
-        <Heading as="3" size="xl" class="text-deep">
+        <Heading as="3" size="xl" class="text-deep" data-portfolio-subtitulo>
           Projetos selecionados de recuperação, modernização e manutenção de fachadas.
         </Heading>
       </div>
@@ -322,14 +341,13 @@ import { ChevronRight } from '@lucide/vue'
     transition: height 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  /* Sem max-height aqui: ele mudaria junto com o estado, so que sem transicao,
+     e prenderia a altura animada num valor novo — o item fecharia num salto.
+     A altura vive no md (height 4.5rem/20rem); abaixo disso o item fica com a
+     altura natural, que e o fallback legivel. */
   [data-portfolio].is-acordeao [data-portfolio-item] {
-    max-height: 4.5rem;
     grid-template-rows: minmax(0, 1fr);
     overflow: hidden;
-  }
-
-  [data-portfolio].is-acordeao [data-portfolio-item].is-ativo {
-    max-height: 1000px;
   }
 
   [data-portfolio-item] [data-portfolio-titulo],
@@ -351,19 +369,24 @@ import { ChevronRight } from '@lucide/vue'
       max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  /* O thumb muda de altura pelo max-height: height:auto (aspect-ratio) nao
+     interpola, entao fechar de auto para um valor fixo dava um salto. */
   [data-portfolio-item] [data-portfolio-thumb] {
     transition:
       width 600ms cubic-bezier(0.22, 1, 0.36, 1),
-      height 600ms cubic-bezier(0.22, 1, 0.36, 1),
-      max-width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+      max-width 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   @media (min-width: 48rem) {
-    /* O gap e controlado aqui porque a coluna precisa caber inteira em 100dvh:
-     1 expandida + 5 recolhidas. Utilitario do Tailwind nao garantia a
-     precedencia sobre o gap do fluxo mobile. */
-    [data-portfolio-lista] {
-      row-gap: 0.5rem;
+    /* 16px entre os cards. Nao e row-gap: a lista e contenedor de bloco e
+       row-gap so vale em flex/grid — o antigo row-gap de 0.5rem era morto, e era
+       por isso que os cards ficavam colados. A margem no irmao seguinte resolve
+       sem trocar o display da lista: com flex, o md:justify-center do markup
+       passaria a valer e, em tela baixa, a pilha (1 expandida + 4 recolhidas)
+       transbordaria para cima por cima do cabecalho. */
+    [data-portfolio-lista] > [data-portfolio-item] + [data-portfolio-item] {
+      margin-top: 1rem;
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item] {
@@ -388,9 +411,17 @@ import { ChevronRight } from '@lucide/vue'
 
     /* Fechado: a foto mantem a largura da ativa e so perde a altura, virando
        uma faixa com os quatro cantos arredondados visiveis. Titulo e descricao
-       voltam a aparecer, so que recuados e desfocados. */
+       voltam a aparecer, so que recuados e desfocados.
+       max-height e nao height: com max-height alto demais a caixa continua na
+       altura natural do aspect-ratio (o visual do ativo nao muda) e o valor
+       interpola com o do recolhido, enquanto a altura visivel e a que o item
+       anima. */
+    [data-portfolio].is-acordeao [data-portfolio-item].is-ativo [data-portfolio-thumb] {
+      max-height: 1000px;
+    }
+
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-thumb] {
-      height: 5rem;
+      max-height: 5rem;
     }
 
     /* Mesma transparencia nos tres blocos do item fechado, com o titulo mais
@@ -418,6 +449,13 @@ import { ChevronRight } from '@lucide/vue'
       filter: blur(4px);
       max-height: 50%;
       overflow: hidden;
+    }
+
+    /* none nao interpola: sem um valor no estado ativo o max-height pulava de
+       50% para o inicial a cada troca. 100% da linha (20rem) nao prende a
+       descricao natural e esta no mesmo tipo de unidade do 50%. */
+    [data-portfolio].is-acordeao [data-portfolio-item].is-ativo [data-portfolio-texto] {
+      max-height: 100%;
     }
 
     /* CTA: aparece apenas quando o item esta ativo, com fade. */
@@ -472,7 +510,7 @@ import { ChevronRight } from '@lucide/vue'
       display: flex;
       width: max-content;
       align-items: stretch;
-      gap: 0.75rem;
+      gap: 1rem;
       padding-inline: 1rem;
       will-change: transform;
     }
@@ -522,9 +560,48 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     /* Estado de carregamento/erro da API: um item solto encolheria para o texto
-       e ficaria grudado na esquerda dentro de um track que agora e max-content. */
-    [data-portfolio].is-horizontal [data-portfolio-lista] > li:not([data-portfolio-item]) {
+       e ficaria grudado na esquerda dentro de um track que agora e max-content.
+       O seletor vai no id porque o card de CTA tambem e li sem
+       data-portfolio-item e precisa manter os 84vw dos outros cards. */
+    [data-portfolio].is-horizontal [data-portfolio-lista] > li#portfolio-home-status {
       flex: 0 0 100vw;
+    }
+
+    /* Card final de CTA: so na faixa ele entra como um degrau a mais; fora dela
+       (pilha vertical do mobile sem GSAP) o flex-basis nao faz efeito porque o li
+       nao e flex-item. */
+    [data-portfolio].is-horizontal [data-portfolio-cta] {
+      flex: 0 0 84vw;
+    }
+  }
+
+  /* Card final "Veja + cases": existe so no mobile. No desktop o CTA e o botao
+     flutuante, entao o card some (display:none vence as utilidades do markup);
+     sem GSAP (reduced-motion, JS bloqueado) ele continua aparecendo no fim da
+     pilha vertical legivel. */
+  [data-portfolio] [data-portfolio-cta] {
+    display: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    [data-portfolio] [data-portfolio-cta] {
+      display: flex;
+    }
+
+    /* So no mobile: o subtitulo sai da cabeca (o titulo Portfólio fica) e o
+       titulo do case centraliza e perde o text-xl — a versao md+ continua com
+       text-right e text-xl do markup. O data-attr esta no Heading, que repassa
+       os attrs para o elemento raiz. */
+    [data-portfolio] [data-portfolio-subtitulo] {
+      display: none;
+    }
+
+    [data-portfolio] [data-portfolio-titulo] {
+      text-align: center;
+    }
+
+    [data-portfolio] [data-portfolio-titulo] h3 {
+      font-size: 1rem;
     }
   }
 </style>
