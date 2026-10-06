@@ -29,6 +29,63 @@ const glass = spacer
     const sync = () => header.toggleAttribute('data-scrolled', window.scrollY > 10)
     sync()
     window.addEventListener('scroll', sync, { passive: true })
+    
+    // Set current page attribute for active menu styling
+    const setCurrentPage = () => {
+      header.setAttribute('data-current-page', Astro.url.pathname)
+    }
+    setCurrentPage()
+    
+    // Active menu item highlighting
+    const highlightActiveMenuItem = () => {
+      const currentPath = Astro.url.pathname
+      
+      // Remove any existing active states
+      const activeElements = header.querySelectorAll('.active, [aria-current="page"]')
+      activeElements.forEach(el => {
+        el.classList.remove('active')
+        el.removeAttribute('aria-current')
+      })
+      
+      // Find and highlight matching menu items
+      const links = header.querySelectorAll('a[href], button[href]')
+      links.forEach(link => {
+        const href = link.getAttribute('href')
+        
+        // Handle exact match
+        if (href === currentPath) {
+          link.classList.add('active')
+          link.setAttribute('aria-current', 'page')
+          return
+        }
+        
+        // Handle trailing slash differences
+        if ((href + '/') === currentPath || href === (currentPath + '/')) {
+          link.classList.add('active')
+          link.setAttribute('aria-current', 'page')
+          return
+        }
+        
+        // Handle parent links for dropdowns (when current path starts with href)
+        if (href !== '/' && currentPath.startsWith(href) && !href.endsWith('-')) {
+          // Avoid matching partial paths like "/serv" for "/servicos"
+          // Only match if it's a exact boundary (end of href is followed by / or end of string)
+          const pathAfterHref = currentPath.substring(href.length)
+          if (pathAfterHref === '' || pathAfterHref.startsWith('/')) {
+            link.classList.add('active')
+            link.setAttribute('aria-current', 'page')
+          }
+        }
+      })
+    }
+    
+    // Run on initial load
+    highlightActiveMenuItem()
+    
+    // Re-run on SPA navigation (if applicable)
+    if (typeof Astro !== 'undefined' && Astro.location) {
+      // For Astro 3.0+ with view transitions
+    }
   }
 </script>
 
@@ -41,6 +98,7 @@ const glass = spacer
   class="site-header"
   data-surface={surface}
   data-glass={glass ? '' : undefined}
+  data-current-page={Astro.url.pathname}
   style={`--page-surface: ${color}`}
 >
   <Button

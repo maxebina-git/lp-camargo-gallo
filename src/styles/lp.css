@@ -462,8 +462,18 @@ img[alt="Logo Camargo Gallo"] {
   z-index: 1000;
 }
 
-.site-footer[data-surface] {
-  background-color: var(--page-surface) !important;
+/* Active menu item styling */
+.site-header .active,
+.site-header [aria-current="page"] {
+  /* Primary underline for active menu items */
+  border-bottom: 2px solid var(--color-primary-500) !important;
+  padding-bottom: 2px !important;
+}
+
+/* For buttons that might have different styling */
+.site-header .active.button,
+.site-header [aria-current="page"].button {
+  /* If buttons need special handling, add it here */
 }
 
 /* Rodape, so no mobile: a descricao da empresa e o copyright ficam no meio.
