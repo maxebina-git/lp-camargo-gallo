@@ -527,3 +527,23 @@ img[alt="Logo Camargo Gallo"] {
     display: block !important;
   }
 }
+
+/* BackToTop no mobile: o botao do DS e um circulo p-4 com icone de
+   24px (~56px), o que pesa na tela do celular. So no mobile, menos
+   padding e um icone menor — ainda respeita os 44px minimos de alvo
+   de toque. O WhatsApp e um <a>, entao o seletor no <button> nao o
+   atinge; o span[style] e o IconSet (width/height inline), que
+   precisa de !important para ceder ao valor menor. */
+@media (max-width: 47.99rem) {
+  button.fixed.bottom-8.right-8 {
+    padding: 0.625rem;
+  }
+  button.fixed.bottom-8.right-8 span[style] {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  button.fixed.bottom-8.right-8 svg {
+    width: 20px;
+    height: 20px;
+  }
+}
