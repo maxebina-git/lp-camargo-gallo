@@ -547,3 +547,14 @@ img[alt="Logo Camargo Gallo"] {
     height: 20px;
   }
 }
+
+/* Menu mobile do Header: todo item do nav fica com o texto colado a esquerda.
+   O alvo "a.block" e exatamente a branch de link simples do DS; o submenu com
+   setinha (button justify-between) e a linha parentLink (a.flex-1) ja nascem
+   alinhados a esquerda, entao nao mexo nelas — senao o chevron perderia a
+   posicao a direita. */
+nav[aria-label="Navegação móvel"] a.block {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
