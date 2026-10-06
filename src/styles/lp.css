@@ -458,6 +458,10 @@ img[alt="Logo Camargo Gallo"] {
   backdrop-filter: none !important;
 }
 
+.site-header {
+  z-index: 1000;
+}
+
 .site-footer[data-surface] {
   background-color: var(--page-surface) !important;
 }
@@ -548,12 +552,47 @@ img[alt="Logo Camargo Gallo"] {
   }
 }
 
-/* Menu mobile do Header: itens de link simples alinhados a esquerda.
-   Alvo pelo id do painel (estavel, sem depender de aria-label com acento).
-   O submenu ESTUDOS DE CASO (button justify-between + a.flex-1) e o botao
-   de dropdown ja nascem alinhados; o chevron a direita permanece. */
-div[id$="-mobile-menu"] nav a.block {
-  display: block;
-  width: 100%;
-  text-align: left !important;
+/* Fix for mobile header menu alignment - allows buttons to hug content while preventing line wrapping */
+@media (width < 48rem) {
+  /* Target all possible menu item selectors in site-header nav */
+  .site-header nav a.block,
+  .site-header nav button,
+  .site-header nav .menu-item,
+  /* Additional fallbacks for DS Header mobile menu variations */
+  [id*="mobile"] nav a.block,
+  [id*="mobile"] nav button,
+  [id*="mobile"] nav .menu-item,
+  [id*="menu"] nav a.block,
+  [id*="menu"] nav button,
+  [id*="menu"] nav .menu-item,
+  [class*="mobile"] nav a.block,
+  [class*="mobile"] nav button,
+  [class*="mobile"] nav .menu-item,
+  [class*="menu"] nav a.block,
+  [class*="menu"] nav button,
+  [class*="menu"] nav .menu-item {
+    display: block !important;
+    /* Allow button to hug its content instead of forcing full width */
+    width: auto !important;
+    max-width: 100% !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Override justify-between specifically for dropdown buttons */
+  .site-header nav button[aria-haspopup="true"],
+  .site-header nav button[data-action="toggle-dropdown"],
+  [id*="mobile"] nav button[aria-haspopup="true"],
+  [id*="mobile"] nav button[data-action="toggle-dropdown"],
+  [id*="menu"] nav button[aria-haspopup="true"],
+  [id*="menu"] nav button[data-action="toggle-dropdown"],
+  [class*="mobile"] nav button[aria-haspopup="true"],
+  [class*="mobile"] nav button[data-action="toggle-dropdown"],
+  [class*="menu"] nav button[aria-haspopup="true"],
+  [class*="menu"] nav button[data-action="toggle-dropdown"] {
+    justify-content: flex-start !important;
+  }
 }
