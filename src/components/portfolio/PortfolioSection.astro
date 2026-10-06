@@ -65,7 +65,18 @@ import { ChevronRight } from '@lucide/vue'
 
     // Delocamento total da faixa: conteudo menos a janela visivel. Funcao para
     // o invalidateOnRefresh reavaliar depois das imagens/fontes carregarem.
-    const distancia = () => Math.max(0, faixa.scrollWidth - raiz.clientWidth)
+    const distancia = () => {
+      const inner = faixa.scrollWidth - raiz.clientWidth
+      const totalItens = itens.length
+      if (totalItens < 2) return Math.max(0, inner)
+      const gap = parseFloat(getComputedStyle(faixa).gap || '0') || 0
+      const step = itens[0].offsetWidth + gap
+      const alvo = step * (totalItens - 1)
+      // Garante que o ultimo card chegue no inicio da janela visivel (snap
+      // cai exatamente em cada passo). Se faltar um pequeno delta (padding/
+      // arredondamento), soma o minimo necessario para bater no ultimo passo.
+      return Math.max(0, Math.max(inner, alvo))
+    }
 
     // Acima de 1 a faixa anda mais devagar que o dedo, o que da tempo de ler a
     // obra antes da proxima entrar. Em 5 cards isso passa de 3 telas de scroll.
