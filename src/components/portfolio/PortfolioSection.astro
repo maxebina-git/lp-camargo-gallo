@@ -378,19 +378,26 @@ import { ChevronRight } from '@lucide/vue'
       max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  @media (min-width: 48rem) {
-    /* 16px entre os cards. Nao e row-gap: a lista e contenedor de bloco e
-       row-gap so vale em flex/grid — o antigo row-gap de 0.5rem era morto, e era
-       por isso que os cards ficavam colados. A margem no irmao seguinte resolve
-       sem trocar o display da lista: com flex, o md:justify-center do markup
-       passaria a valer e, em tela baixa, a pilha (1 expandida + 4 recolhidas)
-       transbordaria para cima por cima do cabecalho. */
-    [data-portfolio-lista] > [data-portfolio-item] + [data-portfolio-item] {
-      margin-top: 1rem;
-    }
+  /* 16px entre os cards em toda a pilha vertical (fallback mobile e acordeao
+     desktop). Nao e row-gap: a lista e contenedor de bloco e row-gap so vale em
+     flex/grid — o antigo row-gap de 0.5rem era morto, e era por isso que os
+     cards ficavam colados. A margem no irmao seguinte resolve sem trocar o
+     display da lista: com flex, o md:justify-center do markup passaria a valer
+     e, em tela baixa, a pilha (1 expandida + 4 recolhidas) transbordaria para
+     cima por cima do cabecalho. Na faixa horizontal ela e zerada abaixo: o gap
+     do track ja resolve e, em row-direction, margem toparia e desalinharia os
+     cards entre si. */
+  [data-portfolio-lista] > [data-portfolio-item] + [data-portfolio-item] {
+    margin-top: 1rem;
+  }
 
+  @media (min-width: 48rem) {
     [data-portfolio].is-acordeao [data-portfolio-item] {
-      height: 4.5rem;
+      /* 4rem (era 4.5rem): a coluna tem 100dvh e o justify-center corta os dois
+         lados pelo excedente/2, entao cada px de pilha vale meio px de corte em
+         tela baixa. Os -32px daqui somados aos -32px do card ativo anulam os
+         +64px do gap de 16px e devolvem o corte original (41px em 1366x768). */
+      height: 4rem;
       /* A linha precisa ter a altura do item: sem isso o grid usa a altura do
          conteudo (titulo e descricao continuam ocupando espaco mesmo com
          opacity 0) e o align-items:center empurra a foto para fora da caixa,
@@ -399,7 +406,8 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-ativo {
-      height: 20rem;
+      /* 18rem (era 20rem) - ver comentario da altura da linha acima. */
+      height: 18rem;
     }
 
     /* min() impede a foto de estourar a coluna em telas estreitas de desktop;
@@ -421,7 +429,7 @@ import { ChevronRight } from '@lucide/vue'
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-thumb] {
-      max-height: 5rem;
+      max-height: 4rem;
     }
 
     /* Mesma transparencia nos tres blocos do item fechado, com o titulo mais
@@ -513,6 +521,15 @@ import { ChevronRight } from '@lucide/vue'
       gap: 1rem;
       padding-inline: 1rem;
       will-change: transform;
+    }
+
+    /* Os 16px da pilha vertical sao gap do track aqui; a margem top dos irmaos
+       seria margem no cross-axis e tiraria metade dos cards de linha. */
+    [data-portfolio].is-horizontal
+      [data-portfolio-lista]
+      > [data-portfolio-item]
+      + [data-portfolio-item] {
+      margin-top: 0;
     }
 
     /* 84vw deixa o peek do vizinho aparecer na direita. A foto e quem cresce
