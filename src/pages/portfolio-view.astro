@@ -22,8 +22,14 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         </div>
 
         <div class="mb-12" id="portfolio-imagem-wrap">
-          <img id="portfolio-imagem" src="" alt="" class="w-full h-auto max-h-[500px] object-cover rounded-2xl shadow-lg" />
-          <div id="portfolio-thumbs" class="gallery-thumbs" hidden></div>
+          <img id="portfolio-imagem" src="" alt="" class="w-full h-auto max-h-[500px] object-contain rounded-2xl shadow-lg" />
+          <div id="portfolio-thumbs-wrap" class="thumbs-wrap" hidden>
+            <button id="thumbs-prev" type="button" class="thumbs-nav prev" aria-label="Ver miniaturas anteriores">&lsaquo;</button>
+            <div id="portfolio-thumbs" class="gallery-thumbs">
+              <div id="portfolio-thumbs-track" class="gallery-thumbs-track"></div>
+            </div>
+            <button id="thumbs-next" type="button" class="thumbs-nav next" aria-label="Ver próximas miniaturas">&rsaquo;</button>
+          </div>
         </div>
 
         <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body">
@@ -37,7 +43,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
     </Container>
   </Section>
 
-  <div id="portfolio-lightbox" class="lightbox" hidden>
+  <div id="portfolio-lightbox" class="lightbox" aria-hidden="true">
     <button id="lb-close" type="button" class="lb-btn lb-close" aria-label="Fechar">&times;</button>
     <button id="lb-prev" type="button" class="lb-btn lb-prev" aria-label="Imagem anterior">&lsaquo;</button>
     <figure class="lb-stage">
@@ -61,6 +67,13 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       var lbCount = document.getElementById('lb-count');
       var lbIndex = 0;
       var lbLastFocus = null;
+      var lbOpen = false;
+
+      var thumbsEl = document.getElementById('portfolio-thumbs');
+      var thumbsWrap = document.getElementById('portfolio-thumbs-wrap');
+      var thumbsPrev = document.getElementById('thumbs-prev');
+      var thumbsNext = document.getElementById('thumbs-next');
+      var THUMB_STEP = (200 + 12) * 2;
 
       function fail(message) {
         statusEl.textContent = message;
@@ -85,21 +98,36 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       function openLightbox(index) {
         if (!galeria.length) return;
         lbLastFocus = document.activeElement;
-        lightbox.hidden = false;
+        lbOpen = true;
+        lightbox.classList.add('is-open');
+        lightbox.setAttribute('aria-hidden', 'false');
         document.documentElement.style.overflow = 'hidden';
         showLightbox(index);
         document.getElementById('lb-close').focus();
       }
 
       function closeLightbox() {
-        lightbox.hidden = true;
+        lbOpen = false;
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
         document.documentElement.style.overflow = '';
         if (lbLastFocus && lbLastFocus.focus) lbLastFocus.focus();
       }
 
+      function updateThumbNav() {
+        if (thumbsWrap.hidden) return;
+        var overflow = thumbsEl.scrollWidth > thumbsEl.clientWidth + 1;
+        thumbsPrev.classList.toggle('is-visible', overflow && thumbsEl.scrollLeft > 1);
+        thumbsNext.classList.toggle('is-visible', overflow && thumbsEl.scrollLeft < thumbsEl.scrollWidth - thumbsEl.clientWidth - 1);
+      }
+
+      function scrollThumbs(direction) {
+        thumbsEl.scrollBy({ left: direction * THUMB_STEP, behavior: 'smooth' });
+      }
+
       function renderThumbs(titulo) {
         if (galeria.length < 2) return;
-        var thumbs = document.getElementById('portfolio-thumbs');
+        var track = document.getElementById('portfolio-thumbs-track');
         galeria.forEach(function (src, i) {
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -118,9 +146,9 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           btn.addEventListener('click', function () {
             openLightbox(i);
           });
-          thumbs.appendChild(btn);
+          track.appendChild(btn);
         });
-        thumbs.hidden = false;
+        thumbsWrap.hidden = false;
       }
 
       document.getElementById('lb-close').addEventListener('click', closeLightbox);
@@ -134,10 +162,19 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         if (event.target === lightbox) closeLightbox();
       });
       document.addEventListener('keydown', function (event) {
-        if (lightbox.hidden) return;
+        if (!lbOpen) return;
         if (event.key === 'Escape') closeLightbox();
         else if (event.key === 'ArrowRight') showLightbox(lbIndex + 1);
         else if (event.key === 'ArrowLeft') showLightbox(lbIndex - 1);
+      });
+
+      thumbsEl.addEventListener('scroll', updateThumbNav, { passive: true });
+      window.addEventListener('resize', updateThumbNav);
+      thumbsPrev.addEventListener('click', function () {
+        scrollThumbs(-1);
+      });
+      thumbsNext.addEventListener('click', function () {
+        scrollThumbs(1);
       });
 
       if (!slug) {
@@ -181,6 +218,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
           statusEl.hidden = true;
           article.hidden = false;
+          requestAnimationFrame(updateThumbNav);
         })
         .catch(function (error) {
           console.error(error);
@@ -200,11 +238,25 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
        gesto vertical sempre sobe; o horizontal resolve no snap-x da faixa.
        touch-action: pan-x pan-y declara os dois eixos: o navegador faz o pan
        horizontal na faixa, o vertical sobe pelo scroll chain. Esconde a
-       scrollbar para a faixa ficar limpa (arrasto com mouse continua). */
-    .gallery-thumbs {
-      display: flex;
-      gap: 0.75rem;
+       scrollbar para a faixa ficar limpa (arrasto com mouse continua).
+       O track interno e width:max-content + margin-inline:auto: quando os
+       thumbs cabem na largura da imagem principal ele os centraliza; quando
+       nao cabem as margens viram 0 e a faixa rola normal — o
+       justify-content:center direto no scroll container deixaria os
+       primeiros thumbs inalcancaveis (overflow negativo no inicio).
+       :global nos rules dos thumbs porque os <button> sao criados em runtime
+       via JS e nao recebem o data-astro-cid-* do escopo do Astro — sem
+       global, cada thumb ficava no tamanho natural da imagem. */
+    .thumbs-wrap {
+      position: relative;
       margin-top: 1rem;
+    }
+
+    .thumbs-wrap[hidden] {
+      display: none;
+    }
+
+    .gallery-thumbs {
       overflow-x: auto;
       overflow-y: hidden;
       scroll-snap-type: x mandatory;
@@ -214,34 +266,41 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       -webkit-overflow-scrolling: touch;
     }
 
-    .gallery-thumbs[hidden] {
-      display: none;
-    }
-
     .gallery-thumbs::-webkit-scrollbar {
       display: none;
     }
 
-    .gallery-thumb {
+    .gallery-thumbs-track {
+      display: flex;
+      gap: 0.75rem;
+      width: max-content;
+      margin-inline: auto;
+    }
+
+    /* Caixa fixa 200x125: a imagem "encaixa" por object-fit:cover, entao
+       fotos de proporcoes diferentes viram a mesma miniatura. Dimensao em px
+       (nao rem) porque o pedido e de tamanho definido. */
+    :global(.gallery-thumb) {
       position: relative;
       flex-shrink: 0;
-      width: 6.5rem;
-      height: 5rem;
+      width: 200px;
+      height: 125px;
       border-radius: 0.5rem;
       overflow: hidden;
       scroll-snap-align: start;
       border: 2px solid transparent;
+      cursor: pointer;
       opacity: 0.7;
       transition: opacity 0.15s ease, border-color 0.15s ease;
     }
 
-    .gallery-thumb:hover,
-    .gallery-thumb:focus-visible {
+    :global(.gallery-thumb:hover),
+    :global(.gallery-thumb:focus-visible) {
       opacity: 1;
       border-color: var(--color-deep, #2b2118);
     }
 
-    .gallery-thumb img {
+    :global(.gallery-thumb img) {
       display: block;
       width: 100%;
       height: 100%;
@@ -249,10 +308,62 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       pointer-events: none;
     }
 
+    /* Setas da faixa: so aparecem quando os thumbs nao cabem (is-visible e
+       setada no JS junto com a checagem de overflow), e cada uma some na
+       propria ponta — sem thumb alem da borda, nao ha o que rolar naquele
+       lado. Ficam sobre a faixa para nao ocupar altura extra. */
+    .thumbs-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 2.25rem;
+      height: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--color-deep, #2b2118);
+      font-size: 1.4rem;
+      line-height: 1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+
+    .thumbs-nav.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .thumbs-nav:hover,
+    .thumbs-nav:focus-visible {
+      background: #fff;
+      outline: none;
+    }
+
+    .thumbs-nav:active {
+      transform: translateY(-50%) scale(0.94);
+    }
+
+    .thumbs-nav.prev {
+      left: 0.25rem;
+    }
+
+    .thumbs-nav.next {
+      right: 0.25rem;
+    }
+
     /* Lightbox: fixed fora do Section de proposito — qualquer reveal com
-       transform dentro da section viraria containing block do fixed. O
-       [hidden] precisa da regra abaixo com especificidade maior que display:
-       flex, senao o lightbox ficaria sempre visivel. */
+       transform dentro da section viraria containing block do fixed.
+       Abre/feche com fade de opacity 0% -> 100% (classe .is-open no JS, o
+       atributo hidden/display:none nao transiciona). visibility acompanha a
+       opacity com delay so no fechamento: enquanto o fade dura, o overlay
+       continua pintando; depois some e os botoes saem da tab-order (safer
+       que so opacity — conteudo invisivel continuaria focavel/clicavel).
+       Overlay translucido (0.8) para a pagina aparecer esmaecida atras. */
     .lightbox {
       position: fixed;
       inset: 0;
@@ -261,17 +372,30 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     }
 
-    .lightbox[hidden] {
-      display: none;
+    .lightbox.is-open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.3s ease;
     }
 
     .lb-stage {
       margin: 0;
       text-align: center;
       max-width: min(100%, 1100px);
+      opacity: 0;
+      transform: scale(0.96);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .lightbox.is-open .lb-stage {
+      opacity: 1;
+      transform: scale(1);
     }
 
     .lb-stage img {
@@ -331,11 +455,6 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
     }
 
     @media (width < 40rem) {
-      .gallery-thumb {
-        width: 5.5rem;
-        height: 4.25rem;
-      }
-
       .lb-prev {
         left: 0.5rem;
       }
