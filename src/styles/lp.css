@@ -7,16 +7,25 @@ body {
   overflow-x: visible;
 }
 
-/* O slider e um scroll container: overflow-x:auto computa overflow-y como auto
-   tambem, entao ele recorta nas quatro bordas. O card cresce 10px por lado em
-   Y (5% de 400px) e 7,5px em X (5% de 300px) no hover:scale-105, entao o
-   headroom precisa ser >= 11px vertical e >= 8px horizontal. O padding cria a
-   area visivel e a margem negativa de mesma medida cancela o efeito no layout,
-   mantendo os cards alinhados com o titulo e a altura da section iguais.
-   scroll-padding-left e obrigatorio: sem ele o snap-start cola o primeiro card
-   na borda do container e ignora o padding-left, comendo o headroom do hover. */
+/* O slider e um scroll container horizontal: overflow-x:auto. Ele recorta nas
+   quatro bordas, e o card cresce 10px por lado em Y (5% de 400px) e 7,5px em X
+   (5% de 300px) no hover:scale-105, entao o headroom precisa ser >= 11px
+   vertical e >= 8px horizontal. O padding cria a area visivel e a margem
+   negativa de mesma medida cancela o efeito no layout, mantendo os cards
+   alinhados com o titulo e a altura da section iguais. scroll-padding-left e
+   obrigatorio: sem ele o snap-start cola o primeiro card na borda do container
+   e ignora o padding-left, comendo o headroom do hover.
+   overflow-y: hidden e forcado: sem ele o overflow-x:auto computaria
+   overflow-y como auto, e o translateY(24px) do reveal (cards ainda nao
+   animados) dava 4px de overflow vertical ao slider — o suficiente para ele
+   tomar gestos verticais e morrer ali sem encadear para a pagina. Escondido,
+   o slider nunca e scroller Y: o gesto vertical sempre sobe para a pagina.
+   O clipping continua no padding-box (igual ao auto), entao o hover:scale e o
+   reveal continuam com a mesma folga; os 4px do pre-reveal sao de cards com
+   opacity 0, invisiveis. */
 #servicos .servicos-slider,
 #insights .servicos-slider {
+  overflow-y: hidden;
   margin-right: calc(-1 * (100vw - 100%) / 2);
   margin-left: -0.75rem;
   margin-top: -1.25rem;
@@ -28,17 +37,17 @@ body {
   scroll-padding-left: 0.75rem;
 }
 
-/* O slider e um scroller nativo (overflow-x:auto) e por isso o overflow-y
-   computa como auto tambem (ver o comentario acima): o navegador trata o
-   elemento como scroller nos dois eixos. touch-action: pan-x pan-y declara que
-   os dois eixos de pan sao permitidos daqui — o componente horizontal move o
-   carrossel com snap-x, e o vertical nao tem overflow para consumir, entao o
-   scroll chain leva o gesto para a pagina (dedo em cima dos cards rola a
-   pagina). O eixo dominante do inicio do gesto decide na pratica; zoom
-   (pinch/double-tap) segue bloqueado dentro da faixa. Vale so abaixo de 640px
-   porque e onde o carrossel ocupa a largura da tela; com mouse nao muda nada
-   (touch-action so vale para toque/caneta). Cobre os dois sliders da home
-   (servicos e insights): mesma classe. */
+/* Com o slider fora do eixo Y (overflow-y: hidden acima), restam dois gestos a
+   resolver no mobile: o pan horizontal, que move o carrossel com snap-x, e o
+   vertical, que deve rolar a pagina. touch-action: pan-x pan-y declara os dois
+   eixos de pan permitidos daqui — o horizontal o navegador resolve no proprio
+   slider, e o vertical, sem overflow Y para consumir, sobe pelo scroll chain
+   para a pagina (dedo em cima dos cards rola a pagina). O eixo dominante do
+   inicio do gesto decide na pratica; zoom (pinch/double-tap) segue bloqueado
+   dentro da faixa. Vale so abaixo de 640px porque e onde o carrossel ocupa a
+   largura da tela; com mouse nao muda nada (touch-action so vale para
+   toque/caneta). Cobre os dois sliders da home (servicos e insights): mesma
+   classe. */
 @media (width < 40rem) {
   .servicos-slider {
     touch-action: pan-x pan-y;
