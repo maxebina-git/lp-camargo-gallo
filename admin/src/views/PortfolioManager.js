@@ -125,6 +125,11 @@ export default {
                                 </select>
                             </div>
                             <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Vídeo do YouTube</label>
+                                <input v-model="form.video_youtube" type="text" placeholder="https://youtu.be/YxwwEqbQLzw?si=5uiP6DduWKKs7Z5g" class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
+                                <p class="mt-0.5 text-xs text-gray-500">Aparece acima da galeria na página da obra. Deixe vazio para não exibir.</p>
+                            </div>
+                            <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Galeria de imagens</label>
                                 <p class="mt-0.5 text-xs text-gray-500">A primeira imagem é a capa usada nos cards. Arraste para reordenar.</p>
 
@@ -201,7 +206,7 @@ export default {
             urlDraft: '',
             imgDragIndex: null,
             imgDragOverIndex: null,
-            form: { titulo: '', descricao: '', imagem: '', imagens: [], categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
+            form: { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
         };
     },
     mounted() {
@@ -263,7 +268,7 @@ export default {
         },
         openModal() {
             this.editingId = null;
-            this.form = { titulo: '', descricao: '', imagem: '', imagens: [], categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+            this.form = { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
             this.uploading = false;
             this.uploadError = '';
             this.urlDraft = '';

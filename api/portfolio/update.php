@@ -44,7 +44,12 @@ try {
 
     $galeria = cg_parse_imagens($input);
 
-    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem, imagens = :imagens WHERE id = :id");
+    $video = (isset($input['video_youtube']) && is_string($input['video_youtube'])) ? trim($input['video_youtube']) : '';
+    if (strlen($video) > 500) {
+        $video = substr($video, 0, 500);
+    }
+
+    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem, imagens = :imagens, video_youtube = :video_youtube WHERE id = :id");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
@@ -57,6 +62,7 @@ try {
         'status'    => $input['status'] ?? 'concluido',
         'imagem'    => $galeria ? $galeria[0] : null,
         'imagens'   => cg_imagens_json($galeria),
+        'video_youtube' => ($video !== '' ? $video : null),
         'id'        => $input['id']
     ]);
 

@@ -15,7 +15,7 @@ if ($slug === '') {
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->prepare("SELECT id, slug, titulo, descricao, cidade, ano, imagem, imagens, categoria, data_obra, status FROM portfolio WHERE slug = :slug LIMIT 1");
+    $stmt = $db->prepare("SELECT id, slug, titulo, descricao, cidade, ano, imagem, imagens, video_youtube, categoria, data_obra, status FROM portfolio WHERE slug = :slug LIMIT 1");
     $stmt->execute([':slug' => $slug]);
     $item = $stmt->fetch();
 

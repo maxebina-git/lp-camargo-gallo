@@ -45,7 +45,12 @@ try {
 
     $galeria = cg_parse_imagens($input);
 
-    $stmt = $db->prepare("INSERT INTO portfolio (titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem, imagens, ordem, user_id) VALUES (:titulo, :slug, :descricao, :cidade, :ano, :categoria, :data_obra, :status, :imagem, :imagens, :ordem, :user_id)");
+    $video = (isset($input['video_youtube']) && is_string($input['video_youtube'])) ? trim($input['video_youtube']) : '';
+    if (strlen($video) > 500) {
+        $video = substr($video, 0, 500);
+    }
+
+    $stmt = $db->prepare("INSERT INTO portfolio (titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem, imagens, video_youtube, ordem, user_id) VALUES (:titulo, :slug, :descricao, :cidade, :ano, :categoria, :data_obra, :status, :imagem, :imagens, :video_youtube, :ordem, :user_id)");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
@@ -58,6 +63,7 @@ try {
         'status'    => $input['status'] ?? 'concluido',
         'imagem'    => $galeria ? $galeria[0] : null,
         'imagens'   => cg_imagens_json($galeria),
+        'video_youtube' => ($video !== '' ? $video : null),
         'ordem'     => $ordem,
         'user_id'   => $_SESSION['user_id']
     ]);

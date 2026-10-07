@@ -21,6 +21,19 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           </div>
         </div>
 
+        <div id="portfolio-video-wrap" class="mb-12" hidden>
+          <div class="video-embed">
+            <iframe
+              id="portfolio-video"
+              src=""
+              title="Vídeo da obra"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+
         <div class="mb-12" id="portfolio-imagem-wrap">
           <img id="portfolio-imagem" src="" alt="" class="w-full aspect-[3/2] object-cover rounded-2xl shadow-lg cursor-zoom-in" />
           <div id="portfolio-thumbs-wrap" class="thumbs-wrap" hidden>
@@ -88,6 +101,16 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         if (item.cidade) p.push(item.cidade);
         if (item.ano) p.push(item.ano);
         return p.join(' · ');
+      }
+
+      /* Extrai o ID de qualquer formato de link do YouTube:
+         youtu.be/ID?si=..., watch?v=ID, /embed/ID, /shorts/ID, /live/ID.
+         Retorna '' se nao for um link reconhecivel — ai o bloco simplesmente
+         nao aparece. */
+      function youtubeId(url) {
+        if (!url || typeof url !== 'string') return '';
+        var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
+        return m ? m[1] : '';
       }
 
       /* Troca a imagem principal e o thumb ativo. E o unico ponto que
@@ -226,6 +249,13 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           document.getElementById('portfolio-meta').textContent = meta(item);
           document.getElementById('portfolio-descricao').textContent = item.descricao || '';
 
+          var videoId = youtubeId(item.video_youtube);
+          if (videoId) {
+            document.getElementById('portfolio-video').src =
+              'https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0';
+            document.getElementById('portfolio-video-wrap').hidden = false;
+          }
+
           var wrap = document.getElementById('portfolio-imagem-wrap');
           var img = document.getElementById('portfolio-imagem');
           galeria = (Array.isArray(item.imagens) && item.imagens.length)
@@ -273,6 +303,26 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
        :global nos rules dos thumbs porque os <button> sao criados em runtime
        via JS e nao recebem o data-astro-cid-* do escopo do Astro — sem
        global, cada thumb ficava no tamanho natural da imagem. */
+    /* Vídeo do YouTube: box 16:9 com o iframe absolutamente encaixado —
+       mesma linguagem visual da imagem principal (rounded + shadow). */
+    .video-embed {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      background: #000;
+    }
+
+    .video-embed iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     .thumbs-wrap {
       position: relative;
       margin-top: 1rem;

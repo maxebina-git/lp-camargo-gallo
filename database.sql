@@ -53,15 +53,22 @@ CREATE TABLE IF NOT EXISTS `insights` (
 CREATE TABLE IF NOT EXISTS `portfolio` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `titulo` varchar(255) NOT NULL,
+  `slug` varchar(191) DEFAULT NULL,
   `descricao` text NOT NULL,
+  `cidade` varchar(120) DEFAULT NULL,
+  `ano` varchar(4) DEFAULT NULL,
   `imagem` varchar(255) DEFAULT NULL,
+  `imagens` text DEFAULT NULL,
+  `video_youtube` varchar(500) DEFAULT NULL,
   `categoria` varchar(100) DEFAULT NULL,
   `data_obra` date DEFAULT NULL,
   `status` enum('concluido', 'em_andamento') DEFAULT 'concluido',
+  `ordem` int(11) NOT NULL DEFAULT 0,
   `user_id` int(11) DEFAULT NULL,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_portfolio_slug` (`slug`),
   KEY `fk_portfolio_user` (`user_id`),
   CONSTRAINT `fk_portfolio_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
