@@ -93,7 +93,8 @@ export default {
 
             <!-- Modal -->
             <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div class="bg-white rounded-lg max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+                <div class="relative bg-white rounded-lg max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+                    <button type="button" @click="closeModal" :disabled="saving" aria-label="Fechar" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none cursor-pointer disabled:opacity-50">&times;</button>
                     <h2 class="text-2xl font-bold mb-6">{{ editingId ? 'Editar Obra' : 'Nova Obra' }}</h2>
                     <form @submit.prevent="saveItem" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +128,11 @@ export default {
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Vídeo do YouTube</label>
                                 <input v-model="form.video_youtube" type="text" placeholder="https://youtu.be/YxwwEqbQLzw?si=5uiP6DduWKKs7Z5g" class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
-                                <p class="mt-0.5 text-xs text-gray-500">Aparece acima da galeria na página da obra. Deixe vazio para não exibir.</p>
+                                <p class="mt-0.5 text-xs text-gray-500">Aparece antes da descrição na página da obra. Deixe vazio para não exibir.</p>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Descrição</label>
+                                <textarea v-model="form.descricao" rows="4" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Galeria de imagens</label>
@@ -171,10 +176,6 @@ export default {
                                         <button type="button" @click="addFromUrl" class="px-3 py-2 text-xs font-medium rounded-md border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100">Adicionar</button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Descrição</label>
-                                <textarea v-model="form.descricao" rows="4" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
                             </div>
                         </div>
                         <div class="flex justify-end space-x-3 mt-6">

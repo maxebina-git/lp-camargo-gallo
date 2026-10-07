@@ -64,7 +64,8 @@ export default {
 
             <!-- Modal -->
             <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div class="bg-white rounded-lg max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+                <div class="relative bg-white rounded-lg max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+                    <button type="button" @click="closeModal" :disabled="saving" aria-label="Fechar" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none cursor-pointer disabled:opacity-50">&times;</button>
                     <h2 class="text-2xl font-bold mb-6">{{ editingId ? 'Editar Artigo' : 'Novo Artigo' }}</h2>
                     <form @submit.prevent="saveItem" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
