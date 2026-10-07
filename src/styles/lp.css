@@ -462,23 +462,71 @@ img[alt="Logo Camargo Gallo"] {
   z-index: 1000;
 }
 
+/* Estado ativo dos itens do menu: mesmo visual do hover — texto ink e o
+   sublinhado ::after do DS expandido (mesma propriedade scale do hover). */
 .site-header .active,
 .site-header [aria-current="page"] {
-  position: relative !important;
-  background-color: var(--color-surface-alt) !important;
-  color: var(--color-ink) !important;
+  color: var(--color-ink);
 }
 
 .site-header .active::after,
 .site-header [aria-current="page"]::after {
-  content: '' !important;
-  position: absolute !important;
-  inset-inline: 0 !important;
-  bottom: 0 !important;
-  height: 1px !important;
-  background-color: var(--color-primary-500) !important;
-  transform-origin: 0 !important;
-  scale: 100% 100% !important;
+  --tw-scale-x: 100%;
+  scale: 100% 100%;
+}
+
+/* Link pai de dropdown: o ::after do sublinhado está no <span> envolvente,
+   enquanto o script marca o <a> interno. */
+.site-header span:has(> a[aria-current="page"])::after,
+.site-header span:has(> a.active)::after {
+  --tw-scale-x: 100%;
+  scale: 100% 100%;
+}
+
+/* Itens de dropdown ativos (desktop e mobile): mesmo bg do hover */
+.site-header [role="menu"] .active,
+.site-header [role="menu"] [aria-current="page"] {
+  background-color: var(--color-surface-alt);
+}
+
+/* Menu mobile: itens não têm as classes after: do DS, então o sublinhado
+   é desenhado do zero (mesma aparência do hover desktop: 1px primary). */
+.site-header nav[aria-label="Navegação móvel"] .active,
+.site-header nav[aria-label="Navegação móvel"] [aria-current="page"] {
+  position: relative;
+}
+
+.site-header nav[aria-label="Navegação móvel"] .active::after,
+.site-header nav[aria-label="Navegação móvel"] [aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--color-primary-500);
+  transform-origin: 0;
+  scale: 100% 100%;
+}
+
+/* Botão Home (coluna esquerda do header): ativo somente na home, quando
+   data-current-page="/" (renderizado no servidor pelo SiteHeader).
+   Réplica do estilo aria-current do DS (ring-2 + offset surface), com
+   accent-100 no lugar de accent-500 para um tom mais suave — o estilo original
+   não está no pacote publicado 1.0.20. Só visual — sem aria-current, que em
+   toda página seria incorreto para leitores de tela. */
+.site-header[data-current-page="/"] a[aria-label="Home"] {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-accent-100);
+}
+
+/* Rodape acompanha a cor da ultima section da pagina: a raiz do FooterBanner
+   (ds-grupo-rkb) vem com bg-surface-alt e pintava de cinza todas as paginas.
+   Cada pagina declara o prop surface igual ao bg da ultima section e o
+   SiteFooter publica essa cor em --page-surface entao o banner nao mostra
+   emenda nenhuma no fim. */
+.site-footer[data-surface] {
+  background-color: var(--page-surface) !important;
 }
 
 /* Rodape, so no mobile: a descricao da empresa e o copyright ficam no meio.
@@ -610,9 +658,4 @@ img[alt="Logo Camargo Gallo"] {
   [class*="menu"] nav button[data-action="toggle-dropdown"] {
     justify-content: flex-start !important;
   }
-}
-
-/* Remove footer background on non-home pages */
-body:not(.is-home) .site-footer[data-surface] {
-  background-color: transparent !important;
 }

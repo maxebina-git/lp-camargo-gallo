@@ -30,42 +30,60 @@ const glass = spacer
     sync()
     window.addEventListener('scroll', sync, { passive: true })
 
+    // Set current page attribute for active menu styling
+    const setCurrentPage = () => {
+      header.setAttribute('data-current-page', window.location.pathname)
+    }
+    setCurrentPage()
+
+    // Active menu item highlighting
     const highlightActiveMenuItem = () => {
+      // Get current path from data attribute (more reliable than Astro.url in client script)
       const currentPath = header.getAttribute('data-current-page')
       if (!currentPath) return
 
+      // Remove any existing active states
       const activeElements = header.querySelectorAll('.active, [aria-current="page"]')
       activeElements.forEach(el => {
         el.classList.remove('active')
         el.removeAttribute('aria-current')
       })
 
+      // Function to find links in element or its shadow root
       const getLinks = (element) => {
+        // Check for shadow root (encapsulated content)
         const shadowRoot = element.shadowRoot
         if (shadowRoot) {
           return shadowRoot.querySelectorAll('a[href], button[href]')
         }
+        // Fallback to light DOM
         return element.querySelectorAll('a[href], button[href]')
       }
 
+      // Find and highlight matching menu items
       const links = getLinks(header)
       links.forEach(link => {
         const href = link.getAttribute('href')
         if (!href) return
 
+        // Handle exact match
         if (href === currentPath) {
           link.classList.add('active')
           link.setAttribute('aria-current', 'page')
           return
         }
 
+        // Handle trailing slash differences
         if ((href + '/') === currentPath || href === (currentPath + '/')) {
           link.classList.add('active')
           link.setAttribute('aria-current', 'page')
           return
         }
 
+        // Handle parent links for dropdowns (when current path starts with href)
         if (href !== '/' && currentPath.startsWith(href)) {
+          // Avoid matching partial paths like "/serv" for "/servicos"
+          // Only match if it's a exact boundary (end of href is followed by / or end of string)
           const pathAfterHref = currentPath.substring(href.length)
           if (pathAfterHref === '' || pathAfterHref.startsWith('/')) {
             link.classList.add('active')
@@ -75,12 +93,20 @@ const glass = spacer
       })
     }
 
+    // Run on initial load with slight delay to ensure DOM is ready
     setTimeout(highlightActiveMenuItem, 0)
 
-    document.addEventListener('astro:page-load', () => {
-      header.setAttribute('data-current-page', window.location.pathname)
-      setTimeout(highlightActiveMenuItem, 0)
-    })
+    // Dropdown e menu mobile são inseridos por v-if no cliente; reaplica a
+    // marcação quando os nós entram no DOM. Observa só childList — as marcas
+    // do script são mudanças de class/atributo, então não há loop.
+    const observer = new MutationObserver(() => requestAnimationFrame(highlightActiveMenuItem))
+    observer.observe(header, { childList: true, subtree: true })
+
+    // Re-run on SPA navigation (if applicable)
+    if (typeof Astro !== 'undefined' && Astro.location) {
+      // For Astro 3.0+ with view transitions - would need to listen to navigation events
+      // This is a simplified approach for traditional MPAs
+    }
   }
 </script>
 
