@@ -2,6 +2,7 @@
 session_start();
 require_once '../db_config.php';
 require_once '../slug.php';
+require_once '../galeria.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -42,7 +43,9 @@ try {
     $slug = cg_unique_slug($db, 'portfolio', $input['slug'] ?? $input['titulo']);
     $ordem = (int) $db->query("SELECT COALESCE(MAX(ordem), 0) + 1 FROM portfolio")->fetchColumn();
 
-    $stmt = $db->prepare("INSERT INTO portfolio (titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem, ordem, user_id) VALUES (:titulo, :slug, :descricao, :cidade, :ano, :categoria, :data_obra, :status, :imagem, :ordem, :user_id)");
+    $galeria = cg_parse_imagens($input);
+
+    $stmt = $db->prepare("INSERT INTO portfolio (titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem, imagens, ordem, user_id) VALUES (:titulo, :slug, :descricao, :cidade, :ano, :categoria, :data_obra, :status, :imagem, :imagens, :ordem, :user_id)");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
@@ -53,7 +56,8 @@ try {
         'categoria' => $input['categoria'] ?? null,
         'data_obra' => $input['data_obra'] ?? null,
         'status'    => $input['status'] ?? 'concluido',
-        'imagem'    => $input['imagem'] ?? null,
+        'imagem'    => $galeria ? $galeria[0] : null,
+        'imagens'   => cg_imagens_json($galeria),
         'ordem'     => $ordem,
         'user_id'   => $_SESSION['user_id']
     ]);

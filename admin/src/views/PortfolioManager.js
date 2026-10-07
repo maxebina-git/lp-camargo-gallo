@@ -1,4 +1,5 @@
 const MIN_LOADING_MS = 600;
+const MAX_IMAGENS = 20;
 
 function ensureMinDuration(startedAt, ms) {
     const remaining = ms - (Date.now() - startedAt);
@@ -124,19 +125,45 @@ export default {
                                 </select>
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Imagem</label>
-                                <div class="mt-1 flex items-start gap-4">
-                                    <div class="w-28 h-28 flex-shrink-0 rounded-md border border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center">
-                                        <img v-if="form.imagem" :src="form.imagem" alt="Prévia" class="w-full h-full object-cover">
-                                        <span v-else class="text-xs text-gray-400">Sem imagem</span>
+                                <label class="block text-sm font-medium text-gray-700">Galeria de imagens</label>
+                                <p class="mt-0.5 text-xs text-gray-500">A primeira imagem é a capa usada nos cards. Arraste para reordenar.</p>
+
+                                <div v-if="form.imagens.length" class="mt-2 grid grid-cols-4 gap-2">
+                                    <div
+                                        v-for="(img, i) in form.imagens"
+                                        :key="img + '-' + i"
+                                        draggable="true"
+                                        @dragstart="onImgDragStart(i, $event)"
+                                        @dragover.prevent="onImgDragOver(i)"
+                                        @drop.prevent="onImgDrop(i)"
+                                        @dragend="onImgDragEnd"
+                                        class="relative aspect-square rounded-md border border-gray-300 bg-gray-50 overflow-hidden cursor-grab active:cursor-grabbing"
+                                        :class="[imgDragIndex === i ? 'opacity-40' : '', imgDragOverIndex === i && imgDragIndex !== i ? 'ring-2 ring-blue-400' : '']"
+                                    >
+                                        <img :src="img" :alt="'Imagem ' + (i + 1)" class="w-full h-full object-cover" draggable="false">
+                                        <span v-if="i === 0" class="absolute top-1 left-1 px-1.5 py-0.5 text-[10px] font-semibold leading-none bg-blue-600 text-white rounded">Capa</span>
+                                        <button
+                                            type="button"
+                                            @click.stop="removeImage(i)"
+                                            :disabled="uploading"
+                                            aria-label="Remover imagem"
+                                            class="absolute top-1 right-1 w-5 h-5 inline-flex items-center justify-center rounded-full bg-black/60 text-white text-xs leading-none hover:bg-black/80 disabled:opacity-50"
+                                        >&times;</button>
                                     </div>
-                                    <div class="flex-1 space-y-2">
-                                        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onFileChange" :disabled="uploading" class="block w-full text-sm text-gray-600">
-                                        <p v-if="uploading" class="text-xs text-blue-600 inline-flex items-center gap-0.5">
-                                            Enviando imagem<span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:0ms"></span><span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:150ms"></span><span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:300ms"></span>
-                                        </p>
-                                        <p v-if="uploadError" class="text-xs text-red-600">{{ uploadError }}</p>
-                                        <input v-model="form.imagem" type="text" placeholder="ou cole uma URL/caminho" class="block w-full border border-gray-300 rounded-md p-2 text-xs">
+                                </div>
+                                <div v-else class="mt-2 border border-dashed border-gray-300 rounded-md p-4 text-center text-xs text-gray-400">
+                                    Nenhuma imagem ainda
+                                </div>
+
+                                <div class="mt-2 space-y-2">
+                                    <input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" @change="onFileChange" :disabled="uploading" class="block w-full text-sm text-gray-600">
+                                    <p v-if="uploading" class="text-xs text-blue-600 inline-flex items-center gap-0.5">
+                                        Enviando imagem {{ uploadIndex }}/{{ uploadTotal }}<span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:0ms"></span><span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:150ms"></span><span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce" style="animation-delay:300ms"></span>
+                                    </p>
+                                    <p v-if="uploadError" class="text-xs text-red-600">{{ uploadError }}</p>
+                                    <div class="flex gap-2">
+                                        <input v-model="urlDraft" type="text" placeholder="ou cole uma URL/caminho" class="flex-1 min-w-0 border border-gray-300 rounded-md p-2 text-xs">
+                                        <button type="button" @click="addFromUrl" class="px-3 py-2 text-xs font-medium rounded-md border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100">Adicionar</button>
                                     </div>
                                 </div>
                             </div>
@@ -169,7 +196,12 @@ export default {
             dragOverIndex: null,
             savingOrder: false,
             saving: false,
-            form: { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
+            uploadIndex: 0,
+            uploadTotal: 0,
+            urlDraft: '',
+            imgDragIndex: null,
+            imgDragOverIndex: null,
+            form: { titulo: '', descricao: '', imagem: '', imagens: [], categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
         };
     },
     mounted() {
@@ -231,17 +263,22 @@ export default {
         },
         openModal() {
             this.editingId = null;
-            this.form = { titulo: '', descricao: '', imagem: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+            this.form = { titulo: '', descricao: '', imagem: '', imagens: [], categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
             this.uploading = false;
             this.uploadError = '';
+            this.urlDraft = '';
             this.saving = false;
             this.showModal = true;
         },
         editItem(item) {
             this.editingId = item.id;
-            this.form = { ...item };
+            const galeria = Array.isArray(item.imagens)
+                ? item.imagens.slice()
+                : (item.imagem ? [item.imagem] : []);
+            this.form = { ...item, imagens: galeria };
             this.uploading = false;
             this.uploadError = '';
+            this.urlDraft = '';
             this.saving = false;
             this.showModal = true;
         },
@@ -249,33 +286,92 @@ export default {
             this.showModal = false;
         },
         onFileChange(event) {
-            const file = event.target.files && event.target.files[0];
-            if (file) this.uploadImage(file);
+            const files = Array.prototype.slice.call(event.target.files || []);
+            event.target.value = '';
+            if (files.length) this.uploadQueue(files);
         },
-        async uploadImage(file) {
+        async uploadQueue(files) {
+            const room = MAX_IMAGENS - this.form.imagens.length;
+            if (room <= 0) {
+                this.uploadError = 'Limite de ' + MAX_IMAGENS + ' imagens atingido.';
+                return;
+            }
+            const truncated = files.length > room;
+            const queue = truncated ? files.slice(0, room) : files;
+
             this.uploading = true;
             this.uploadError = '';
+            this.uploadTotal = queue.length;
+            const failed = [];
+
+            for (let i = 0; i < queue.length; i++) {
+                this.uploadIndex = i + 1;
+                const path = await this.uploadImage(queue[i]);
+                if (path) this.form.imagens.push(path);
+                else if (queue[i] && queue[i].name) failed.push(queue[i].name);
+            }
+
+            this.uploading = false;
+            this.uploadIndex = 0;
+            this.uploadTotal = 0;
+
+            const notes = [];
+            if (truncated) notes.push('Limite de ' + MAX_IMAGENS + ' imagens: apenas os ' + queue.length + ' primeiros foram processados.');
+            if (failed.length) notes.push('Falha ao enviar: ' + failed.join(', ') + '.');
+            this.uploadError = notes.join(' ');
+        },
+        async uploadImage(file) {
             const startedAt = Date.now();
             let path = '';
-            let failure = '';
             try {
                 const body = new FormData();
                 body.append('file', file);
                 const response = await fetch(`${this.apiBase()}/upload.php`, { method: 'POST', body });
                 const data = await response.json().catch(() => ({}));
-                if (response.ok && data.path) {
-                    path = data.path;
-                } else {
-                    failure = data.error || 'Falha no upload';
-                }
+                if (response.ok && data.path) path = data.path;
             } catch (e) {
-                failure = 'Erro de conexão no upload';
+                path = '';
             } finally {
                 await ensureMinDuration(startedAt, MIN_LOADING_MS);
-                this.uploading = false;
             }
-            if (path) this.form.imagem = path;
-            if (failure) this.uploadError = failure;
+            return path;
+        },
+        removeImage(index) {
+            if (this.uploading) return;
+            this.form.imagens.splice(index, 1);
+        },
+        addFromUrl() {
+            const url = (this.urlDraft || '').trim();
+            if (!url) return;
+            if (this.form.imagens.length >= MAX_IMAGENS) {
+                this.uploadError = 'Limite de ' + MAX_IMAGENS + ' imagens atingido.';
+                return;
+            }
+            this.form.imagens.push(url);
+            this.urlDraft = '';
+        },
+        onImgDragStart(index, event) {
+            this.imgDragIndex = index;
+            this.imgDragOverIndex = index;
+            if (event && event.dataTransfer) {
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', String(index));
+            }
+        },
+        onImgDragOver(index) {
+            this.imgDragOverIndex = index;
+        },
+        onImgDragEnd() {
+            this.imgDragIndex = null;
+            this.imgDragOverIndex = null;
+        },
+        onImgDrop(index) {
+            const from = this.imgDragIndex;
+            this.imgDragIndex = null;
+            this.imgDragOverIndex = null;
+            if (from === null || from === index || from < 0 || from >= this.form.imagens.length) return;
+            const moved = this.form.imagens.splice(from, 1)[0];
+            this.form.imagens.splice(index, 0, moved);
         },
         async saveItem() {
             const endpoint = this.editingId ? `${this.apiBase()}/portfolio/update.php` : `${this.apiBase()}/portfolio/insert.php`;
@@ -287,7 +383,12 @@ export default {
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ ...this.form, id: this.editingId }).toString()
+                    body: new URLSearchParams({
+                        ...this.form,
+                        imagens: JSON.stringify(this.form.imagens),
+                        imagem: this.form.imagens[0] || '',
+                        id: this.editingId
+                    }).toString()
                 });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok) {

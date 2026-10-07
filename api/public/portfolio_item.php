@@ -1,5 +1,6 @@
 <?php
 require_once '../db_config.php';
+require_once '../galeria.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -14,7 +15,7 @@ if ($slug === '') {
 
 try {
     $db = Database::getInstance();
-    $stmt = $db->prepare("SELECT id, slug, titulo, descricao, cidade, ano, imagem, categoria, data_obra, status FROM portfolio WHERE slug = :slug LIMIT 1");
+    $stmt = $db->prepare("SELECT id, slug, titulo, descricao, cidade, ano, imagem, imagens, categoria, data_obra, status FROM portfolio WHERE slug = :slug LIMIT 1");
     $stmt->execute([':slug' => $slug]);
     $item = $stmt->fetch();
 
@@ -24,6 +25,7 @@ try {
         exit;
     }
 
+    $item['imagens'] = cg_imagens_list($item);
     echo json_encode($item);
 } catch (Exception $e) {
     http_response_code(500);

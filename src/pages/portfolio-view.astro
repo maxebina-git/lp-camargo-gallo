@@ -23,6 +23,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
         <div class="mb-12" id="portfolio-imagem-wrap">
           <img id="portfolio-imagem" src="" alt="" class="w-full h-auto max-h-[500px] object-cover rounded-2xl shadow-lg" />
+          <div id="portfolio-thumbs" class="gallery-thumbs" hidden></div>
         </div>
 
         <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body">
@@ -36,6 +37,16 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
     </Container>
   </Section>
 
+  <div id="portfolio-lightbox" class="lightbox" hidden>
+    <button id="lb-close" type="button" class="lb-btn lb-close" aria-label="Fechar">&times;</button>
+    <button id="lb-prev" type="button" class="lb-btn lb-prev" aria-label="Imagem anterior">&lsaquo;</button>
+    <figure class="lb-stage">
+      <img id="lb-img" src="" alt="" />
+      <figcaption id="lb-count" class="lb-count"></figcaption>
+    </figure>
+    <button id="lb-next" type="button" class="lb-btn lb-next" aria-label="Próxima imagem">&rsaquo;</button>
+  </div>
+
   <script is:inline>
     (function () {
       var parts = window.location.pathname.replace(/\/+$/, '').split('/');
@@ -43,6 +54,13 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
       var statusEl = document.getElementById('portfolio-status');
       var article = document.getElementById('portfolio-article');
+
+      var galeria = [];
+      var lightbox = document.getElementById('portfolio-lightbox');
+      var lbImg = document.getElementById('lb-img');
+      var lbCount = document.getElementById('lb-count');
+      var lbIndex = 0;
+      var lbLastFocus = null;
 
       function fail(message) {
         statusEl.textContent = message;
@@ -56,6 +74,71 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         if (item.ano) p.push(item.ano);
         return p.join(' · ');
       }
+
+      function showLightbox(index) {
+        lbIndex = (index + galeria.length) % galeria.length;
+        lbImg.src = galeria[lbIndex];
+        lbImg.alt = 'Imagem ' + (lbIndex + 1) + ' de ' + galeria.length;
+        lbCount.textContent = (lbIndex + 1) + ' / ' + galeria.length;
+      }
+
+      function openLightbox(index) {
+        if (!galeria.length) return;
+        lbLastFocus = document.activeElement;
+        lightbox.hidden = false;
+        document.documentElement.style.overflow = 'hidden';
+        showLightbox(index);
+        document.getElementById('lb-close').focus();
+      }
+
+      function closeLightbox() {
+        lightbox.hidden = true;
+        document.documentElement.style.overflow = '';
+        if (lbLastFocus && lbLastFocus.focus) lbLastFocus.focus();
+      }
+
+      function renderThumbs(titulo) {
+        if (galeria.length < 2) return;
+        var thumbs = document.getElementById('portfolio-thumbs');
+        galeria.forEach(function (src, i) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'gallery-thumb';
+          btn.setAttribute('aria-label', 'Ver imagem ' + (i + 1) + ' de ' + galeria.length + (titulo ? ' de ' + titulo : ''));
+
+          var thumb = document.createElement('img');
+          thumb.src = src;
+          thumb.alt = '';
+          thumb.loading = 'lazy';
+          thumb.addEventListener('error', function () {
+            btn.hidden = true;
+          });
+
+          btn.appendChild(thumb);
+          btn.addEventListener('click', function () {
+            openLightbox(i);
+          });
+          thumbs.appendChild(btn);
+        });
+        thumbs.hidden = false;
+      }
+
+      document.getElementById('lb-close').addEventListener('click', closeLightbox);
+      document.getElementById('lb-prev').addEventListener('click', function () {
+        showLightbox(lbIndex - 1);
+      });
+      document.getElementById('lb-next').addEventListener('click', function () {
+        showLightbox(lbIndex + 1);
+      });
+      lightbox.addEventListener('click', function (event) {
+        if (event.target === lightbox) closeLightbox();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (lightbox.hidden) return;
+        if (event.key === 'Escape') closeLightbox();
+        else if (event.key === 'ArrowRight') showLightbox(lbIndex + 1);
+        else if (event.key === 'ArrowLeft') showLightbox(lbIndex - 1);
+      });
 
       if (!slug) {
         fail('Obra não encontrada.');
@@ -79,15 +162,21 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           document.getElementById('portfolio-meta').textContent = meta(item);
           document.getElementById('portfolio-descricao').textContent = item.descricao || '';
 
+          var wrap = document.getElementById('portfolio-imagem-wrap');
           var img = document.getElementById('portfolio-imagem');
-          if (item.imagem) {
-            img.src = item.imagem;
+          galeria = (Array.isArray(item.imagens) && item.imagens.length)
+            ? item.imagens.slice()
+            : (item.imagem ? [item.imagem] : []);
+
+          if (galeria.length) {
+            img.src = galeria[0];
             img.alt = item.titulo;
             img.addEventListener('error', function () {
-              document.getElementById('portfolio-imagem-wrap').hidden = true;
+              wrap.hidden = true;
             });
+            renderThumbs(item.titulo);
           } else {
-            document.getElementById('portfolio-imagem-wrap').hidden = true;
+            wrap.hidden = true;
           }
 
           statusEl.hidden = true;
@@ -101,4 +190,159 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
   </script>
 
   <SiteFooter surface="warm" />
+
+  <style>
+    /* Faixa de miniaturas: scroll container horizontal, mesmo contrato do
+       .servicos-slider da home. overflow-y: hidden e obrigatorio: com
+       overflow-x:auto o eixo Y seria auto, e qualquer overflow vertical
+       (borda focada do thumb, imagem de um px a mais) faria a faixa tomar o
+       gesto de scroll vertical e nao encadear para a pagina. Escondido, o
+       gesto vertical sempre sobe; o horizontal resolve no snap-x da faixa.
+       touch-action: pan-x pan-y declara os dois eixos: o navegador faz o pan
+       horizontal na faixa, o vertical sobe pelo scroll chain. Esconde a
+       scrollbar para a faixa ficar limpa (arrasto com mouse continua). */
+    .gallery-thumbs {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      touch-action: pan-x pan-y;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .gallery-thumbs[hidden] {
+      display: none;
+    }
+
+    .gallery-thumbs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gallery-thumb {
+      position: relative;
+      flex-shrink: 0;
+      width: 6.5rem;
+      height: 5rem;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      scroll-snap-align: start;
+      border: 2px solid transparent;
+      opacity: 0.7;
+      transition: opacity 0.15s ease, border-color 0.15s ease;
+    }
+
+    .gallery-thumb:hover,
+    .gallery-thumb:focus-visible {
+      opacity: 1;
+      border-color: var(--color-deep, #2b2118);
+    }
+
+    .gallery-thumb img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /* Lightbox: fixed fora do Section de proposito — qualquer reveal com
+       transform dentro da section viraria containing block do fixed. O
+       [hidden] precisa da regra abaixo com especificidade maior que display:
+       flex, senao o lightbox ficaria sempre visivel. */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.92);
+    }
+
+    .lightbox[hidden] {
+      display: none;
+    }
+
+    .lb-stage {
+      margin: 0;
+      text-align: center;
+      max-width: min(100%, 1100px);
+    }
+
+    .lb-stage img {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      max-height: 82vh;
+      width: auto;
+      height: auto;
+      border-radius: 0.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .lb-count {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .lb-btn {
+      position: absolute;
+      width: 2.75rem;
+      height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 1.75rem;
+      line-height: 1;
+      transition: background 0.15s ease;
+    }
+
+    .lb-btn:hover,
+    .lb-btn:focus-visible {
+      background: rgba(255, 255, 255, 0.28);
+      outline: none;
+    }
+
+    .lb-close {
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .lb-prev {
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .lb-next {
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    @media (width < 40rem) {
+      .gallery-thumb {
+        width: 5.5rem;
+        height: 4.25rem;
+      }
+
+      .lb-prev {
+        left: 0.5rem;
+      }
+
+      .lb-next {
+        right: 0.5rem;
+      }
+    }
+  </style>
 </BaseLayout>

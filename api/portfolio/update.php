@@ -2,6 +2,7 @@
 session_start();
 require_once '../db_config.php';
 require_once '../slug.php';
+require_once '../galeria.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -41,7 +42,9 @@ try {
     $db = Database::getInstance();
     $slug = cg_unique_slug($db, 'portfolio', $input['slug'] ?? $input['titulo'], (int) $input['id']);
 
-    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem WHERE id = :id");
+    $galeria = cg_parse_imagens($input);
+
+    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem, imagens = :imagens WHERE id = :id");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
@@ -52,7 +55,8 @@ try {
         'categoria' => $input['categoria'] ?? null,
         'data_obra' => $input['data_obra'] ?? null,
         'status'    => $input['status'] ?? 'concluido',
-        'imagem'    => $input['imagem'] ?? null,
+        'imagem'    => $galeria ? $galeria[0] : null,
+        'imagens'   => cg_imagens_json($galeria),
         'id'        => $input['id']
     ]);
 
