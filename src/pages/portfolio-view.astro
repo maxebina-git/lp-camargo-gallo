@@ -22,7 +22,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         </div>
 
         <div class="mb-12" id="portfolio-imagem-wrap">
-          <img id="portfolio-imagem" src="" alt="" class="w-full h-auto max-h-[500px] object-contain rounded-2xl shadow-lg" />
+          <img id="portfolio-imagem" src="" alt="" class="w-full aspect-[3/2] object-cover rounded-2xl shadow-lg cursor-zoom-in" />
           <div id="portfolio-thumbs-wrap" class="thumbs-wrap" hidden>
             <button id="thumbs-prev" type="button" class="thumbs-nav prev" aria-label="Ver miniaturas anteriores">&lsaquo;</button>
             <div id="portfolio-thumbs" class="gallery-thumbs">
@@ -62,6 +62,8 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       var article = document.getElementById('portfolio-article');
 
       var galeria = [];
+      var heroIndex = 0;
+      var obraTitulo = '';
       var lightbox = document.getElementById('portfolio-lightbox');
       var lbImg = document.getElementById('lb-img');
       var lbCount = document.getElementById('lb-count');
@@ -88,11 +90,29 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         return p.join(' · ');
       }
 
+      /* Troca a imagem principal e o thumb ativo. E o unico ponto que
+         define heroIndex: clique no thumb e navegacao do lightbox passam
+         por aqui, entao principal, faixa e lightbox nunca divergem. */
+      function showHero(index) {
+        if (!galeria.length) return;
+        heroIndex = (index + galeria.length) % galeria.length;
+        var hero = document.getElementById('portfolio-imagem');
+        hero.src = galeria[heroIndex];
+        hero.alt = obraTitulo || ('Imagem ' + (heroIndex + 1) + ' de ' + galeria.length);
+        var thumbs = document.getElementById('portfolio-thumbs-track').querySelectorAll('.gallery-thumb');
+        for (var i = 0; i < thumbs.length; i++) {
+          var active = i === heroIndex;
+          thumbs[i].classList.toggle('is-active', active);
+          if (active) thumbs[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+      }
+
       function showLightbox(index) {
         lbIndex = (index + galeria.length) % galeria.length;
         lbImg.src = galeria[lbIndex];
         lbImg.alt = 'Imagem ' + (lbIndex + 1) + ' de ' + galeria.length;
         lbCount.textContent = (lbIndex + 1) + ' / ' + galeria.length;
+        showHero(lbIndex);
       }
 
       function openLightbox(index) {
@@ -144,7 +164,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
           btn.appendChild(thumb);
           btn.addEventListener('click', function () {
-            openLightbox(i);
+            showHero(i);
           });
           track.appendChild(btn);
         });
@@ -177,6 +197,12 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         scrollThumbs(1);
       });
 
+      /* A imagem principal e a unica porta de entrada do lightbox: cliques
+         nos thumbs trocam a imagem (showHero), nao abrem o overlay. */
+      document.getElementById('portfolio-imagem').addEventListener('click', function () {
+        openLightbox(heroIndex);
+      });
+
       if (!slug) {
         fail('Obra não encontrada.');
         return;
@@ -195,6 +221,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           if (!item) return;
 
           document.title = item.titulo + ' | Camargo Gallo Engenharia';
+          obraTitulo = item.titulo;
           document.getElementById('portfolio-titulo').textContent = item.titulo;
           document.getElementById('portfolio-meta').textContent = meta(item);
           document.getElementById('portfolio-descricao').textContent = item.descricao || '';
@@ -206,12 +233,11 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
             : (item.imagem ? [item.imagem] : []);
 
           if (galeria.length) {
-            img.src = galeria[0];
-            img.alt = item.titulo;
             img.addEventListener('error', function () {
               wrap.hidden = true;
             });
             renderThumbs(item.titulo);
+            showHero(0);
           } else {
             wrap.hidden = true;
           }
@@ -296,6 +322,13 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
     :global(.gallery-thumb:hover),
     :global(.gallery-thumb:focus-visible) {
+      opacity: 1;
+      border-color: var(--color-deep, #2b2118);
+    }
+
+    /* Thumb da imagem que esta na principal — mesmo tratamento do hover
+       para continuar valendo depois que o mouse sai. */
+    :global(.gallery-thumb.is-active) {
       opacity: 1;
       border-color: var(--color-deep, #2b2118);
     }
