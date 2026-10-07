@@ -360,6 +360,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       color: var(--color-deep, #2b2118);
       font-size: 1.4rem;
       line-height: 1;
+      cursor: pointer;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
       opacity: 0;
       pointer-events: none;
@@ -400,7 +401,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
     .lightbox {
       position: fixed;
       inset: 0;
-      z-index: 100;
+      z-index: 2000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -460,6 +461,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       color: #fff;
       font-size: 1.75rem;
       line-height: 1;
+      cursor: pointer;
       transition: background 0.15s ease;
     }
 
