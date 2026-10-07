@@ -586,12 +586,17 @@ img[alt="Logo Camargo Gallo"] {
    No mobile a faixa horizontal nao tem CTA — o unico show-on-mobile-only da
    codebase foi removido junto com o botao inline da home. */
 .portfolio-cases-btn.show-on-desktop-only {
-  display: none; /* hidden by default, shown on desktop via media query */
+  /* !important tambem aqui: sem ele, o a[href='/portfolio'] do bloco
+     < 40rem (display:flex !important) reexibia o botao invisivel full-width
+     no mobile, capturando toques na parte de baixo da tela. */
+  display: none !important; /* hidden by default, shown on desktop via media query */
 }
 
 @media (width >= 48rem) {
   .portfolio-cases-btn.show-on-desktop-only {
-    display: block !important;
+    /* inline-flex, nao block: o Button do DS centra o label com
+       items-center/justify-center, que so valem em contexto flex. */
+    display: inline-flex !important;
   }
 }
 

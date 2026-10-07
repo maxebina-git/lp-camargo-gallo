@@ -1,5 +1,5 @@
 ---
-import { Button, Container, Heading, Section } from 'ds-grupo-rkb'
+import { Button, Container, FeatureCard, Heading, Section } from 'ds-grupo-rkb'
 ---
 
 <script>
@@ -257,17 +257,11 @@ import { Button, Container, Heading, Section } from 'ds-grupo-rkb'
       '</li>'
   }
 
-  // Card final da faixa mobile: nao e um case, e a saida para /portfolio, com o
-  // mesmo botao primario do botao flutuante do desktop. Precisa ter a mesma
+  // O card final da faixa mobile (CTA para /portfolio) e markup estatico no
+  // <ul> abaixo, renderizado pelo Astro com FeatureCard do DS: aqui os cases
+  // apenas entram antes dele, na ordem 1..5 + CTA. Precisa ter a mesma
   // largura dos cases (84vw, ver .is-horizontal) para os offsets ficarem
   // uniformes e o snap de 1/(n-1) cair em cada card.
-  function ctaHTML() {
-    const chevron = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
-    return '' +
-      '<li data-portfolio-cta class="items-center justify-center">' +
-        '<a href="/portfolio" aria-label="Veja mais cases" class="inline-flex h-10 select-none items-center justify-center gap-2 rounded-md bg-primary-500 px-5 text-sm font-medium text-on-primary transition duration-500 ease-out cursor-pointer hover:-translate-y-0.5 hover:bg-primary-700 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Veja + cases ' + chevron + '</a>' +
-      '</li>'
-  }
 
   const lista = document.querySelector('[data-portfolio-lista]')
   const status = document.getElementById('portfolio-home-status')
@@ -284,8 +278,8 @@ import { Button, Container, Heading, Section } from 'ds-grupo-rkb'
         if (status) status.textContent = 'Nenhuma obra publicada ainda.'
         return
       }
-      if (lista) lista.innerHTML = obras.map(itemHTML).join('') + ctaHTML()
       if (status) status.remove()
+      if (lista) lista.insertAdjacentHTML('afterbegin', obras.map(itemHTML).join(''))
       if (document.readyState === 'complete') initPortfolio()
       else window.addEventListener('load', initPortfolio, { once: true })
     })
@@ -308,6 +302,25 @@ import { Button, Container, Heading, Section } from 'ds-grupo-rkb'
 
       <ul data-portfolio-lista class="flex-1 md:justify-center">
         <li id="portfolio-home-status" class="py-12 text-center font-body text-deep/70">Carregando…</li>
+        <!-- 6º card da faixa mobile: saida para /portfolio no estilo
+             FeatureCard WithCTACDeep (tone deep + divider + descricao + CTA).
+             Fora do mobile ele some (display:none no bloco [data-portfolio-cta]
+             la embaixo) — no desktop o CTA e o botao flutuante. -->
+        <li data-portfolio-cta class="items-center justify-center">
+          <FeatureCard tone="deep" class="w-full">
+            <Fragment slot="title">
+              <Heading as="3" size="3xl">Portfólio</Heading>
+            </Fragment>
+            <Fragment slot="description">
+              <p>Projetos selecionados de recuperação, modernização e manutenção de fachadas.</p>
+            </Fragment>
+            <Fragment slot="actions">
+              <Button as="a" href="/portfolio" variant="secondary" aria-label="Veja mais cases">
+                Veja + cases
+              </Button>
+            </Fragment>
+          </FeatureCard>
+        </li>
       </ul>
     </Container>
   </div>
