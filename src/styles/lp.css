@@ -28,19 +28,20 @@ body {
   scroll-padding-left: 0.75rem;
 }
 
-/* Gesto vertical que comeca no slider nao deve rolar a pagina. O slider e um
-   scroller nativo (overflow-x:auto), e por isso o overflow-y computa como auto
-   tambem (ver o comentario acima): o navegador trata o elemento como scroller
-   nos dois eixos e o scroll chain levava a home junto — arrastar para cima/baixo
-   em cima de um card rolava a pagina inteira. touch-action: pan-x declara que
-   daqui so o pan horizontal e permitido, que e o que o snap-x precisa; o
-   componente vertical do gesto e descartado pelo navegador antes de qualquer
-   rolagem. Vale so abaixo de 640px porque e onde o carrossel ocupa a largura da
-   tela; com mouse nao muda nada (touch-action so vale para toque/caneta).
-   Cobre os dois sliders da home (servicos e insights): mesma classe. */
+/* O slider e um scroller nativo (overflow-x:auto) e por isso o overflow-y
+   computa como auto tambem (ver o comentario acima): o navegador trata o
+   elemento como scroller nos dois eixos. touch-action: pan-x pan-y declara que
+   os dois eixos de pan sao permitidos daqui — o componente horizontal move o
+   carrossel com snap-x, e o vertical nao tem overflow para consumir, entao o
+   scroll chain leva o gesto para a pagina (dedo em cima dos cards rola a
+   pagina). O eixo dominante do inicio do gesto decide na pratica; zoom
+   (pinch/double-tap) segue bloqueado dentro da faixa. Vale so abaixo de 640px
+   porque e onde o carrossel ocupa a largura da tela; com mouse nao muda nada
+   (touch-action so vale para toque/caneta). Cobre os dois sliders da home
+   (servicos e insights): mesma classe. */
 @media (width < 40rem) {
   .servicos-slider {
-    touch-action: pan-x;
+    touch-action: pan-x pan-y;
   }
 }
 
