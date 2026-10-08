@@ -101,7 +101,7 @@ export const bannerProps = {
   bannerImage: '/assets/logo-camargo-gallo.png',
   bannerImageAlt: 'Logo Camargo Gallo',
   bannerTitle: 'Pronto para começar?',
-  bannerDescription: 'Recuperação e impermeabilização de fachadas com retorno em até 24h.',
+  bannerDescription: 'Recuperação e impermeabilização de fachadas\ncom retorno em até 24h.',
   companyDescription: 'Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo.',
   copyright: '© 2026 Camargo Gallo Engenharia. Todos os direitos reservados.',
   size: 'lg' as const,

@@ -13,13 +13,13 @@ const color = surfaceColor(surface)
 ---
 
 <FooterBanner
-  class="site-footer"
+  class="site-footer whitespace-pre-line"
   data-surface={surface}
   style={`--page-surface: ${color}`}
   bannerImage="/assets/logo-camargo-gallo.png"
   bannerImageAlt="Logo Camargo Gallo"
   bannerTitle="Pronto para começar?"
-  bannerDescription="Recuperação e impermeabilização de fachadas com retorno em até 24h."
+  bannerDescription={"Recuperação e impermeabilização de fachadas\ncom retorno em até 24h."}
   bannerCta={{ label: 'Solicite um orçamento', href: '/contato' }}
   companyDescription="Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo."
   contacts={footerCompany.contacts}
@@ -30,6 +30,14 @@ const color = surfaceColor(surface)
 />
 
 <LegalDrawer client:load />
+
+<style is:global>
+  @media (min-width: 640px) {
+    .site-footer a[href="/contato"] {
+      margin-left: auto;
+    }
+  }
+</style>
 
 <script is:inline>
   document.addEventListener('click', function (event) {
