@@ -93,48 +93,48 @@ export default {
 
             <!-- Modal -->
             <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div class="relative bg-white rounded-lg max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+                <div class="relative bg-white rounded-lg max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
                     <button type="button" @click="closeModal" :disabled="saving" aria-label="Fechar" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none cursor-pointer disabled:opacity-50">&times;</button>
                     <h2 class="text-2xl font-bold mb-6">{{ editingId ? 'Editar Obra' : 'Nova Obra' }}</h2>
-                    <form @submit.prevent="saveItem" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="col-span-2">
+                        <form @submit.prevent="saveItem" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Título</label>
                                 <input v-model="form.titulo" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
-                            <div>
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Categoria</label>
                                 <input v-model="form.categoria" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
-                            <div>
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Data da Obra</label>
                                 <input v-model="form.data_obra" type="date" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
-                            <div>
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Cidade</label>
                                 <input v-model="form.cidade" type="text" placeholder="Ex.: São Paulo, SP" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
-                            <div>
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Ano</label>
                                 <input v-model="form.ano" type="text" inputmode="numeric" maxlength="4" placeholder="Ex.: 2024" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
-                            <div>
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Status</label>
                                 <select v-model="form.status" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                                     <option value="concluido">Concluído</option>
                                     <option value="em_andamento">Em Andamento</option>
                                 </select>
                             </div>
-                            <div class="col-span-2">
+                            <div class="md:col-span-6">
                                 <label class="block text-sm font-medium text-gray-700">Vídeo do YouTube</label>
                                 <input v-model="form.video_youtube" type="text" placeholder="https://youtu.be/YxwwEqbQLzw?si=5uiP6DduWKKs7Z5g" class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
                                 <p class="mt-0.5 text-xs text-gray-500">Aparece antes da descrição na página da obra. Deixe vazio para não exibir.</p>
                             </div>
-                            <div class="col-span-2">
+                            <div class="md:col-span-6">
                                 <label class="block text-sm font-medium text-gray-700">Descrição</label>
                                 <textarea v-model="form.descricao" rows="4" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
                             </div>
-                            <div class="col-span-2">
+                            <div class="md:col-span-6">
                                 <label class="block text-sm font-medium text-gray-700">Galeria de imagens</label>
                                 <p class="mt-0.5 text-xs text-gray-500">A primeira imagem é a capa usada nos cards. Arraste para reordenar.</p>
 
@@ -213,6 +213,9 @@ export default {
     mounted() {
         this.fetchItems();
     },
+    beforeUnmount() {
+        window.removeEventListener('keydown', this.onEscKey);
+    },
     methods: {
         apiBase() {
             return window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
@@ -275,6 +278,7 @@ export default {
             this.urlDraft = '';
             this.saving = false;
             this.showModal = true;
+            window.addEventListener('keydown', this.onEscKey);
         },
         editItem(item) {
             this.editingId = item.id;
@@ -287,9 +291,16 @@ export default {
             this.urlDraft = '';
             this.saving = false;
             this.showModal = true;
+            window.addEventListener('keydown', this.onEscKey);
         },
         closeModal() {
+            window.removeEventListener('keydown', this.onEscKey);
             this.showModal = false;
+        },
+        onEscKey(event) {
+            if (event.key === 'Escape' && !this.saving) {
+                this.closeModal();
+            }
         },
         onFileChange(event) {
             const files = Array.prototype.slice.call(event.target.files || []);

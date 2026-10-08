@@ -134,6 +134,9 @@ export default {
     mounted() {
         this.fetchItems();
     },
+    beforeUnmount() {
+        window.removeEventListener('keydown', this.onEscKey);
+    },
     methods: {
         async fetchItems() {
             try {
@@ -151,6 +154,7 @@ export default {
             this.uploadError = '';
             this.saving = false;
             this.showModal = true;
+            window.addEventListener('keydown', this.onEscKey);
         },
         editItem(item) {
             this.editingId = item.id;
@@ -159,9 +163,16 @@ export default {
             this.uploadError = '';
             this.saving = false;
             this.showModal = true;
+            window.addEventListener('keydown', this.onEscKey);
         },
         closeModal() {
+            window.removeEventListener('keydown', this.onEscKey);
             this.showModal = false;
+        },
+        onEscKey(event) {
+            if (event.key === 'Escape' && !this.saving) {
+                this.closeModal();
+            }
         },
         onFileChange(event) {
             const file = event.target.files && event.target.files[0];
