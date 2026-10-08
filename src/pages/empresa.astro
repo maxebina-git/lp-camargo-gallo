@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import { Container, Heading, Section } from 'ds-grupo-rkb'
 import SiteHeader from '../components/layout/SiteHeader.astro'
 import SiteFooter from '../components/layout/SiteFooter.astro'
+import AboutSectionStatic from '../components/about/AboutSectionStatic.astro'
 ---
 
 <BaseLayout
@@ -20,6 +21,8 @@ import SiteFooter from '../components/layout/SiteFooter.astro'
       </div>
     </Container>
   </Section>
+
+  <AboutSectionStatic />
 
   <SiteFooter surface="warm" />
 

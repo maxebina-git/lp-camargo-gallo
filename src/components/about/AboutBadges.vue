@@ -6,6 +6,13 @@ import { aboutBadges } from '../../data/about-badges'
 const dur = ['5.5s', '6.4s', '4.8s', '7s', '5.9s']
 const delay = ['-1.2s', '-3.4s', '-2.1s', '-0.4s', '-4.6s']
 
+const props = defineProps({
+  items: {
+    type: Array,
+    default: () => aboutBadges,
+  },
+})
+
 // A fileira e renderizada DUAS vezes: a segunda copia existe so para o marquee
 // do mobile poder fechar o ciclo (ver lp.css). Sem ela sobra um vao vazio a
 // esquerda no fim do trajeto. A copia fica aria-hidden, some a partir de 640px
@@ -13,8 +20,8 @@ const delay = ['-1.2s', '-3.4s', '-2.1s', '-0.4s', '-4.6s']
 // O indice i vai em data-badge-index para o GSAP escalar o desenho do icone
 // pelo card e nao pela posicao na lista (sao 10 icones, nao 5).
 const items = computed(() => [
-  ...aboutBadges.map((b, i) => ({ b, i, clone: false })),
-  ...aboutBadges.map((b, i) => ({ b, i, clone: true })),
+  ...props.items.map((b, i) => ({ b, i, clone: false })),
+  ...props.items.map((b, i) => ({ b, i, clone: true })),
 ])
 
 const cardClass = 'about-badge w-full !p-2 [&>div]:flex-1 [&>div]:justify-center [&_[role=separator]]:mx-auto'
