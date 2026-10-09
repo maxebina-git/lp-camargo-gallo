@@ -1,36 +1,68 @@
 ---
 import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
 import AboutBadges from './AboutBadges.vue'
+import ImageCarousel from './ImageCarousel.astro'
 import { diferenciais } from '../../data/diferenciais'
 ---
 
-<Section tone="warm" size="lg" class="py-16 about-static">
-  <Container size="lg">
-    <div class="grid gap-10 md:grid-cols-2 md:items-center">
-      <div class="flex flex-col gap-4">
-        <Heading as="2" size="display" class="section-title">Sobre a Camargo Gallo Engenharia</Heading>
-        <Heading as="3" size="xl" class="text-deep">Técnica e Trabalho, Renovando Construções</Heading>
+<Section tone="warm" size="lg" class="py-16 about-static about-wrapper">
+  <Container size="lg" class="about-pin-wrapper relative">
+    <div class="grid gap-10 md:grid-cols-[1fr_450px] md:items-center">
+      <div class="flex min-w-0 flex-col gap-4" data-about-texto>
+        <Heading as="2" size="display" class="section-title">Uma história construída entre gerações</Heading>
+        <Heading as="3" size="xl" class="text-deep">Honrar nossas origens para construir o futuro com responsabilidade</Heading>
         <Text tone="secondary">
-          A Camargo Gallo Engenharia é uma empresa especializada na recuperação e tratamento de fachadas
-          prediais, com foco nas anomalias e patologias construtivas e possui elevada capacitação técnica
-          para a correta intervenção e manutenção do seu empreendimento.
+          O nome Camargo Gallo nasce dos sobrenomes dos meus avós. Mais do que uma escolha, representa
+          gratidão, respeito às nossas origens e a consciência de que ninguém constrói uma história sozinho.
+          Minha relação com a engenharia e com as fachadas faz parte de uma trajetória familiar iniciada em 1948,
+          atravessando gerações dedicadas ao trabalho e à construção civil.
+        </Text>
+        <Text tone="secondary">
+          Comecei aos 14 anos, ainda com meu avô presente, e foi principalmente com meu pai e meu tio que
+          aprendi desde cedo o valor do trabalho e da responsabilidade. Deles não recebi um caminho pronto, mas
+          oportunidades reais para aprender, trabalhar e assumir desafios cada vez maiores. Procurei
+          corresponder a essa confiança e, com o passar dos anos, tive a oportunidade de crescer
+          profissionalmente até me tornar sócio.
+        </Text>
+        <Text tone="secondary">
+          A formação em Engenharia Civil e a especialização em Patologia das Construções ampliaram essa
+          experiência. Professores, mestres, amigos e o convívio com meu sogro, um empresário de grande
+          experiência, contribuíram para minha formação técnica e empresarial. Ao mesmo tempo, o casamento e
+          a formação da minha própria família trouxeram novas responsabilidades e um sentido ainda maior de
+          propósito e legado.
+        </Text>
+        <Text tone="secondary">
+          Na engenharia, enxerguei um mercado em transformação: edifícios envelhecendo e construções mais
+          recentes, cada vez mais altas e esbeltas, apresentando novos desafios e manifestações patológicas.
+          Havia espaço para uma engenharia cada vez mais especializada.
+        </Text>
+        <Text tone="secondary">
+          Foi desse encontro entre tradição e conhecimento, experiência e inovação, responsabilidade e visão de
+          futuro que nasceu a Camargo Gallo Engenharia.
+        </Text>
+        <Text tone="secondary">
+          Uma empresa preparada para grandes desafios, com estrutura, equipe e identidade próprias, construída
+          sobre uma convicção: honrar aquilo que recebemos, melhorar o que está em nossas mãos e deixar algo
+          ainda melhor para as próximas gerações.
         </Text>
       </div>
-      <div class="relative aspect-[1201/718] overflow-hidden rounded-xl">
-        <img
-          src="/about-image.png"
-          alt="Equipe da Camargo Gallo executando recuperação de fachada"
-          width="1201"
-          height="718"
-          class="h-full w-full object-cover"
-          decoding="async"
-        />
-      </div>
+      <ImageCarousel
+        images={[
+          { src: '/about-image-1.png', alt: 'Equipe da Camargo Gallo executando recuperação de fachada' },
+          { src: '/about-image-2.png', alt: 'Equipe da Camargo Gallo em obra' },
+          { src: '/about-image-3.png', alt: 'Equipe da Camargo Gallo finalizando projeto' },
+        ]}
+      />
     </div>
 
-    <AboutBadges class="mt-10" />
-
-    <AboutBadges class="mt-6 about-badges--extra" items={diferenciais} />
+    <!-- mt menor no celular: com a imagem presa no topo e os cards logo abaixo, a
+         folga de 80px empurrava a fileira para fora da tela durante o pin. -->
+    <div class="about-badges-clip mt-12 md:mt-20">
+      <div class="about-badges">
+        <AboutBadges clones={false} />
+        <AboutBadges clones={false} items={diferenciais} />
+      </div>
+    </div>
   </Container>
 </Section>
 
@@ -44,36 +76,244 @@ import { diferenciais } from '../../data/diferenciais'
     animation: none;
   }
 
-  /* Segunda fileira de badges (diferenciais): 4 cards, mesma grade.
-     O grid-template-columns de .about-badges em lp.css e 5 colunas — com 4
-     items sobra um buraco a direita. Forcando 4 colunas fica pareado. */
-  .about-static .about-badges--extra .about-badges {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Quantos cards o clip mostra de cada vez. O MESMO numero e lido pelo script
+     (--about-badge-visiveis) para calcular o quanto a fileira anda, entao CSS e
+     JS nao podem divergir: quem decide e esta variavel. */
+  .about-static {
+    --about-badge-visiveis: 5;
   }
 
-  @media (width < 80rem) {
-    .about-static .about-badges--extra .about-badges {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Os 9 cards numa grade unica.
+     Cada AboutBadges abre a SUA propria .about-badges-clip + .about-badges
+     (lp.css), entao sem isto haveria tres grades aninhadas e as larguras
+     divergiriam. display:contents dissolve as duas grades internas: os cards
+     passam a ser itens diretos da grade de fora, e cada grupo mantem o seu
+     par duration/delay de float (que aqui esta desligado). O seletor usa `>`
+     de proposito, para nao atingir o clip externo. */
+  .about-static .about-badges > .about-badges-clip,
+  .about-static .about-badges > .about-badges-clip > .about-badges {
+    display: contents;
+  }
+
+  /* Cada coluna e 1/N do clip descontando os N-1 gaps visiveis, entao N cards
+     preenchem a linha exata e os 9 nao ficam espremidos. Os que sobram
+     transbordam a direita e o clip esconde — e o GSAP que os traz de volta. */
+  .about-static .about-badges-clip {
+    overflow: hidden;
+  }
+
+  .about-static .about-badges {
+    display: grid;
+    grid-template-columns: repeat(
+      9,
+      calc(
+        (
+            100% - (var(--about-badge-visiveis) - 1) * var(--about-badge-gap)
+          ) / var(--about-badge-visiveis)
+      )
+    );
+  }
+
+  /* lp.css troca a grade por marquee (flex + width:max-content + 45vw por card)
+     abaixo de 40rem. Aqui a grade e unica e o corte fica a cargo do GSAP, entao
+     o marquee e desligado: sem ele os cards manteriam a largura da grade. */
+  @media (width < 40rem) {
+    /* No celular entra UM card por vez: 5 de 375px dariam cards de ~75px, uteis
+       a ninguem. O card ocupa a largura toda e o GSAP vai passando um a um. */
+    .about-static {
+      --about-badge-visiveis: 1;
     }
-  }
 
-  /* No mobile o marquee de lp.css pressupoe 5 cards por repetição (10 na
-     trilha); com 4 o ciclo andaria errado. Casa a fileira extra em grid
-     estatica de 2 colunas. */
-  @media (width < 40rem) and (prefers-reduced-motion: no-preference) {
-    .about-static .about-badges--extra .about-badges {
-      display: grid;
+    .about-static .about-badges {
       width: auto;
       animation: none;
     }
 
-    .about-static .about-badges--extra .about-badge {
-      width: auto;
+    .about-static .about-badges .about-badge {
       flex: none;
+      width: auto;
+    }
+  }
+
+  /* Sem movimento nao ha corte por scroll, entao os 4 (ou 8) cards de fora ficariam
+     inalcancaveis para sempre. Sem GSAP eles saem todos, empilhados em 2 colunas. */
+  @media (prefers-reduced-motion: reduce) {
+    .about-static .about-badges-clip {
+      overflow: visible;
     }
 
-    .about-static .about-badges--extra .about-badge--clone {
-      display: none;
+    .about-static .about-badges {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>
+
+<script>
+  // O wrapper e pinado e a timeline tem duas fases com um VAO no meio: o vao e o
+  // atraso pedido — sem ele a fileira de cards passa rapido demais para ser
+  // percebida. No fim da timeline (100%) o card 9 esta inteiro na tela, que e
+  // exatamente onde o pin solta.
+  function initAboutScroll() {
+    const wrapper = document.querySelector('.about-pin-wrapper')
+    if (!wrapper) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const gsap = window.gsap
+    const ScrollTrigger = window.ScrollTrigger
+    if (!gsap || !ScrollTrigger) return
+    gsap.registerPlugin(ScrollTrigger)
+
+    const badgesGrid = wrapper.querySelector('.about-badges')
+    if (!badgesGrid) return
+
+    // Quantos cards o clip mostra de cada vez. O MESMO numero aparece no CSS
+    // (--about-badge-visiveis, que define a largura da coluna) e aqui no calculo
+    // de quanto a fileira anda; ler a variavel mantem os dois lados de acordo.
+    const visiveis = () =>
+      parseInt(getComputedStyle(badgesGrid).getPropertyValue('--about-badge-visiveis'), 10) || 1
+
+    // Distancia do slide: leva o ultimo card ate a posicao do ultimo card que
+    // estava visivel (o que fica na borda direita do clip). Medido por offsetLeft,
+    // como no PortfolioSection — os dois sao irmaos de grade, entao a diferenca
+    // independe de offsetParent e nao acumula arredondamento como offsetWidth.
+    const distancia = () => {
+      const cards = badgesGrid.querySelectorAll('.about-badge')
+      const ultimo = cards[cards.length - 1]
+      const ultimoVisivel = cards[visiveis() - 1]
+      if (!ultimo || !ultimoVisivel) return 0
+      return Math.max(0, ultimo.offsetLeft - ultimoVisivel.offsetLeft)
+    }
+
+    // Ritmo do ramo MOBILE: 1 = o scroll percorre exatamente o percurso da
+    // fileira. La nao ha fase de imagem nem vao (ver o ramo mobile abaixo), a
+    // timeline e um tween so, entao o comprimento do pin e o unico ajuste
+    // disponivel. Acima de 1 a fileira anda menos que o dedo e o scroll parece
+    // escorregar; pagava com 1834px de rolagem morta no celular.
+    // No desktop as fases estao em px (PX_* no ramo de cima).
+    const ritmoMobile = 1
+
+    const mm = gsap.matchMedia()
+
+    // Desktop: a imagem desce ate alinhar com o ultimo paragrafo e so entao a
+    // fileira de cards entra. O trigger e o wrapper inteiro, entao as duas fases
+    // sao o mesmo continuum de scroll.
+    mm.add('(min-width: 40rem)', () => {
+      const carousel = wrapper.querySelector('.carousel-container')
+      const paragrafo = wrapper.querySelector('[data-about-texto] p:last-of-type')
+      if (!carousel || !paragrafo) return
+
+      // O rect do carousel carregaria o y que o proprio scrub aplicou, e a medida
+      // sairia contaminada a cada refresh. Zerando o y antes de ler, a diferenca
+      // sai da posicao natural do layout. Os dois rects sao medidos no mesmo
+      // frame, entao qualquer transform de ancestral comum (o pin) se cancela.
+      const y = () => {
+        gsap.set(carousel, { y: 0 })
+        return paragrafo.getBoundingClientRect().bottom - carousel.getBoundingClientRect().bottom
+      }
+
+      // As quatro fases em px de scroll, usadas direto como unidades da
+      // timeline. A timeline e normalizada no trecho do pin, entao 1 unidade
+      // aqui vale exatamente 1px de rolagem — e por isso que as duracoes sao os
+      // proprios px, sem conversao. Em unidades abstratas (o 1 / 0.9 / 1 antigo)
+      // mudar o total da timeline mexia no tamanho do pin E na velocidade dos
+      // cards de uma vez, e os dois ficavam impossiveis de prever separadamente.
+      const PX_IMAGEM = 351 // reveal da imagem (ela desce ~119px)
+      const PX_PAUSA = 316 // vao antes da fileira comecar — intencional
+      const PX_CARDS = 351 // 1017px de percurso em 351px = 2,9 px/px
+      const PX_SAIDA = 316 // segura o pin o mesmo tempo que o vao de entrada,
+                            // para a composicao final ficar parada e legivel
+                            // antes de o pin soltar
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: wrapper,
+          start: 'top top',
+          // Soma explicita das quatro fases, e nao 'bottom bottom': o wrapper e
+          // mais alto que a viewport, entao a borda de baixo nunca alcanca a da
+          // tela e um end que nao chega faz o pin nao engatar.
+          end: () => '+=' + (PX_IMAGEM + PX_PAUSA + PX_CARDS + PX_SAIDA),
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          scrub: 0.4,
+          invalidateOnRefresh: true,
+        },
+      })
+
+      tl.to(carousel, { y, ease: 'none', duration: PX_IMAGEM }, 0)
+
+      // Três anéis entram junto com a imagem, em 3 blocos iguais de 117px.
+      // Alvo é o overlay, nunca o container: o transform do container pertence
+      // ao scrub do y acima, e o GSAP escreve a string transform inteira, então
+      // um x aqui apagaria o y. O overlay não tem transform nenhum.
+      // Cada anel cresce do zero até a nominal; o de dentro é sempre o mais
+      // grosso (24px), mas só 8px ficam visíveis porque os de fora estão por cima.
+      const anel = wrapper.querySelector('.carousel-frames')
+      if (anel) {
+        const BLOCO = PX_IMAGEM / 3
+        tl.fromTo(anel, { '--anel-1': '0px' }, { '--anel-1': '8px', ease: 'none', duration: BLOCO }, 0)
+        tl.fromTo(anel, { '--anel-2': '0px' }, { '--anel-2': '16px', ease: 'none', duration: BLOCO }, BLOCO)
+        tl.fromTo(anel, { '--anel-3': '0px' }, { '--anel-3': '24px', ease: 'none', duration: BLOCO }, BLOCO * 2)
+      }
+      tl.to(
+        badgesGrid,
+        { x: () => -distancia(), ease: 'none', duration: PX_CARDS },
+        PX_IMAGEM + PX_PAUSA
+      )
+      // Tween vazio: nao mexe em nada, so estica a timeline ate o fim do trecho.
+      // Sem ele o pin soltaria em cima do ultimo card, engolindo a saida.
+      tl.to({}, { duration: PX_SAIDA }, PX_IMAGEM + PX_PAUSA + PX_CARDS)
+    })
+
+    // Mobile: mesma coisa que o desktop — a fileira de cards vai da direita para a
+    // esquerda e o pin solta no card 9. A diferenca e ONDE o pin engata: aqui ele
+    // espera a imagem encostar no topo da tela, e nao o wrapper inteiro. No
+    // celular o texto vem antes da imagem e ja foi lido nessa altura; pinar desde
+    // o topo do wrapper deixaria o texto congelado e grande parte dele fora de
+    // alcance. Como o wrapper e relative (ver markup), carousel.offsetTop e
+    // exatamente a distancia do wrapper ate o topo da imagem, entao
+    // "top top-=offset" marca o instante em que a imagem chega ao topo da tela.
+    // A troca das 3 imagens continua no CSS e nao depende de JS.
+    mm.add('(max-width: 39.99rem)', () => {
+      const carousel = wrapper.querySelector('.carousel-container')
+      if (!carousel) return
+
+      // Folga do header fixo. Com o wrapper pinado em position:fixed o topo dele
+    // vai para y=0 da tela e a imagem ficaria ATRAS da barra (que e fixed
+    // top-3 h-16, cobrindo de 12px a 76px). Medir a barra em vez de cravar 76px
+    // acompanha o header se ele mudar de tamanho ou de estado ao rolar.
+    const header = document.querySelector('.site-header')
+    const folga = () => header?.getBoundingClientRect().bottom ?? 0
+
+    const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: wrapper,
+          // top-=offset marca a imagem no topo da tela; descontar a folga do
+          // header adia o pin em exatamente essa altura, deixando a imagem comecar
+          // logo abaixo da barra em vez de sob ela.
+          start: () => 'top top-=' + Math.max(0, carousel.offsetTop - folga()),
+          end: () => '+=' + Math.max(1, distancia() * ritmoMobile),
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          scrub: 0.4,
+          invalidateOnRefresh: true,
+        },
+      })
+
+      // Pequena entrada antes do movimento: com o pin ja engatado e a imagem
+      // parada no topo, entrar em movimento imediato leria como solavanco.
+      tl.to(badgesGrid, { x: () => -distancia(), ease: 'none', duration: 1 }, 0.2)
+    })
+
+    // As fontes mudam a altura do texto, entao o refresh depois delas assentadas
+    // evita que a distancia e o y do carousel fiquem medidos com a fallback.
+    if (document.fonts?.ready) document.fonts.ready.then(() => ScrollTrigger.refresh())
+  }
+
+  if (document.readyState === 'complete') {
+    initAboutScroll()
+  } else {
+    window.addEventListener('load', initAboutScroll, { once: true })
+  }
+</script>

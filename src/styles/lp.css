@@ -1,5 +1,42 @@
+/* Rodape no limite de baixo e canvas na cor da pagina.
+
+   min-height + flex column no body e margin-top:auto no footer e o sticky
+   footer: quando o conteudo e menor que a viewport sobrava canvas embaixo do
+   rodape (o scrollHeight do html devolve max(clientHeight, conteudo), e essa
+   sobra e pintada pelo fundo do body). O display:flex e o que da efeito ao
+   margin-top:auto — em block o auto-margin nao empurra nada.
+
+   O fundo do body espelha o data-surface que o SiteFooter ja publica em todas
+   as paginas (SiteFooter.astro:17), via :has() em vez de um prop novo no
+   BaseLayout: as duas pontas leem a mesma fonte, entao nao ha como
+   dessincronizar quando uma pagina troca o surface. A especificidade (0,1,1)
+   contra o (0,0,1) do body{background} do ds-grupo-rkb faz valer sem depender
+   da ordem de import. */
 body {
   overflow-x: clip;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+body > footer.site-footer {
+  margin-top: auto;
+}
+
+body:has(> footer[data-surface="warm"]) {
+  background-color: var(--color-surface-warm);
+}
+
+body:has(> footer[data-surface="brand"]) {
+  background-color: var(--color-surface-brand);
+}
+
+body:has(> footer[data-surface="surface-alt"]) {
+  background-color: var(--color-surface-alt);
+}
+
+body:has(> footer[data-surface="surface"]) {
+  background-color: var(--color-surface);
 }
 
 #servicos,

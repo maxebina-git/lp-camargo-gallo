@@ -1,0 +1,102 @@
+---
+interface Props {
+  images: { src: string; alt: string }[]
+}
+const { images } = Astro.props
+---
+
+<div class="carousel-container">
+  {images.map((img, i) => (
+    <img
+      src={img.src}
+      alt={img.alt}
+      class="carousel-img"
+      style={`animation-delay: ${i * 4}s`}
+      decoding="async"
+    />
+  ))}
+
+  <!-- Os anéis vivem aqui e não no container: o inset shadow do container pinta
+       ATRÁS das <img> (absolutas e opacas) e some. Este elemento vem depois
+       delas no DOM, então pinta por cima. aria-hidden: é decoração. -->
+  <div class="carousel-frames" aria-hidden="true"></div>
+</div>
+
+<style>
+  .carousel-container {
+    position: relative;
+    /* A proporcao e a mesma dos 450x433 que a coluna do desktop ja reservava
+       (450/433 = 865/832), entao no desktop o resultado e identico ao anterior —
+       so que a largura agora acompanha a coluna em vez de empurrar a tela. */
+    width: 100%;
+    aspect-ratio: 865 / 832;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 8px solid var(--color-material-amber-700);
+  }
+
+  /* No celular o card tem ~140px: a borda de 8px comeria 11% dele e o raio de
+     12px ficava desproporcional. */
+  @media (width < 40rem) {
+    .carousel-container {
+      border-width: 4px;
+      border-radius: 0.5rem;
+    }
+  }
+
+  .carousel-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: carousel 12s infinite;
+  }
+
+  /* Moldura interna que o GSAP engrossa durante o pin (ver
+     AboutSectionStatic.astro, ramo desktop). Três anéis que crescem de 0 até a
+     espessura nominal, um de cada vez. */
+  .carousel-frames {
+    position: absolute;
+    /* inset:0 resolve contra a padding box do container — medido em 434x417 no
+       desktop, exatamente a área da foto. */
+    inset: 0;
+    pointer-events: none;
+    /* 0.25rem = o raio que sobra dentro do 0.75rem do container depois da borda
+       de 8px (12 - 8 = 4). No mobile o mesmo 4px continua correto (8 - 4). */
+    border-radius: 0.25rem;
+    --anel-1: 0px;
+    --anel-2: 0px;
+    --anel-3: 0px;
+    /* A ordem importa: o primeiro da lista pinta por cima. Assim 600 fica mais
+       fora, 500 no meio e 100 mais dentro, e cada anel cresce só o seu spread
+       — o "empurrar os anteriores pra dentro" é a cascata fazendo sozinha. */
+    box-shadow:
+      inset 0 0 0 var(--anel-1) var(--color-material-amber-600),
+      inset 0 0 0 var(--anel-2) var(--color-material-amber-500),
+      inset 0 0 0 var(--anel-3) var(--color-material-amber-100);
+  }
+
+  @keyframes carousel {
+    0% {
+      opacity: 0;
+    }
+    8%, 33% {
+      opacity: 1;
+    }
+    42%, 100% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-img {
+      animation: none;
+      opacity: 1;
+    }
+    .carousel-img + .carousel-img {
+      display: none;
+    }
+  }
+</style>
