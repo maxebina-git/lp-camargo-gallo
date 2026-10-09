@@ -1,0 +1,827 @@
+---
+import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
+import { servicos } from '../../data/servicos'
+
+// Todo o conteudo do servico vem da fonte compartilhada, que tambem alimenta o
+// carrossel da home. A descricao fica no proprio item para nao depender da ordem
+// de um array paralelo.
+const itens = servicos
+---
+
+<script>
+  // Section pinada de altura de tela com 11 cards. O window.gsap/ScrollTrigger
+  // sao definidos pelo BaseLayout (modulos bundlados), entao init so roda depois
+  // do load para nao depender da ordem de execucao.
+  let inicializado = false
+
+  function initServicos() {
+    if (inicializado) return
+    const raiz = document.querySelector('[data-servicos-raiz]')
+    if (!raiz) return
+
+    const movimentoReduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const lista = raiz.querySelector('[data-servicos-lista]')
+    const cards = lista ? Array.from(lista.querySelectorAll('[data-col]')) : []
+    if (!lista || cards.length < 2) return
+
+    const indicadores = Array.from(raiz.querySelectorAll('[data-servicos-indice]'))
+    const links = indicadores.map((indicador) => indicador.querySelector('[data-servicos-indice-link]'))
+    const marcadores = indicadores.map((indicador) => indicador.querySelector('[data-servicos-indice-marcador]'))
+
+    // O destino de cada controle e o fim da cena correspondente: assim o card
+    // selecionado chega completamente assentado, em vez de parar no inicio do
+    // wipe. O primeiro card ja esta ativo no inicio do pin.
+    const SEG = window.innerHeight * 0.7
+    const PAUSA = window.innerHeight * 0.3
+    const TROCAS = cards.length - 1
+    const duracaoTotal = PAUSA + TROCAS * SEG + PAUSA
+    let scrollTriggerAtivo = null
+
+    const indiceDoHash = () => {
+      const valor = window.location.hash.slice(1)
+      if (!valor) return -1
+
+      let hash
+      try {
+        hash = decodeURIComponent(valor)
+      } catch {
+        return -1
+      }
+
+      return cards.findIndex((card) => card.id === hash)
+    }
+
+    const irParaServico = (indice, comportamento = 'smooth') => {
+      if (indice < 0 || indice >= cards.length) return
+
+      if (movimentoReduzido) {
+        cards[indice]?.scrollIntoView({ behavior: 'auto', block: 'start' })
+        return
+      }
+
+      const trigger = scrollTriggerAtivo
+      if (!trigger || !Number.isFinite(trigger.start) || !Number.isFinite(trigger.end)) return
+
+      const tempoAlvo = indice === 0 ? 0 : PAUSA + indice * SEG
+      const progressoAlvo = Math.min(1, Math.max(0, tempoAlvo / duracaoTotal))
+      const destino = trigger.start + (trigger.end - trigger.start) * progressoAlvo
+      window.scrollTo({ top: destino, behavior: comportamento })
+    }
+
+    const posicionarHash = (comportamento = 'auto') => {
+      const indice = indiceDoHash()
+      if (indice >= 0) irParaServico(indice, comportamento)
+    }
+
+    links.forEach((link, indice) => {
+      link?.addEventListener('click', (event) => {
+        // Modificadores continuam permitindo abrir o destino em outra aba ou
+        // janela; o controle da timeline vale para o clique normal.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+        event.preventDefault()
+        const destino = link.getAttribute('href')
+        if (destino) {
+          const url = new URL(destino, window.location.href)
+          window.history.replaceState(null, '', url.pathname + url.search + url.hash)
+        }
+        irParaServico(indice)
+      })
+    })
+
+    window.addEventListener('hashchange', () => posicionarHash())
+
+    inicializado = true
+    if (movimentoReduzido) {
+      requestAnimationFrame(() => posicionarHash())
+      return
+    }
+
+    const gsap = window.gsap
+    const ScrollTrigger = window.ScrollTrigger
+    if (!gsap || !ScrollTrigger) return
+    gsap.registerPlugin(ScrollTrigger)
+
+    const total = cards.length
+    const corAtiva = getComputedStyle(raiz).getPropertyValue('--color-primary-500').trim()
+    const corInativa = getComputedStyle(raiz).getPropertyValue('--color-text-secondary').trim()
+
+    // O primeiro item ja nasce ativo no HTML para o fallback sem JS. A timeline
+    // assume a mesma geometria visual e anima os estados seguintes junto com os
+    // cards, em vez de criar um segundo ScrollTrigger apenas para os numeros.
+    const estadoAtivo = { opacity: 1, scale: 1.12, color: corAtiva }
+    const estadoInativo = { opacity: 0.48, scale: 0.9, color: corInativa }
+    const marcadorAtivo = { opacity: 1, scaleX: 1, backgroundColor: corAtiva }
+    const marcadorInativo = { opacity: 0.7, scaleX: 0.65, backgroundColor: corInativa }
+
+    gsap.set(indicadores, estadoInativo)
+    gsap.set(marcadores, marcadorInativo)
+    if (indicadores[0]) gsap.set(indicadores[0], estadoAtivo)
+    if (marcadores[0]) gsap.set(marcadores[0], marcadorAtivo)
+
+    let indiceAriaAtual = 0
+    const atualizarIndiceAcessivel = (tempo, duracaoSegmento) => {
+      // Durante a pausa inicial o primeiro card continua sendo o ativo. A troca
+      // semantica acontece no meio de cada segmento, quando o card novo ja esta
+      // suficientemente revelado; a animacao visual do GSAP comeca no inicio
+      // do mesmo segmento e, portanto, nao existe um salto de estado.
+      const tempoDeTrocas = Math.max(0, tempo - PAUSA)
+      const indice = Math.min(TROCAS, Math.max(0, Math.round(tempoDeTrocas / duracaoSegmento)))
+      if (indice === indiceAriaAtual) return
+
+      indicadores.forEach((indicador, i) => {
+        if (i === indice) indicador.setAttribute('aria-current', 'true')
+        else indicador.removeAttribute('aria-current')
+      })
+      indiceAriaAtual = indice
+    }
+
+    const animarIndicador = (timeline, indice, inicio, duracaoSegmento) => {
+      const anterior = indicadores[indice - 1]
+      const atual = indicadores[indice]
+      const marcadorAnterior = marcadores[indice - 1]
+      const marcadorAtual = marcadores[indice]
+      if (!anterior || !atual || !marcadorAnterior || !marcadorAtual) return
+
+      timeline.to(anterior, { ...estadoInativo, ease: 'none', duration: duracaoSegmento }, inicio)
+      timeline.to(marcadorAnterior, { ...marcadorInativo, ease: 'none', duration: duracaoSegmento }, inicio)
+      timeline.to(atual, { ...estadoAtivo, ease: 'none', duration: duracaoSegmento }, inicio)
+      timeline.to(marcadorAtual, { ...marcadorAtivo, ease: 'none', duration: duracaoSegmento }, inicio)
+    }
+
+    const pin = { pin: true, pinSpacing: true, anticipatePin: 1, scrub: 0.4, invalidateOnRefresh: true }
+
+    const mm = gsap.matchMedia()
+
+    // Desktop: pilha vertical. O card ativo fica PARADO num unico lugar e sobe
+    // para 100% quando vira o ativo; cada card que ja saiu sobe um pouquinho e
+    // fica ATRAS do ativo, pintando so a fatia de 1% do TOPO dele; os que ainda
+    // nao passaram ficam abaixo, pintando a fatia de 1% da base.
+    mm.add('(min-width: 48rem)', () => {
+      // A altura do card vem do LAYOUT resolvido (offsetHeight), e nao da custom
+      // property: getComputedStyle().getPropertyValue('--servico-altura')
+      // devolve o token cru "28rem", e o parseFloat disso daria 28 — o
+      // deslocamento saia -27,7px em vez de -443,5px e a pilha nunca andava.
+      // offsetHeight e a caixa de layout, que o transform nao altera — logo da a
+      // altura cheia mesmo nos cards ja escalados. O peek sai dela em vez de
+      // repetir 4.48px aqui, para os dois lados acompanharem se --altura mudar.
+      const H = () => cards[0].offsetHeight || 448
+      const peek = () => H() / 100
+
+      // O GSAP assume transform e escala dos cards aqui, em vez de anim so o y
+      // e deixar a escala no CSS: o GSAP escreve a string transform inteira, e
+      // um y sozinho apagaria o scale do CSS. O CSS continua com a escala como
+      // fallback estatico para sem JS / reduced-motion — o set inline abaixo
+      // sobrescreve exatamente com os mesmos valores.
+      // Z do comeco: card 1 ativo na frente (100), os outros esperando, atras
+      // de tudo (0). Os que ja sairam recebem 10 + indice no fim do segmento
+      // deles — assim o mais recente sai fica a frente dos antigos, que e o que
+      // impede o corpo de um card de cobrir a fatia do vizinho de cima.
+      // Z-INDEX por posicao na piramide, e nao fixo. Sem isso os cards que
+      // esperam ficam todos em 0 e, no empate, vale a ordem do DOM: o card 11
+      // pintaria por cima dos outros 9 e a escada de baixo viraria uma unica
+      // faixa de 32px em vez de 10 fatias de 4,48px.
+      //   apice          100  na frente de tudo
+      //   acima, N degraus  10 + N  (o mais recente, N=1, na frente dos antigos)
+      //   abaixo, N degraus  10 - N  (o mais perto do apice, N=1, na frente)
+      // Os dois lados usam 10 +- N entao nenhum card de cima invade o espaco do
+      // de baixo: o menor valor acima e o maior abaixo sao ambos 10.
+      const zDaPosicao = (cardIdx, apiceIdx) =>
+        apiceIdx === cardIdx ? 100 : 10 + Math.abs(apiceIdx - cardIdx) * (cardIdx < apiceIdx ? 1 : -1)
+
+      cards.forEach((card, i) => {
+        gsap.set(card, {
+          y: 0,
+          scale: 1 - i * 0.01,
+          zIndex: zDaPosicao(i, 0),
+          transformOrigin: '50% 100%',
+          // Declarado no JS tambem (e nao so no CSS) porque o tween de clip-path
+          // interpola A PARTIR do valor atual: sem um ponto de partida explicito
+          // aqui, a interpolacao sairia de "none" e o GSAP nao conseguiria
+          // passar de uma funcao para outra.
+          clipPath: 'inset(0% 0% 0% 0%)',
+        })
+      })
+      gsap.set(lista, { y: 0 })
+
+      const tl = gsap.timeline({
+        onUpdate() {
+          atualizarIndiceAcessivel(this.time(), SEG)
+        },
+        scrollTrigger: {
+          ...pin,
+          trigger: raiz,
+          start: 'top top',
+          end: () => '+=' + duracaoTotal,
+        },
+      })
+      scrollTriggerAtivo = tl.scrollTrigger
+
+      // Pausa inicial: sem ela a rolagem comecaria a empurrar o card 1 antes de
+      // o usuario conseguir ler.
+      tl.to({}, { duration: PAUSA }, 0)
+
+      cards.forEach((card, i) => {
+        if (i === 0) return
+        const t0 = PAUSA + (i - 1) * SEG
+
+        animarIndicador(tl, i, t0, SEG)
+
+        // O CONJUNTO desce de um peek por segmento. E o que trava o card ativo
+        // no mesmo lugar para sempre: o top estatico dele ja carrega a folga
+        // (--servico-folga) mais (i-1)*peek, e transladar a <ol> em -(i*peek)
+        // deixa o resultado em folga, independente de i. Sem esse tween o card
+        // ativo andaria 4,48px por troca, porque ele ficaria colado na base da
+        // escada de fatias — que e justamente o que cresce a cada troca.
+        tl.to(lista, { y: -i * peek(), ease: 'none', duration: SEG }, t0)
+
+        // O CLIP vai sozinho. Ele so pode terminar no fim do segmento em que o
+        // card sai, enquanto escala e y continuam andando nos segmentos
+        // seguintes — no tween unico de antes os tres dividiam o mesmo prazo e
+        // o recorte fechava com o card ainda mudando de escala.
+        //
+        // O 99% vai no BOTTOM de proposito: inset() e top right bottom left,
+        // entao inset(99% 0 0 0) recortaria a parte de CIMA e deixaria a fatia
+        // no pe — que e o card sendo comido de cima para baixo, com a fatia
+        // final escondida uns 12px abaixo da base do apice. O que o desenho
+        // pede e o contrario: a fatia de cima e o TOPO do card, com os cantos
+        // de cima, entao o recorte tem de comer de baixo para cima.
+        tl.fromTo(
+          cards[i - 1],
+          { clipPath: 'inset(0% 0% 0% 0%)' },
+          { clipPath: 'inset(0% 0% 99% 0%)', ease: 'none', duration: SEG },
+          t0
+        )
+
+        // Escala e y por POSICAO na piramide: N = quantos degraus o card esta
+        // do apice. Vale nos dois sentidos — acima encolhe 1% por segmento,
+        // abaixo alarga 1% por segmento (o card 11 cresce de 90% ate 99% em vez
+        // de dar um salto de 90% para 100%).
+        //
+        // O alvo antigo era scale: 1 - (i-1)*0.01, identico ao que o gsap.set ja
+        // tinha aplicado (1 - k*0.01) — entao a escala nunca mudava e o y
+        // congelava na saida, com o card 1 preso em 100%, mais largo que o
+        // apice.
+        //
+        // O y e o que compensa a escala para a borda de cima cair na fatia: o
+        // topo de um card acima e folga + k*peek + 0,01*H*N + y - i*peek, que
+        // com y = -0,01*H*N fecha em folga - N*peek (um degrau por card).
+        // Abaixo o y e 0 e a base fica em folga + H + (k-i)*peek, tambem um
+        // degrau — e e por isso que a pilha ladrilha em 44,80px nas 12 cenas.
+        for (let k = 0; k < total; k++) {
+          if (k === i) continue // o apice tem o fromTo dele, ate 100%
+          const N = i - k
+          tl.to(
+            cards[k],
+            {
+              scale: 1 - Math.abs(N) * 0.01,
+              y: N > 0 ? -0.01 * H() * N : 0,
+              ease: 'none',
+              duration: SEG,
+            },
+            t0
+          )
+          // O z tambem e reposicionado a cada segmento, porque N cresce para os
+          // cards de cima e encolhe para os de baixo conforme o apice avanca.
+          tl.set(cards[k], { zIndex: zDaPosicao(k, i) }, t0 + SEG)
+        }
+
+        // O card de tras assume a cena esticando da escala da pilha ate 100%.
+        tl.fromTo(
+          card,
+          { scale: 1 - i * 0.01 },
+          { scale: 1, ease: 'none', duration: SEG },
+          t0
+        )
+
+        // A troca de z do apice e no FIM do segmento, nunca no meio: durante o
+        // segmento ele fica NA FRENTE, encolhendo enquanto o corpo e comido de
+        // baixo para cima, e o card novo aparece por baixo dele — um wipe
+        // continuo. Trocar no meio daria um baque, porque o card que sai ainda
+        // pinta ~200px. No fim as caixas ja sao disjuntas (o que saiu pinta so
+        // a fatia de 4,48px acima), entao nenhum pixel muda e o set some.
+        tl.set(card, { zIndex: 100 }, t0 + SEG)
+      })
+
+      // Pausa final: segura o card 11 esticado o mesmo tempo que a pausa de
+      // entrada, para a ultima cena ficar parada e legivel antes de o pin soltar.
+      tl.to({}, { duration: PAUSA }, PAUSA + TROCAS * SEG)
+    })
+
+    // Mobile: slider lateral. O card ativo ocupa a tela e os outros ficam a
+    // direita, escondidos pelo overflow do wrapper; a rolagem vertical puxa a
+    // trilha em x. A lista e transladada em bloco (um tween so) em vez de cada
+    // card ganhar o proprio x — 11 tweens para expresses equivalente.
+    mm.add('(max-width: 47.99rem)', () => {
+      // Distancia medida por offsetLeft, como no PortfolioSection: medindo a
+      // propria lista daria sempre 0, porque ela e o container que rola, nao o
+      // que desloca.
+      const distancia = () => {
+        const ultimo = cards[cards.length - 1]
+        const primeiro = cards[0]
+        if (!ultimo || !primeiro) return 0
+        return Math.max(0, ultimo.offsetLeft - primeiro.offsetLeft)
+      }
+
+      const tl = gsap.timeline({
+        onUpdate() {
+          atualizarIndiceAcessivel(this.time(), SEG)
+        },
+        scrollTrigger: {
+          ...pin,
+          trigger: raiz,
+          start: 'top top',
+          end: () => '+=' + duracaoTotal,
+        },
+      })
+      scrollTriggerAtivo = tl.scrollTrigger
+
+      tl.to({}, { duration: PAUSA }, 0)
+      tl.to(lista, { x: () => -distancia(), ease: 'none', duration: TROCAS * SEG }, PAUSA)
+      tl.to({}, { duration: PAUSA }, PAUSA + TROCAS * SEG)
+      for (let i = 1; i < total; i++) {
+        animarIndicador(tl, i, PAUSA + (i - 1) * SEG, SEG)
+      }
+    })
+
+    // As fontes mudam a altura dos titulos e portanto a das colunas; o refresh
+    // depois delas assentadas evita que o pin meca o layout com a fallback. O
+    // hash tambem so e aplicado depois do refresh: antes disso start/end ainda
+    // podem refletir a geometria com a fonte de fallback e levar ao card errado.
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        ScrollTrigger.refresh()
+        posicionarHash()
+      })
+    } else {
+      ScrollTrigger.refresh()
+      posicionarHash()
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    initServicos()
+  } else {
+    window.addEventListener('load', initServicos, { once: true })
+  }
+</script>
+
+<Section tone="surface-alt" size="none" id="servicos" class="servicos-section">
+  <!-- Wrapper separado da lista porque cada layout corta em um elemento
+       diferente: no desktop quem corta a pilha e a propria <ol> (o card 1 sobe
+       para top negativo e precisa ser aparado nela), e no mobile quem corta a
+       trilha e o wrapper — se o overflow ficasse na <ol>, o recorte andaria
+       junto com a trilha em x e nada seria cortado. E e o alvo do pin. -->
+  <div data-servicos-raiz class="servicos-raiz">
+    <Container size="lg" class="servicos-conteudo">
+      <div class="servicos-cabecalho">
+        <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-border"></div>
+        <!-- Esta e a unica section da pagina, entao o rotulo dela e o h1. Os 11
+             titulos de card sao h2 para nao pular um nivel. -->
+        <Heading as="1" size="display" class="section-title">Serviços</Heading>
+
+        <ol data-servicos-indice-lista class="servicos-indice" aria-label="Índice dos serviços">
+          {itens.map((s, i) => (
+            <li
+              data-servicos-indice
+              class="servicos-indice-item"
+              aria-label={`Serviço ${String(i + 1).padStart(2, '0')}`}
+              aria-current={i === 0 ? 'true' : undefined}
+            >
+              <a
+                href={s.href}
+                data-servicos-indice-link
+                class="servicos-indice-link"
+                aria-label={`Ir para o serviço ${String(i + 1).padStart(2, '0')}`}
+              >
+                <span class="servicos-indice-numero">{String(i + 1).padStart(2, '0')}</span>
+                <span class="servicos-indice-marcador" aria-hidden="true">
+                  <span data-servicos-indice-marcador class="servicos-indice-marcador-linha"></span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <!-- <ol> e nao <ul> porque a ordem faz parte do conteudo (a lista segue a
+           ordem comercial de src/data/servicos.ts). O numero desenhado no card e
+           aria-hidden: quem le por leitor de tela ja recebe a ordem pela
+           semantica da lista, entao o numero desenhado e aria-hidden para nao
+           duplicar a ordem.
+           --i em cada <li> e o indice da pilha: e o que posiciona o card (top) e
+           define a ordem de pintura (z-index). Vai no style inline porque e um
+           valor por item — uma classe utilitaria exigiria 11 utilidades que o
+           Tailwind nem geraria. -->
+        <ol data-servicos-lista class="servicos-lista">
+          {itens.map((s, i) => (
+          <li id={s.slug} data-col class="servico-card" style={`--i:${i}`}>
+            <div class="servico-card-texto">
+              <span class="servico-card-indice" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <Heading as="2" size="xl" class="servico-card-titulo">{s.titulo}</Heading>
+              <Text as="p" size="sm" tone="secondary" class="servico-card-descricao">{s.descricao}</Text>
+            </div>
+            <!-- A imagem e decorativa: o que ela mostra esta dito no titulo e na
+                 descricao logo ao lado, entao alt vazio (e nao o titulo repetido).
+                 absolute + inset 0 em vez de h-full porque a altura da midia vem
+                 do grid ou do min-height, e nenhum dos dois da um valor
+                 definitivo para o height:100% da img resolver. -->
+            <div class="servico-card-midia">
+              <img
+                src={s.imagem}
+                alt=""
+                loading={i < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Container>
+  </div>
+</Section>
+
+<style is:global>
+  /* Padding vertical no proprio style, e nao via class no Section: o size="none"
+     acima e o que permite isto. A utility do app perderia para o py-16 do DS
+     (size default) porque utilities de igual especificidade empatam e quem vem
+     depois no bundle vence — o DS embute o proprio Tailwind. */
+  .servicos-section {
+    padding-block: 3rem;
+  }
+
+  .servicos-raiz {
+    display: flex;
+    align-items: center;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .servicos-conteudo {
+    width: 100%;
+  }
+
+  .servicos-cabecalho {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  /* Indice visual dos 11 servicos. Ele usa 75% do container, a mesma proporcao
+     do separador usado em outras secoes da LP, e cada item ocupa uma coluna de
+     largura igual para o numero ativo permanecer sempre sobre o mesmo card. */
+  .servicos-indice {
+    display: grid;
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    align-items: start;
+    width: 75%;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .servicos-indice-item {
+    display: flex;
+    min-width: 0;
+    color: var(--color-text-secondary);
+    opacity: 0.48;
+    transform: scale(0.9);
+    transform-origin: center bottom;
+    will-change: transform, opacity, color;
+  }
+
+  .servicos-indice-link {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .servicos-indice-link:focus-visible {
+    border-radius: 0.25rem;
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 0.35rem;
+  }
+
+  .servicos-indice-numero {
+    font-family: var(--font-display);
+    font-size: clamp(0.75rem, 1.5vw, 1.125rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.06em;
+  }
+
+  .servicos-indice-marcador {
+    display: block;
+    width: 0.75rem;
+    height: 2px;
+    border-radius: 999px;
+    transform-origin: center;
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .servicos-indice-marcador-linha {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--color-border);
+    opacity: 0.7;
+    transform: scaleX(0.65);
+    transform-origin: center;
+    will-change: transform, opacity, background-color;
+  }
+
+  /* O estado repouso e horizontal. O hover vale para itens inativos e gira a
+     linha para a vertical; o ativo tambem permanece vertical para continuar
+     funcionando como a leitura persistente do estado selecionado. */
+  .servicos-indice-item:not([aria-current='true']):hover .servicos-indice-marcador,
+  .servicos-indice-item:not([aria-current='true']):focus-within .servicos-indice-marcador {
+    transform: rotate(90deg);
+  }
+
+  /* Estado inicial e fallback quando o GSAP nao e executado. */
+  .servicos-indice-item[aria-current='true'] {
+    color: var(--color-primary-500);
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  .servicos-indice-item[aria-current='true'] .servicos-indice-marcador-linha {
+    background-color: var(--color-primary-500);
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .servicos-indice-item[aria-current='true'] .servicos-indice-marcador {
+    transform: rotate(90deg);
+  }
+
+  /* Pilha de 11 cards sobrepostos: cada um absoluto, encostado no de cima com
+     1% da propria altura aparecendo embaixo. O card 1 cobre tudo; abaixo dele
+     aparece uma fatia de 1% do card 2, abaixo dessa, 1% do card 3, e assim ate
+     o 11.
+     O peek e 1% do CARD (--altura/100) e nao 1% do wrapper, de proposito: um
+     top em % resolve contra a altura do containing block, que aqui seria o
+     wrapper — e o wrapper e maior que o card por causa dos deslocamentos, entao
+     "1%" do wrapper sairia 1,11x maior e o card 11 passaria do limite da pilha.
+     A altura e tres pedacos: a folga do topo (as 10 fatias que se acumulam
+     enquanto o scroll avanca), o card, e a escada de fatias de baixo. Card
+     absoluto nao contribui para a altura do pai, entao a reserva e explicita.
+     O overflow hidden e uma rede de seguranca: com o clip-path de cada card o
+     conteudo ja fica dentro da caixa, mas ele ainda impede que um card chegue a
+     vazar por cima do h1 se o clip falhar em algum navegador. */
+  .servicos-lista {
+    --servico-altura: 32rem;
+    --servico-peek: calc(var(--servico-altura) / 100);
+    /* Folga do topo: o espaco que as 10 fatias empilhadas vao precisar acima do
+       card ativo. E ela que permite o card ativo ficar parado — sem ela o card
+       ativo encosta na base da escada de fatias, que cresce a cada troca, e
+       acaba andando 1 peek por segmento. Ver o tween da <ol> no JS. */
+    --servico-folga: calc(10 * var(--servico-peek));
+    position: relative;
+    height: calc(var(--servico-folga) + var(--servico-altura) + 10 * var(--servico-peek));
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Caixa com os mesmos tokens do <Card> do DS (rounded-lg, border-border,
+     bg-surface) em vez do componente: o Card e um div de slot unico com o
+     padding no card inteiro, o que recua a imagem e nao permite o full-bleed
+     pedido aqui — e o padding nao da para zerar por class, pelo mesmo motivo da
+     especificidade acima.
+     A altura e fixa porque o peek e uma fracao dela: com altura natural (cada
+     card tem um titulo de tamanho diferente) a fatia de 1% variaria de card
+     para card. --altura esta dimensionada com folga para o texto mais longo dos
+     11 caber sem corte. */
+  .servico-card {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: var(--servico-altura);
+    top: calc(var(--servico-folga) + var(--i) * var(--servico-peek));
+    /* Card 1 (--i: 0) por cima, card 11 (--i: 10) no fundo. Sem z-index o
+       ultimo do DOM pintaria por cima, que e o oposto do desejado. */
+    z-index: calc(11 - var(--i));
+    /* Estado inicial SEM recorte, e o ponto de partida que o GSAP interpola ate
+       inset(0% 0% 99% 0%) quando o card sai de cena. O 99% e o peek ao pe —
+       --servico-peek e 1% da altura por definicao, entao o numero fecha sem
+       depender de px. Ele vai no BOTTOM porque inset() e top right bottom left:
+       cortar embaixo e o que mantem a fatia do TOPO, que e a aresta que a
+       piramide mostra acima do apice. Importante vir declarado no CSS e nao
+       como "none": o GSAP so interpola dois valores de clip-path com a mesma
+       estrutura de funcao. */
+    clip-path: inset(0% 0% 0% 0%);
+    /* Cada card atras encolhe 1% a mais que o da frente: card 2 = 99%, card 3 =
+       98% ... card 11 = 90%. No scroll o GSAP sobrescreve esse transform inline
+       (e o mesmo valor), porque ele precisa ser dono do transform para poder
+       animar o y sem perder a escala.
+       A origem e bottom center DE PROPÓSITO — com a origem padrão (center) o
+       efeito inteiro colapsaria, porque o 1% por card e exatamente o
+       --servico-peek: ancorando embaixo, a borda inferior de cada card nao se
+       move, o card encolhe para cima a partir dela, e a fatia de 1% continua
+       exata — sem precisar mexer no height do wrapper. O que passa a variar e a
+       LARGURA: cada faixa e 1% mais estreita e centralizada, então a pilha
+       afunila em vez de repetir 11 linhas paralelas. */
+    transform-origin: bottom center;
+    transform: scale(calc(1 - var(--i) * 0.01));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: hidden;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .servico-card-texto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.75rem;
+  }
+
+  .servico-card-midia {
+    position: relative;
+    overflow: hidden;
+    min-height: 14rem;
+    background-color: var(--color-surface-alt);
+  }
+
+  .servico-card-midia img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .servico-card-indice {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+  }
+
+  /* balance equilibra as quebras: os 11 titulos vao de 5 a 9 palavras, e sem
+     isso o bloco de texto fica com borda de baixo irregular entre os cards. */
+  .servico-card-titulo {
+    text-wrap: balance;
+  }
+
+  .servico-card-descricao {
+    max-width: 46ch;
+  }
+
+  /* Media query explicita, e nao a utility md:grid-cols-2, pelo motivo da
+     especificidade do DS ja citado — as utilities de grid dele vem depois das
+     do app em dev. minmax(0,...) impede que um titulo longo estoure a coluna e
+     empurre a imagem. */
+  @media (width >= 48rem) {
+    /* Sem o topo: o espaco abaixo do header e da barra fixa e ja vem do
+       padding-top do .servicos-raiz, que e unico nos dois estados da pagina
+       (repouso e pin). Com o padding-top aqui em vez disso o titulo nasceria
+       80px mais abaixo em repouso do que nasce no /empresa. O bottom segue
+       valendo: e o que separa o fim da area pinada do rodape. */
+    .servicos-section {
+      padding-block: 0 5rem;
+    }
+
+    /* Ancoragem do titulo: com align-items: center os 671,6px de conteudo
+       (titulo + pilha) sobrava 48,2px de folga acima num viewport de 768px —
+       menos que os 76px do header fixo, que comeca em top-0 assim que o scroll
+       passa de 10px (data-scrolled no SiteHeader). O separador do h1 ficava
+       atras da barra durante o pin inteiro.
+       O padding-top e o do spacer do SiteHeader (h-[4.75rem]), o que faz o
+       titulo encostar na barra sem sobra. Como o preflight do Tailwind traz
+       box-sizing: border-box, ele entra DENTRO do height: 100dvh: a section
+       nao cresce e o excedente que sobrar sai sempre pela base, nunca pelo
+       topo — o titulo e o unico elemento que nao pode ser cortado.
+       O efeito colateral de zerar o topo do Section e o start: 'top top' do
+       ScrollTrigger engatar em scrollY = 76 em vez de 156. */
+    .servicos-raiz {
+      align-items: flex-start;
+      padding-top: 4.75rem;
+    }
+
+    /* Com imagem e texto lado a lado o card fica bem mais baixo que no mobile
+       empilhado, entao a altura da pilha cai junto (e o peek, que e 1% dela,
+       tambem). */
+    .servicos-lista {
+      --servico-altura: 28rem;
+    }
+
+    .servicos-cabecalho {
+      margin-bottom: 1.5rem;
+    }
+
+    .servico-card {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .servico-card-midia {
+      min-height: 20rem;
+    }
+
+    .servico-card-texto {
+      padding: 2.5rem;
+    }
+
+    /* O DOM e sempre texto -> imagem, entao o espelhamento dos pares e so uma
+       troca de order. Usar order em vez de direction:rtl mantem a ordem de
+       leitura do leitor de tela igual a ordem visual nos dois casos. */
+    .servico-card:nth-child(even) .servico-card-texto {
+      order: 2;
+    }
+
+    .servico-card:nth-child(even) .servico-card-midia {
+      order: 1;
+    }
+  }
+
+  /* Mobile: a <ol> deixa de ser pilha e vira a trilha do slider lateral. Tudo
+     que sustenta o absoluto do desktop precisa ser zerado aqui — top/left/width/
+     z-index — e a escala de 2% sai, porque num slider a largura precisa ser
+     uniforme para o passo entre um card e outro ser sempre o mesmo.
+     O overflow da lista vira visible de proposito: aqui quem corta e o
+     .servicos-raiz (ver o comentario do wrapper no markup). */
+  @media (width < 48rem) {
+    .servicos-lista {
+      display: flex;
+      gap: 1rem;
+      height: var(--servico-altura);
+      overflow: visible;
+    }
+
+    .servico-card {
+      position: static;
+      flex: 0 0 100%;
+      width: auto;
+      height: 100%;
+      top: auto;
+      left: auto;
+      z-index: auto;
+      transform: none;
+      transform-origin: 50% 50%;
+    }
+  }
+
+  /* Fallback de reduced-motion. Sem GSAP a pilha estatica esconderia 10 dos 11
+     cards (eles ficam sobrepostos, e so o primeiro e legivel), o que e
+     exatamente o oposto do que quem pede menos movimento espera. O bloco
+     desfaz o absoluto e devolve os 11 em fluxo normal, um embaixo do outro.
+     O wrapper entra junto: ele e a area pinada de 100dvh com overflow hidden, e
+     deixalo assim cortaria tudo abaixo da dobra da tela — os ultimos cards
+     ficariam inacessiveis numa pagina que nem rola o suficiente para alcancalos.
+     Este e o unico lugar do arquivo em que prefers-reduced-motion aparece no
+     CSS: no JS ele sai antes de criar qualquer ScrollTrigger. */
+  @media (prefers-reduced-motion: reduce) {
+    .servicos-raiz {
+      display: block;
+      height: auto;
+      overflow: visible;
+    }
+
+    .servicos-lista {
+      display: flex;
+      height: auto;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow: visible;
+    }
+
+    .servico-card {
+      position: static;
+      /* Reseta o flex: 0 0 100% do slider mobile, que em coluna passaria a ser
+         flex-basis em altura, e nao em largura. */
+      flex: 0 0 auto;
+      width: 100%;
+      height: auto;
+      top: auto;
+      left: auto;
+      z-index: auto;
+      transform: none;
+    }
+
+    .servico-card-midia {
+      min-height: 14rem;
+    }
+  }
+</style>
