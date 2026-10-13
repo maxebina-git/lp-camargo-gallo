@@ -1,10 +1,11 @@
 ---
-import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
+import { Button, Container, Heading, Section } from 'ds-grupo-rkb'
 import { servicos } from '../../data/servicos'
 
 // Todo o conteudo do servico vem da fonte compartilhada, que tambem alimenta o
 // carrossel da home. A descricao fica no proprio item para nao depender da ordem
-// de um array paralelo.
+// de um array paralelo — e ela nao aparece aqui: a hub mostra so o titulo, e o
+// texto corrido fica na pagina interna de cada servico, que e quem precisa dele.
 const itens = servicos
 ---
 
@@ -80,11 +81,8 @@ const itens = servicos
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
 
         event.preventDefault()
-        const destino = link.getAttribute('href')
-        if (destino) {
-          const url = new URL(destino, window.location.href)
-          window.history.replaceState(null, '', url.pathname + url.search + url.hash)
-        }
+        // O href aponta para a pagina individual como fallback, mas o clique
+        // normal continua controlando a timeline sem trocar a URL da pagina hub.
         irParaServico(indice)
       })
     })
@@ -182,12 +180,15 @@ const itens = servicos
       // pintaria por cima dos outros 9 e a escada de baixo viraria uma unica
       // faixa de 32px em vez de 10 fatias de 4,48px.
       //   apice          100  na frente de tudo
-      //   acima, N degraus  10 + N  (o mais recente, N=1, na frente dos antigos)
-      //   abaixo, N degraus  10 - N  (o mais perto do apice, N=1, na frente)
-      // Os dois lados usam 10 +- N entao nenhum card de cima invade o espaco do
-      // de baixo: o menor valor acima e o maior abaixo sao ambos 10.
+      //   acima, N degraus  total + N  (o mais recente, N=1, na frente dos antigos)
+      //   abaixo, N degraus  total - N  (o mais perto do apice, N=1, na frente)
+      // A base e o TOTAL, e nao um numero: com 11 cards o minimo abaixo seria
+      // 0, que perderia a ordem de pintura para o <ol> posicionado; com base
+      // total o minimo e 1 (sempre positivo) e nenhum card de cima invade o
+      // espaco de baixo — o menor valor acima e o maior abaixo sao ambos o
+      // total mais 1.
       const zDaPosicao = (cardIdx, apiceIdx) =>
-        apiceIdx === cardIdx ? 100 : 10 + Math.abs(apiceIdx - cardIdx) * (cardIdx < apiceIdx ? 1 : -1)
+        apiceIdx === cardIdx ? 100 : total + Math.abs(apiceIdx - cardIdx) * (cardIdx < apiceIdx ? 1 : -1)
 
       cards.forEach((card, i) => {
         gsap.set(card, {
@@ -372,7 +373,7 @@ const itens = servicos
        para top negativo e precisa ser aparado nela), e no mobile quem corta a
        trilha e o wrapper — se o overflow ficasse na <ol>, o recorte andaria
        junto com a trilha em x e nada seria cortado. E e o alvo do pin. -->
-  <div data-servicos-raiz class="servicos-raiz">
+  <div data-servicos-raiz class="servicos-raiz" style={`--servicos-total:${itens.length}`}>
     <Container size="lg" class="servicos-conteudo">
       <div class="servicos-cabecalho">
         <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-border"></div>
@@ -419,10 +420,12 @@ const itens = servicos
             <div class="servico-card-texto">
               <span class="servico-card-indice" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
               <Heading as="2" size="xl" class="servico-card-titulo">{s.titulo}</Heading>
-              <Text as="p" size="sm" tone="secondary" class="servico-card-descricao">{s.descricao}</Text>
+              <Button as="a" href={s.href} variant="primary" size="md">
+                Saiba mais
+              </Button>
             </div>
-            <!-- A imagem e decorativa: o que ela mostra esta dito no titulo e na
-                 descricao logo ao lado, entao alt vazio (e nao o titulo repetido).
+            <!-- A imagem e decorativa: o que ela mostra esta dito no titulo logo
+                 ao lado, entao alt vazio (e nao o titulo repetido).
                  absolute + inset 0 em vez de h-full porque a altura da midia vem
                  do grid ou do min-height, e nenhum dos dois da um valor
                  definitivo para o height:100% da img resolver. -->
@@ -472,10 +475,13 @@ const itens = servicos
 
   /* Indice visual dos 11 servicos. Ele usa 75% do container, a mesma proporcao
      do separador usado em outras secoes da LP, e cada item ocupa uma coluna de
-     largura igual para o numero ativo permanecer sempre sobre o mesmo card. */
+     largura igual para o numero ativo permanecer sempre sobre o mesmo card.
+     A contagem vem de --servicos-total (o numero de itens da fonte), e nao de um
+     literal: um 12º serviço acrescentado em src/data/servicos.ts estenderia o
+     indice sem nenhum ajuste aqui. */
   .servicos-indice {
     display: grid;
-    grid-template-columns: repeat(11, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--servicos-total), minmax(0, 1fr));
     align-items: start;
     width: 75%;
     margin: 0 auto;
@@ -583,21 +589,35 @@ const itens = servicos
      absoluto nao contribui para a altura do pai, entao a reserva e explicita.
      O overflow hidden e uma rede de seguranca: com o clip-path de cada card o
      conteudo ja fica dentro da caixa, mas ele ainda impede que um card chegue a
-     vazar por cima do h1 se o clip falhar em algum navegador. */
+     vazar por cima do h1 se o clip falhar em algum navegador.
+     pointer-events: none com pointer-events: auto no .servico-card e o que
+     mantem a linha de botoes do indice clicavel: essa <ol> e posicionada e a
+     GSAP a translada ate -(total - 1) * peek para travar o card ativo no lugar
+     (ver o tween da lista no JS), de modo que essa caixa transparente — cuja
+     faixa de topo e a folga, vazia — sobe por cima do indice, que e estatico e
+     portanto fica na camada de nao-posicionados. Visualmente nada se sobrepoe,
+     porque o top de cada card compensa o mesmo deslocamento e o vao entre o
+     indice e o card ativo e constante; mas no hit-test a folga engolia a linha
+     aos poucos, e no card 11 cobria 21 dos 26px dela — todos os 11 botoes
+     ficavam com ~6% clicaveis. O card reassume o evento, entao o CTA "Saiba
+     mais" e o texto continuam normalmente clicaveis. */
   .servicos-lista {
     --servico-altura: 32rem;
     --servico-peek: calc(var(--servico-altura) / 100);
-    /* Folga do topo: o espaco que as 10 fatias empilhadas vao precisar acima do
-       card ativo. E ela que permite o card ativo ficar parado — sem ela o card
-       ativo encosta na base da escada de fatias, que cresce a cada troca, e
-       acaba andando 1 peek por segmento. Ver o tween da <ol> no JS. */
-    --servico-folga: calc(10 * var(--servico-peek));
+    /* Folga do topo: o espaco que as (total - 1) fatias empilhadas vao precisar
+       acima do card ativo. E ela que permite o card ativo ficar parado — sem ela
+       o card ativo encosta na base da escada de fatias, que cresce a cada troca,
+       e acaba andando 1 peek por segmento. Ver o tween da <ol> no JS. O total vem
+       de --servicos-total, e nao de um literal: a folga precisa valer exatamente
+       para o deslocamento maximo do tween, que e -(total - 1) * peek. */
+    --servico-folga: calc((var(--servicos-total) - 1) * var(--servico-peek));
     position: relative;
-    height: calc(var(--servico-folga) + var(--servico-altura) + 10 * var(--servico-peek));
+    height: calc(var(--servico-altura) + 2 * var(--servico-folga));
     overflow: hidden;
     margin: 0;
     padding: 0;
     list-style: none;
+    pointer-events: none;
   }
 
   /* Caixa com os mesmos tokens do <Card> do DS (rounded-lg, border-border,
@@ -607,8 +627,9 @@ const itens = servicos
      especificidade acima.
      A altura e fixa porque o peek e uma fracao dela: com altura natural (cada
      card tem um titulo de tamanho diferente) a fatia de 1% variaria de card
-     para card. --altura esta dimensionada com folga para o texto mais longo dos
-     11 caber sem corte. */
+     para card. --altura esta dimensionada pela coluna de imagem, e nao pelo texto:
+     desde que a descricao saiu do card da hub sobra folga abaixo do titulo, mas
+     reduzir a altura aqui encolheria o peek e mudaria a geometria da piramide. */
   .servico-card {
     position: absolute;
     left: 0;
@@ -617,7 +638,11 @@ const itens = servicos
     top: calc(var(--servico-folga) + var(--i) * var(--servico-peek));
     /* Card 1 (--i: 0) por cima, card 11 (--i: 10) no fundo. Sem z-index o
        ultimo do DOM pintaria por cima, que e o oposto do desejado. */
-    z-index: calc(11 - var(--i));
+    z-index: calc(var(--servicos-total) - var(--i));
+    /* Reassume o evento que o .servicos-lista desligou: e o card — e nao a
+       caixa da folga vazia — que precisa responder a clique. Vale para o CTA
+       "Saiba mais" e para o texto selecionado, em qualquer card. */
+    pointer-events: auto;
     /* Estado inicial SEM recorte, e o ponto de partida que o GSAP interpola ate
        inset(0% 0% 99% 0%) quando o card sai de cena. O 99% e o peek ao pe —
        --servico-peek e 1% da altura por definicao, entao o numero fecha sem
@@ -686,10 +711,6 @@ const itens = servicos
     text-wrap: balance;
   }
 
-  .servico-card-descricao {
-    max-width: 46ch;
-  }
-
   /* Media query explicita, e nao a utility md:grid-cols-2, pelo motivo da
      especificidade do DS ja citado — as utilities de grid dele vem depois das
      do app em dev. minmax(0,...) impede que um titulo longo estoure a coluna e
@@ -734,6 +755,20 @@ const itens = servicos
 
     .servico-card {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* O titulo sobe de 1.5rem (xl) para 1.875rem (2xl) aqui e nao no size do
+       <Heading>, porque o espaco so existe nesta media query. No desktop o texto
+       divide a largura com a imagem, sobrou folga depois que a descricao saiu do
+       card, e o maior titulo (11, de 9 palavras) fecha em 6 linhas dentro dos
+       28rem. No mobile o card e uma coluna de 32rem com a imagem embaixo: a
+       1.875rem o titulo mais longo estourava a caixa em 106px e empurrava a
+       imagem para fora do card (que tem overflow hidden), entao la permanece
+       em 1.5rem. O seletor tem duas classes de proposito — a utility text-xl do
+       DS tem uma, e no bundle do DS ela pode vir depois e empatar na
+       especificidade, que e o motivo dos outros overrides deste arquivo. */
+    .servico-card .servico-card-titulo {
+      font-size: 1.875rem;
     }
 
     .servico-card-midia {

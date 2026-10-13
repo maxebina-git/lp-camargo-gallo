@@ -1,8 +1,39 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { Container, Heading, Section } from 'ds-grupo-rkb'
+import { Check } from '@lucide/vue'
 import SiteHeader from '../components/layout/SiteHeader.astro'
 import SiteFooter from '../components/layout/SiteFooter.astro'
+
+/* As fotos vivem em public/assets/seguranca, entao passam pelo servidor como
+   arquivo estatico e nao pelo pipeline de imagem do Astro. Por isso o width e o
+   height sao escritos na mao: e o que reserva o espaco antes do arquivo chegar e
+   evita o salto de layout. Ja vem em 640x480 (4:3), o mesmo do aspect-[4/3] do
+   img abaixo.
+   A lista cobre so a coluna da esquerda: a da direita (7 das 12 do grid) e o box
+   de texto com efeito de lanterna, entao nao tem foto nenhuma. */
+const fotosEsquerda = [
+  {
+    src: '/assets/seguranca/seguranca-de-trabalho-1.webp',
+    alt: 'Colaborador de obra com barreiras de isolamento, ao fundo um profissional em corda na fachada',
+  },
+  {
+    src: '/assets/seguranca/seguranca-de-trabalho-2.webp',
+    alt: 'Dois colaboradores executando serviço em altura com cordas ancoradas na fachada',
+  },
+]
+
+/* Conteudo do box da direita. Sao os compromissos que a empresa declara em obra,
+   e nao copy de descricao de servico: por isso fica aqui, e nao em src/data. */
+const compromissos = [
+  'Departamento de Segurança do Trabalho',
+  'Equipe especializada e treinada conforme NR-35',
+  'Equipamento de trabalho e segurança conforme NR-18',
+  'Seguro de responsabilidade civil',
+  'Seguro de acidentes pessoais',
+  'Emissão da ART - Anotação de Responsabilidade Técnica',
+  'Emissão de Alvará junto à Prefeitura',
+]
 ---
 
 <BaseLayout
@@ -19,7 +50,195 @@ import SiteFooter from '../components/layout/SiteFooter.astro'
         <Heading as="1" size="display" class="section-title">Segurança</Heading>
       </div>
     </Container>
-  </Section>
+
+    <!-- Container IRMAO do de cima, e nao aninhado: o Container ja traz px-4 e
+         max-w-7xl, e um dentro do outro somaria o padding lateral duas vezes e
+         desalinharia as fotos em relacao ao resto do site. O mt-10 e o respiro
+         entre o titulo e as fotos.
+
+         O grid de 12 colunas e a utility grid-cols-12 do Tailwind v4, gerada sob
+         demanda: nao existe configuracao de "12 colunas" no DS. O <Grid> dele
+         trava em cols 1-4, e o <Container> so aceita sm/md/lg com max-w fixo
+         (3xl/5xl/7xl), entao nenhuma das duas portas da para um grid de 12.
+         O que existe no CSS do DS sao lg:grid-cols-12 e lg:col-span-4, mas sao
+         interno do <FooterBanner> e sao sobrescritos em lp.css.
+
+         As colunas usam col-span-5 e col-span-7, a unica forma de o grid entregar
+         a proporcao 5:7: com o gap-6 a coluna da esquerda fica com 506px e a da
+         direita com 718px, dos 1248px de conteudo (1280 do max-w-7xl menos os
+         px-4). O gap-6 e o mesmo nos 12 slots, entao entre as duas colunas cai
+         exatamente um gap, como dentro de uma coluna.
+
+         Abaixo de md fica uma coluna so: com col-span fixo as fotos ficariam com
+         190px de lado, estreitas demais, entao empilham na largura toda.
+
+         NAO usar grid-cols-1 como base, que era a primeira tentativa. O bundle
+         tem as duas utilities em ordem invertida: .md\\:grid-cols-12 sai no
+         offset 28576 e .grid-cols-1 no 35696, porque o global.css importa o
+         ds-grupo-rkb/style.css DEPOIS do tailwindcss e a copia do DS vem por
+         ultimo. Especificidade identica (0,1,0) e @media nao acrescenta nada,
+         entao a base vencia tambem no desktop: o grid ficava com 1 track
+         explicito e o col-span-5/7 criava 7 tracks implicitos vazios — medido
+         como 1104px 0px 0px 0px 0px 0px 0px. Sem a base declarada nao ha
+         conflito: no mobile o grid fica sem template, que equivale a uma coluna
+         so, e em md o col-span passa a valer sozinho. Vale para qualquer par
+         base/variante neste projeto. -->
+    <Container size="lg" class="mt-10">
+      <div class="grid gap-6 md:grid-cols-12">
+        <div class="flex flex-col gap-6 md:col-span-5">
+          {fotosEsquerda.map((foto) => (
+            <figure class="overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
+              <img
+                src={foto.src}
+                alt={foto.alt}
+                width="640"
+                height="480"
+                loading="eager"
+                decoding="async"
+                class="aspect-[4/3] h-full w-full object-cover"
+              />
+            </figure>
+          ))}
+        </div>
+
+        <!-- O box de texto e o proprio item do grid, filho direto junto com a coluna
+         das fotos, e nao um div intermediario com h-full dentro: o item de grid
+         ja recebe a altura da linha pelo align-self: stretch do padrao, e um
+         height:100% cairia num pai de altura auto e resolveria para auto.
+         Por isso o md:self-start que existia aqui saiu — ele so fazia sentido
+         com a coluna vazia, e agora impediria o box de acompanhar a altura das
+         duas fotos empilhadas.
+         bg-deep e nao bg-slate-900: nao existe slate/gray/zinc no projeto, e o
+         escuro da casa e a utility bg-deep, a mesma do Section tone="deep" e do
+         FeatureCard tone="deep". Vale saber que --color-deep resolve para
+         #3c405d (azul-ardosia da marca) e nao para o neutral-900 do token do
+         app: o bundle tem a definicao duas vezes e a do ds-grupo-rkb vem por
+         ultimo, sem especificidade para desempatar. Branco sobre #3c405d da
+         10:1 de contraste. rounded-2xl tem token proprio (--radius-2xl,
+         1.5rem). isolate fecha o contexto de empilhamento para o halo nao
+         escapar, overflow-hidden recorta o gradiente nos cantos. O texto leva
+         relative para pintar acima do ::before, que e o primeiro filho
+         posicionado do box. -->
+    <div
+      id="seguranca-spotlight"
+      class="seguranca-spotlight relative isolate flex flex-col justify-center gap-6 overflow-hidden rounded-2xl bg-deep p-12 text-on-deep md:col-span-7"
+    >
+      <Heading as="2" size="xl" class="relative">Compromisso com a Segurança</Heading>
+      <!-- O icone e text-accent-500 e nao text-primary-500: o bundle define
+         --color-primary-500 tres vezes e o valor que vence e #12284e (navy),
+         quase invisivel sobre o fundo do box. --color-accent-500 resolve para
+         #459aff, o azul que o halo tambem usa. E o <Check> do lucide entra por
+         import e renderiza no servidor, sem diretiva de hidratacao — mesmo
+         caminho do ChevronRight em AboutSection.astro. -->
+      <ul class="relative flex flex-col gap-3.5">
+        {compromissos.map((compromisso) => (
+          <li class="flex items-start gap-3 text-base leading-snug text-on-deep">
+            <Check class="mt-0.5 h-4 w-4 shrink-0 text-accent-500" aria-hidden="true" />
+            <span>{compromisso}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Container>
+</Section>
+
+<script is:inline>
+  // Mede o retangulo do box UMA VEZ e no handler so escreve as custom
+  // properties. Chamar getBoundingClientRect aqui dentro leria o layout que a
+  // escrita anterior acabou de invalidar: o par le/escreve a cada pointermove
+  // derruba o frame. A propriedade alimenta so um gradiente, entao nao provoca
+  // layout — repinta apenas o ::before.
+  var box = document.getElementById('seguranca-spotlight');
+  var semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (box && !semMovimento.matches) {
+    var rect = box.getBoundingClientRect();
+
+    var medir = function () {
+      rect = box.getBoundingClientRect();
+    };
+
+    box.addEventListener('pointerenter', medir);
+    window.addEventListener('resize', medir);
+    // O box se desloca com a pagina enquanto o cursor nao: sem remedir no
+    // scroll, o halo ficaria preso na coordenada antiga da tela. passive: true
+    // para nao travar a rolagem.
+    window.addEventListener('scroll', medir, { passive: true });
+
+    box.addEventListener('pointermove', function (event) {
+      box.style.setProperty('--mouse-x', event.clientX - rect.left + 'px');
+      box.style.setProperty('--mouse-y', event.clientY - rect.top + 'px');
+    });
+
+    // Quem acende o ::before e este atributo, nao o :hover. Quem decide se o
+    // efeito existe e o matchMedia acima: com movimento reduzido o box fica num
+    // bg-deep limpo, sem halo.
+    box.setAttribute('data-spotlight', '');
+  }
+</script>
+
+<style>
+  /* --mouse-x/--mouse-y recebem px do script acima. O fallback e o que aparece
+     antes do primeiro pointermove e com prefers-reduced-motion ligado: sem ele
+     o radial-gradient cairia num ponto invalido e o box apareceria com um canto
+     iluminado. */
+  .seguranca-spotlight {
+    --mouse-x: 50%;
+    --mouse-y: 0%;
+    --spotlight-raio: 50rem;
+    --spotlight-nucleo: 24rem;
+  }
+
+  /* Duas camadas: um nucleo branco que da a sensacao de lanterna, e embaixo o
+     halo largo na cor da marca. As duas usam o mesmo par --mouse-x/--mouse-y,
+     entao acompanham o cursor juntas. A ordem no background importa: a primeira
+     listada e a que fica por cima.
+
+     O que deixa o brilho "duro" nao e o raio e o numero de paradas: com duas
+     paradas (cor cheia no centro, transparente em 68%) o miolo fica num platô
+     uniforme e cai de uma vez. Medindo o mapa de luminancia dentro da caixa
+     dava +-**++++** ate a borda e um nucleo de 130px, com a transicao
+     concentrada. Aqui cada camada tem 4-5 paradas com queda ja amortecida, e o
+     raio dobrou: o miolo vira rampa continua e o halo alcanca a borda da caixa.
+
+     As porcentagens seguem medidas na captura, nao escolhidas no olho:
+     pico do halo sobre o fundo #3c405d = 1,54:1 e texto branco sobre esse pico
+     = 6,54:1 (AA p/ 16px pede 4,5:1). Da para ir mais suave (raio 56rem
+     chegou a 1,47:1 de pico com 6,85:1 no texto), mas o brilho no centro
+     enfraquece e a caixa comeca a parecer lavada. */
+  .seguranca-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      radial-gradient(
+        var(--spotlight-nucleo) circle at var(--mouse-x) var(--mouse-y),
+        color-mix(in oklab, var(--color-on-deep) 24%, transparent),
+        color-mix(in oklab, var(--color-on-deep) 14%, transparent) 32%,
+        color-mix(in oklab, var(--color-on-deep) 6%, transparent) 64%,
+        transparent 100%
+      ),
+      radial-gradient(
+        var(--spotlight-raio) circle at var(--mouse-x) var(--mouse-y),
+        color-mix(in oklab, var(--color-primary-500) 84%, transparent),
+        color-mix(in oklab, var(--color-primary-500) 48%, transparent) 24%,
+        color-mix(in oklab, var(--color-primary-500) 24%, transparent) 48%,
+        color-mix(in oklab, var(--color-primary-500) 9%, transparent) 74%,
+        transparent 100%
+      );
+    opacity: 0;
+    transition: opacity 250ms ease-out;
+    pointer-events: none;
+  }
+
+  /* Seletor com o atributo e nao :hover de proposito: quem acende o halo e o
+     script, depois da checagem de movimento reduzido. */
+  .seguranca-spotlight[data-spotlight]::before {
+    opacity: 1;
+  }
+</style>
 
   <SiteFooter />
 

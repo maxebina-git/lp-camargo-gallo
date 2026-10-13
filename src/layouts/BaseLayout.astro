@@ -5,9 +5,15 @@ import '../styles/lp.css'
 interface Props {
   title: string
   description?: string
+  canonical?: string
+  ogImage?: string
+  structuredData?: Record<string, unknown>
 }
 
-const { title, description } = Astro.props
+const { title, description, canonical, ogImage, structuredData } = Astro.props
+const siteUrl = Astro.site ?? new URL('https://staging.camargogallo.com.br')
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href
+const socialImage = ogImage ? new URL(ogImage, siteUrl).href : new URL('/og-image.jpg', siteUrl).href
 ---
 
 <!doctype html>
@@ -28,13 +34,15 @@ const { title, description } = Astro.props
     </script>
     <meta name="description" content={description} />
     <title>{title}</title>
-    <meta property="og:title" content="Restauração de Fachadas e Pintura Predial em SP | Camargo Gallo Engenharia" />
-    <meta property="og:description" content="Especialistas em reforma de fachadas, impermeabilização e pintura predial em São Paulo. Solicite um orçamento com a Camargo Gallo Engenharia." />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://staging.camargogallo.com.br/" />
-    <meta property="og:image" content="https://staging.camargogallo.com.br/og-image.jpg" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImage} />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {structuredData && <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
     <noscript>
       <style>
         .hero-underline-s1,

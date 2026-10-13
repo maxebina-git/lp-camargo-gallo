@@ -509,6 +509,31 @@ img[alt="Logo Camargo Gallo"] {
   z-index: 1000;
 }
 
+/* Drawer de Privacidade/Termos: o <Drawer> do DS fixa o proprio z-index em duas
+   utilities — z-40 no backdrop e z-50 no painel — e nao e teleportado, entao ele
+   renderiza no lugar, dentro do rodape. Com a barra em 1000 o drawer inteiro
+   abria ATRAS dela: a barra continuava clicavel por cima do dim e do painel,
+   enquanto o <aside role="dialog" aria-modal="true"> declara ao leitor de tela
+   que o resto da pagina esta inerte. Visual e acessibilidade diziam coisas
+   opostas.
+   Nao da para resolver baixando a barra: em /servicos os cards da piramide
+   chegam a z-index 100 (o apice, escrito inline pelo GSAP) e precisam ficar
+   abaixo dela.
+   A faixa segue a do lightbox do portfolio-view, que ja usa 2000 pelo mesmo
+   motivo (commit 6cf6843). Cada seletor ganha uma classe ou um atributo de
+   proposito — .fixed.bg-overlay (0,2,0) contra .z-40 (0,1,0) e
+   aside[role][aria-modal] (0,3,1) contra .z-50 (0,1,0) — para vencer o bundle
+   do DS sem depender de qual stylesheet entra por ultimo, e sem !important.
+   .bg-overlay aparece 1 vez em todo o DS (o backdrop do Drawer) e zero no app;
+   role="dialog" tambem e exclusivo. */
+.fixed.bg-overlay {
+  z-index: 1900;
+}
+
+aside[role='dialog'][aria-modal='true'] {
+  z-index: 2000;
+}
+
 /* Estado ativo dos itens do menu: mesmo visual do hover — texto ink e o
    sublinhado ::after do DS expandido (mesma propriedade scale do hover). */
 .site-header .active,

@@ -1,0 +1,119 @@
+---
+import { Button, Container, Heading, Section, Text } from 'ds-grupo-rkb'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SiteHeader from '../../components/layout/SiteHeader.astro'
+import SiteFooter from '../../components/layout/SiteFooter.astro'
+import { servicos, type Servico } from '../../data/servicos'
+
+interface Props {
+  servico: Servico
+}
+
+export function getStaticPaths() {
+  return servicos.map((servico) => ({
+    params: { slug: servico.slug },
+    props: { servico },
+  }))
+}
+
+const { servico } = Astro.props
+const siteUrl = Astro.site ?? new URL('https://staging.camargogallo.com.br')
+const canonicalUrl = new URL(servico.href, siteUrl).href
+const imageUrl = new URL(servico.imagem, siteUrl).href
+const numero = String(servicos.findIndex((item) => item.slug === servico.slug) + 1).padStart(2, '0')
+const relacionados = servicos.filter((item) => item.slug !== servico.slug).slice(0, 3)
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': `${canonicalUrl}#service`,
+  name: servico.titulo,
+  description: servico.descricao,
+  image: imageUrl,
+  url: canonicalUrl,
+  serviceType: servico.titulo,
+  provider: {
+    '@type': 'ProfessionalService',
+    name: 'Camargo Gallo Engenharia',
+    url: siteUrl.href,
+    telephone: '+551129248556',
+  },
+  areaServed: {
+    '@type': 'City',
+    name: 'São Paulo',
+  },
+}
+---
+
+<BaseLayout
+  title={`${servico.titulo} | Camargo Gallo Engenharia`}
+  description={servico.descricao}
+  canonical={canonicalUrl}
+  ogImage={servico.imagem}
+  structuredData={structuredData}
+>
+  <SiteHeader />
+
+  <main>
+    <Section tone="surface-alt" class="service-detail-hero py-16 md:py-24">
+      <Container size="lg">
+        <a
+          href="/servicos/"
+          class="inline-flex items-center gap-2 font-body text-sm font-semibold text-deep transition-colors hover:text-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-600"
+        >
+          <span aria-hidden="true">←</span>
+          Todos os serviços
+        </a>
+
+        <div class="mt-8 grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] md:gap-16">
+          <div class="flex min-w-0 flex-col items-start gap-5">
+            <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-border"></div>
+            <span class="font-body text-sm font-bold text-text-secondary" aria-label={`Serviço ${numero}`}>{numero}</span>
+            <Heading as="1" size="display" class="section-title text-ink">{servico.titulo}</Heading>
+            <Text as="p" tone="secondary" class="max-w-2xl">{servico.descricao}</Text>
+            <Button as="a" href="/contato" variant="primary" size="lg">
+              Solicitar orçamento
+            </Button>
+          </div>
+
+          <figure class="overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
+            <img
+              src={servico.imagem}
+              alt={servico.titulo}
+              class="aspect-[4/3] h-full w-full object-cover"
+              width="960"
+              height="720"
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+        </div>
+      </Container>
+    </Section>
+
+    <Section tone="surface" class="py-16 md:py-20">
+      <Container size="lg">
+        <div class="flex flex-col items-center gap-4 text-center">
+          <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-divider"></div>
+          <Heading as="2" size="xl" class="text-deep">Conheça também outros serviços</Heading>
+        </div>
+
+        <ul class="mt-10 grid gap-4 md:grid-cols-3">
+          {relacionados.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class="group flex h-full flex-col justify-between gap-8 rounded-lg border border-border bg-surface-alt p-6 transition-colors hover:border-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-600"
+              >
+                <Heading as="3" size="lg" class="text-ink transition-colors group-hover:text-primary-600">{item.titulo}</Heading>
+                <span class="font-body text-sm font-semibold text-deep">Conheça o serviço <span aria-hidden="true">→</span></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </Section>
+  </main>
+
+  <SiteFooter surface="surface-alt" />
+</BaseLayout>
