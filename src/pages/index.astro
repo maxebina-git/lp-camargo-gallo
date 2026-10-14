@@ -19,7 +19,6 @@ import PortfolioSection from '../components/portfolio/PortfolioSection.astro'
 import ServiceCard from '../components/services/ServiceCard.vue'
 import FaqSection from '../components/faq/FaqSection.vue'
 import { servicos } from '../data/servicos'
-import { headerNavHome } from '../data/site'
 import lucide from '@lucide/vue'
 const { ChevronUp } = lucide
 ---
@@ -48,7 +47,12 @@ const { ChevronUp } = lucide
 
 <BaseLayout title="Restauração de Fachadas e Pintura Predial em SP | Camargo Gallo Engenharia" description="Especialistas em reforma de fachadas, impermeabilização e pintura predial em São Paulo. Solicite um orçamento com a Camargo Gallo Engenharia e garanta a valorização do seu patrimônio.">
 
-  <SiteHeader nav={headerNavHome} spacer={false} />
+  <!-- Sem `nav` aqui: a home usa a lista padrao do SiteHeader. Havia um
+       headerNavHome em src/data/site.ts identico byte a byte ao headerNavSite,
+       e ele so existia para este `nav={...}`; os dois foram fundidos num
+       array so. A prop `nav?` continua no SiteHeader para uma pagina que
+       precise de outra lista. -->
+  <SiteHeader spacer={false} />
 
   <HeroSlider client:load />
 

@@ -57,40 +57,9 @@ export const footerCompany: FooterCompany = {
   ],
 }
 
-export const headerNavHome: NavLink[] = [
-  { label: 'EMPRESA', href: '/empresa' },
-  { label: 'SERVIÇOS', href: '/servicos' },
-  {
-    label: 'ESTUDOS DE CASO',
-    href: '/estudos-de-caso',
-    parentLink: true,
-    dropdown: [
-      { label: 'Revitalização de fachadas e áreas comuns', href: '/estudos-de-caso/revitalizacao-de-fachadas' },
-      { label: 'Retrofit de fachadas e áreas comuns', href: '/estudos-de-caso/retrofit-de-fachadas' },
-      { label: 'Pintura de fachadas e áreas comuns', href: '/estudos-de-caso/pintura-de-fachadas' },
-      { label: 'Impermeabilização de lajes de cobertura', href: '/estudos-de-caso/impermeabilizacao-de-lajes' },
-    ],
-  },
-  { label: 'SEGURANÇA', href: '/seguranca' },
-  { label: 'PORTFÓLIO', href: '/portfolio' },
-  { label: 'INSIGHTS', href: '/insights' },
-  { label: 'CONTATO', href: '/contato' },
-]
-
 export const headerNavSite: NavLink[] = [
   { label: 'EMPRESA', href: '/empresa' },
   { label: 'SERVIÇOS', href: '/servicos' },
-  {
-    label: 'ESTUDOS DE CASO',
-    href: '/estudos-de-caso',
-    parentLink: true,
-    dropdown: [
-      { label: 'Revitalização de fachadas e áreas comuns', href: '/estudos-de-caso/revitalizacao-de-fachadas' },
-      { label: 'Retrofit de fachadas e áreas comuns', href: '/estudos-de-caso/retrofit-de-fachadas' },
-      { label: 'Pintura de fachadas e áreas comuns', href: '/estudos-de-caso/pintura-de-fachadas' },
-      { label: 'Impermeabilização de lajes de cobertura', href: '/estudos-de-caso/impermeabilizacao-de-lajes' },
-    ],
-  },
   { label: 'SEGURANÇA', href: '/seguranca' },
   { label: 'PORTFÓLIO', href: '/portfolio' },
   { label: 'INSIGHTS', href: '/insights' },
