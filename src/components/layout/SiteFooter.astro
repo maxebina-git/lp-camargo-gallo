@@ -5,9 +5,20 @@ import { footerCompany, surfaceColor, type Surface } from '../../data/site'
 
 interface Props {
   surface?: Surface
+  /** Titulo e descricao do banner sao falados pelo rodape inteiro, entao o
+      padrao mora aqui como literal e nao em src/data/site.ts: o `bannerProps`
+      de la tem os mesmos dois textos e ninguem importa. Props opcional para
+      uma pagina nenhuma trocar so o banner dela — foi o que a /seguranca fez
+      com o texto da marca. */
+  bannerTitle?: string
+  bannerDescription?: string
 }
 
-const { surface = 'surface' } = Astro.props
+const {
+  surface = 'surface',
+  bannerTitle = 'Pronto para começar?',
+  bannerDescription = 'Recuperação e impermeabilização de fachadas\ncom retorno em até 24h.',
+} = Astro.props
 
 const color = surfaceColor(surface)
 ---
@@ -18,8 +29,8 @@ const color = surfaceColor(surface)
   style={`--page-surface: ${color}`}
   bannerImage="/assets/logo-camargo-gallo.png"
   bannerImageAlt="Logo Camargo Gallo"
-  bannerTitle="Pronto para começar?"
-  bannerDescription={"Recuperação e impermeabilização de fachadas\ncom retorno em até 24h."}
+  bannerTitle={bannerTitle}
+  bannerDescription={bannerDescription}
   bannerCta={{ label: 'Solicite um orçamento', href: '/contato' }}
   companyDescription="Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo."
   contacts={footerCompany.contacts}

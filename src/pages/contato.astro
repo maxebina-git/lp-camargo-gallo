@@ -21,51 +21,131 @@ import { Mail, Phone } from '@lucide/vue'
   <SiteHeader />
 
   <section id="contato" class="bg-surface text-ink py-16">
-    <Container>
-      <div class="max-w-3xl mx-auto">
-        <div class="flex flex-col gap-4 items-center text-center mb-12">
-          <Heading as="2" size="2xl" id="titulo-orcamento">Solicite seu orçamento</Heading>
-          <Text tone="secondary">Retorno em até 24h. Atendemos condomínios, indústrias e edifícios comerciais.</Text>
-          <div class="flex flex-wrap items-center justify-center gap-3">
-            <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              <Phone class="h-4 w-4" aria-hidden="true" /> (11) 2924-8556
-            </a>
-            <span class="opacity-50">|</span>
-            <a href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              <BrandIcon name="whatsapp" class="h-4 w-4" aria-hidden="true" /> WhatsApp
-            </a>
-            <span class="opacity-50">|</span>
-            <a href="mailto:atendimento@camargogallo.com.br" onclick="gtag('event', 'lp_email_click', { 'event_category': 'contato', 'event_label': 'email_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
-              <Mail class="h-4 w-4" aria-hidden="true" /> atendimento@camargogallo.com.br
-            </a>
-          </div>
+    <!-- size="lg" e nao o Container padrao: /contato era a unica pagina do site
+         no md (5xl), e num layout de duas colunas isso deixava o conteudo 112px
+         mais estreito que o header (size="lg" em SiteHeader.astro) e que o
+         banner do rodape (max-w-7xl). As outras 14 paginas ja eram 7xl.
+         O max-w-3xl mx-auto que existia aqui foi embora com a troca: dentro dos
+         768px as duas colunas ficariam com 368px cada, e esse limite so
+         existia para segurar a forma de coluna unica que a pagina tem hoje. -->
+    <Container size="lg">
+<!-- Bloco de contato no topo, centralizado. Antes ele vivia dentro do bloco
+           que centralizava o titulo da pagina; aquele saiu de cena e o que
+           sobrou foi a linha de contatos — que agora ganha um titulo e um
+           separador na frente.
+           h1 e nao h2: este e o primeiro bloco de conteudo da pagina, e a
+           pagina nao tinha h1 nenhum (o unico heading era o "Solicite seu
+           orcamento", que saiu). Com o "Contato" aqui a hierarquia fecha —
+           h1 Contato, e o h2 da coluna de texto abaixo dele.
+           size="display" + .section-title e a mesma dupla dos outros 12 h1 do
+           site (/seguranca, /empresa, /portfolio, /insights, os estudos de
+           caso, servicos/[slug]): sem ela este h1 ficaria em 20px e o h2 da
+           coluna em 24px, com a hierarquia visual invertida. A utility
+           section-title e a que manda no tamanho — ela trava o
+           clamp(1.75rem, 7.6vw, 2.5rem) de lp.css:98 e, por estar fora de
+           qualquer camada, vence o text-display do @layer utilities do
+           Tailwind. O clamp e o que mantem o h1 legivel em 375px e no 7xl
+           alike.
+           O separador e o mesmo desenho dos h1 das outras paginas (/seguranca,
+           /empresa): tracinho + h1, marcando o inicio do conteudo. O w-1/4 e o
+           mesmo divisor de la.
+           A linha de contatos em si nao mudou: as tres classes que ela ja
+           tinha (flex-wrap justify-center gap-3) e os tres <a> com o onclick
+           do gtag continuam igual. -->
+      <div class="mb-12 flex flex-col items-center text-center gap-4">
+        <div role="separator" aria-hidden="true" class="h-4 w-1/4 rounded-full bg-divider"></div>
+        <Heading as="1" size="display" class="section-title">Contato</Heading>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a href="tel:+551129248556" onclick="gtag('event', 'lp_phone_click', { 'event_category': 'contato', 'event_label': 'telefone_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
+            <Phone class="h-4 w-4" aria-hidden="true" /> (11) 2924-8556
+          </a>
+          <span class="opacity-50">|</span>
+          <a href="https://wa.me/551129248556?text=Olá, gostaria de saber mais sobre recuperação de fachadas" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'lp_whatsapp_click', { 'event_category': 'contato', 'event_label': 'whatsapp_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
+            <BrandIcon name="whatsapp" class="h-4 w-4" aria-hidden="true" /> WhatsApp
+          </a>
+          <span class="opacity-50">|</span>
+          <a href="mailto:atendimento@camargogallo.com.br" onclick="gtag('event', 'lp_email_click', { 'event_category': 'contato', 'event_label': 'email_lp' });" class="flex items-center gap-2 font-body text-ink hover:text-primary transition-colors">
+            <Mail class="h-4 w-4" aria-hidden="true" /> atendimento@camargogallo.com.br
+          </a>
         </div>
-        <Card>
-          <form id="contato-form" class="flex flex-col gap-4" action="/lp-camargo-gallo/send-email.php" method="post" onsubmit="submeterForm(event)" novalidate>
-            <FormField label="Nome" id="nome">
-              <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>=3) document.getElementById('erro-nome').classList.add('hidden')" />
-              <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
-            </FormField>
-            <FormField label="WhatsApp" id="whatsapp">
-              <Input id="whatsapp" name="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this); if(/^\d{11}$/.test(this.value.replace(/\D/g,''))) document.getElementById('erro-whatsapp').classList.add('hidden')" />
-              <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
-            </FormField>
-            <FormField label="Email" id="email">
-              <Input id="email" name="email" type="email" placeholder="seu@email.com.br" oninput="if(this.value.trim()){ if(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden'); else document.getElementById('erro-email').classList.remove('hidden'); } else { document.getElementById('erro-email').classList.remove('hidden'); }" />
-              <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Informe um email válido.</p>
-            </FormField>
-            <FormField label="Mensagem" id="mensagem">
-              <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>=10) document.getElementById('erro-mensagem').classList.add('hidden')" />
-              <p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
-            </FormField>
-            <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
-            <div class="flex items-center gap-4">
-              <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center justify-center">
-                <Mail id="submit-icon" class="inline w-4 h-4 mr-2" /> Enviar mensagem
-              </Button>
-            </div>
-          </form>
-        </Card>
+      </div>
+
+      <!-- items-start alinea o texto com o topo do Card, e nao o centro dele: com
+           o formulario em torno de 500px de altura, um bloco de duas linhas
+           centralizado ficaria flutuando no meio.
+
+           5fr/7fr e nao md:grid-cols-2: a coluna do texto e menor que a do
+           formulario, como pedido. A razao 5:7 e a mesma do grid de
+           seguranca.astro (col-span-5/col-span-7), entao as duas paginas com
+           colunas assimetricas usam a mesma proporcao — da para ler de relance
+           qual lado e o texto. O DS nao tem porta para isso: o <Grid> dele
+           trava em colunas iguais (cols 1-4) e o md:grid-cols-2 unlayered dele
+           e 50/50, entao o caminho e o template arbitrario, como ja e em
+           servicos/[slug].astro:68. Por ser arbitrario, o DS nao tem como bater nessa
+           regra: ela so existe no bundle do Tailwind.
+
+           Sem grid-cols-1 na base pelo motivo que seguranca.astro:134
+           documenta: as duas classes saem no bundle em ordem invertida e a base
+           venceria a variante em qualquer largura. -->
+      <div class="grid items-start gap-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div class="flex flex-col gap-4">
+          <Heading as="2" size="2xl">Segurança em obra começa no planejamento</Heading>
+          <!-- Tres paragrafos e tres <Text>, e nao um so com quebra: o <Text> do
+               DS renderiza um <p>, e sao tres ideias distintas — o que a empresa
+               faz, a promessa de prazo e onde ela fica. O gap-4 da coluna (16px)
+               e o que separa um do outro.
+               O endereco vai como texto simples, sem link: nao ha href, e um
+               <address> puxaria o itálico do UA. Os <br> sao o que empilha as
+               quatro linhas — o <Text> nao tem whitespace-pre-line (ao contrario
+               do banner do rodape), entao so o br resolve. O espaco/indentacao
+               que o Astro deixa depois de cada <br> nao aparece: em
+               white-space normal o navegador descarta o espaco no começo da
+               linha. O rotulo "Nossa sede:" vai em <strong> com text-ink
+               dentro do proprio paragrafo, para nao virar um quarto bloco com
+               gap-4 de espaco acima dele. -->
+          <Text tone="secondary">A Camargo Gallo Engenharia é uma empresa especializada em reforma de fachadas prediais e impermeabilização de lajes.</Text>
+          <Text tone="secondary">Do primeiro contato à entrega, você acompanha a obra com retorno em até 24h.</Text>
+          <Text tone="secondary"><strong class="font-semibold text-ink">Nossa sede:</strong><br />
+            Rua Maria José Rangel, 159<br />
+            Vila São Paulo<br />
+            CEP: 04650-180<br />
+            São Paulo/SP
+          </Text>
+        </div>
+
+        <!-- O Card segue aqui porque e ele que da a moldura do formulario
+             (rounded-lg border border-border bg-surface p-6): a section ja e
+             bg-surface, entao sem a borda o formulario ficaria solto. A div e o
+             item da grade, e nao o Card direto, para os dois lados terem o mesmo
+             envelope. -->
+        <div>
+          <Card>
+            <form id="contato-form" class="flex flex-col gap-4" action="/lp-camargo-gallo/send-email.php" method="post" onsubmit="submeterForm(event)" novalidate>
+              <FormField label="Nome" id="nome">
+                <Input id="nome" name="nome" placeholder="Seu nome" oninput="if(this.value.trim().length>=3) document.getElementById('erro-nome').classList.add('hidden')" />
+                <p id="erro-nome" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
+              </FormField>
+              <FormField label="WhatsApp" id="whatsapp">
+                <Input id="whatsapp" name="whatsapp" type="tel" placeholder="(11) 99999-9999" oninput="formatarTelefone(this); if(/^\d{11}$/.test(this.value.replace(/\D/g,''))) document.getElementById('erro-whatsapp').classList.add('hidden')" />
+                <p id="erro-whatsapp" class="text-error-500 text-sm hidden mt-1">Formato inválido. Use DDD + celular (11 dígitos).</p>
+              </FormField>
+              <FormField label="Email" id="email">
+                <Input id="email" name="email" type="email" placeholder="seu@email.com.br" oninput="if(this.value.trim()){ if(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(this.value.trim())) document.getElementById('erro-email').classList.add('hidden'); else document.getElementById('erro-email').classList.remove('hidden'); } else { document.getElementById('erro-email').classList.remove('hidden'); }" />
+                <p id="erro-email" class="text-error-500 text-sm hidden mt-1">Informe um email válido.</p>
+              </FormField>
+              <FormField label="Mensagem" id="mensagem">
+                <Textarea id="mensagem" name="mensagem" placeholder="Conte sobre sua fachada" rows={4} oninput="if(this.value.trim().length>=10) document.getElementById('erro-mensagem').classList.add('hidden')" />
+                <p id="erro-mensagem" class="text-error-500 text-sm hidden mt-1">Campo obrigatório.</p>
+              </FormField>
+              <div id="form-feedback" class="hidden text-green-600 text-sm font-medium mb-2">Mensagem enviada com sucesso!</div>
+              <div class="flex items-center gap-4">
+                <Button id="submit-btn" type="submit" variant="primary" size="md" class="w-full md:w-1/2 font-body flex items-center justify-center">
+                  <Mail id="submit-icon" class="inline w-4 h-4 mr-2" /> Enviar mensagem
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
       </div>
     </Container>
   </section>

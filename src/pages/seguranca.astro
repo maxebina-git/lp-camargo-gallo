@@ -4,6 +4,7 @@ import { Container, Heading, Section } from 'ds-grupo-rkb'
 import { Check } from '@lucide/vue'
 import SiteHeader from '../components/layout/SiteHeader.astro'
 import SiteFooter from '../components/layout/SiteFooter.astro'
+import SafetyFeatureSection from '../components/seguranca/SafetyFeatureSection.astro'
 
 /* As fotos vivem em public/assets/seguranca, entao passam pelo servidor como
    arquivo estatico e nao pelo pipeline de imagem do Astro. Por isso o width e o
@@ -34,6 +35,64 @@ const compromissos = [
   'Emissão da ART - Anotação de Responsabilidade Técnica',
   'Emissão de Alvará junto à Prefeitura',
 ]
+
+/* As tres secoes em zig-zag que vem depois do bloco de duas colunas, e que
+   juntas formam uma fita vertical continua.
+   `reverse` alterna a ordem so no desktop: no mobile as duas colunas empilham
+   sempre na mesma ordem (foto, depois texto), que e a leitura natural de cima
+   para baixo. O `reverse` da segunda e true para o padrao ficar
+   foto-esquerda / texto-direita, texto-esquerda / foto-direita,
+   foto-esquerda / texto-direita.
+   `position` diz onde cada secao esta na fita: so a primeira arredonda o topo e
+   so a ultima arredonda a base, entao a secao do meio nao arredonda nada. */
+const destaques = [
+  {
+    image: {
+      src: '/assets/seguranca/seguranca-de-trabalho-3.webp',
+      alt: 'Técnico de segurança do trabalho conferindo a montagem de equipamento de proteção individual em obra',
+    },
+    items: [
+      'Cinto de segurança',
+      'Trava queda',
+      'Talabarte',
+      'Corda',
+      'Luvas, botas, capacetes, óculos',
+      'Máscara respiratória e uniforme',
+    ],
+    reverse: false,
+    position: 'first',
+  },
+  {
+    image: {
+      src: '/assets/seguranca/seguranca-de-trabalho-4.webp',
+      alt: 'Colaboradores com equipamentos de proteção individual e coletiva durante serviço em altura',
+    },
+    items: [
+      'Plataforma elevatória',
+      'Balancim',
+      'Andaime tubular e suspenso',
+      'Escada',
+      'Balancim individual (cadeira suspensa) da Fibramfer - Grupo RKB',
+    ],
+    reverse: true,
+    position: 'middle',
+  },
+  {
+    image: {
+      src: '/assets/seguranca/seguranca-de-trabalho-5.webp',
+      alt: 'Profissional analisando documentação técnica de obra junto ao canteiro',
+    },
+    items: [
+      'Medidor de espessura de tinta (micra)',
+      'Termo higrômetro',
+      'Fita filamentosa 3M (teste de aderência)',
+      'Pentes de medição de película úmida',
+      'Medidor de dureza (Barcol)',
+    ],
+    reverse: false,
+    position: 'last',
+  },
+]
 ---
 
 <BaseLayout
@@ -48,6 +107,21 @@ const compromissos = [
       <div class="flex flex-col items-center text-center gap-4">
         <div role="separator" aria-hidden="true" class="h-4 w-1/2 rounded-full bg-divider"></div>
         <Heading as="1" size="display" class="section-title">Segurança</Heading>
+        <!-- O paragrafo de entrada, com as mesmas tres classes de insights.astro:18
+             e portfolio.astro:18 — sao as outras duas paginas que repetem este
+             bloco de titulo identico (separador + h1 display + div
+             centralizado), e o max-w-2xl e o que impede a linha de correr os
+             1248px do Container 7xl. Nao e o <Text tone="secondary"> de
+             servicos/[slug].astro:73 porque ali o texto divide a linha com uma
+             coluna de imagem, e nao fica sozinho sob um titulo.
+
+             O text-deep/70 sobre o fundo surface (#fff) da 4,3:1, um pouco abaixo
+             do piso AA de 4,5:1 do text-base. Fica igual as outras duas paginas
+             por escolha; se um dia quiser o piso, e text-deep/80 (5,6:1) sem
+             mudar o desenho. -->
+        <p class="text-deep/70 max-w-2xl font-body">
+          Investimos constantemente no treinamento e capacitação de nossos colaboradores para a realização dos trabalhos em altura, com o propósito de assegurar que os clientes recebam um atendimento ágil, seguro e de qualidade.
+        </p>
       </div>
     </Container>
 
@@ -141,6 +215,57 @@ const compromissos = [
     </div>
   </div>
 </Container>
+</Section>
+
+<!-- As tres secoes em zig-zag. Outro <Section tone="surface">, e nao mais um
+     <Container> dentro do de cima: o Container ja traz px-4 e max-w, e um dentro
+     do outro somaria o padding lateral duas vezes.
+     pb-20 pt-10 em vez de py-20 para nao somar dois blocos de 160px de
+     respiro na emenda com o bloco de duas colunas.
+     gap-0 porque as tres secoes formam uma fita vertical continua. Aqui a
+     utility resolve direto: .gap-0 nao existe no DS, entao nao tem a briga de
+     camada que o gap interno do componente tem com o .gap-8 unlayered.
+
+     size="md" e nao "lg": a fita e a unica coisa da pagina com respiro lateral
+     proprio, 1024px em vez dos 1280 do bloco de cima — sao 128px a mais de
+     margem dos dois lados, e as fotos e o box de Compromisso acima continuam
+     nos 7xl. Efeito colateral aceito de proposito: a fita deixa de alinhar com
+     as fotos de cima, que e o que da a ela o ar de bloco separado. -->
+<Section tone="surface" class="pb-20 pt-10">
+  <Container size="md">
+    <!-- h2 e nao h3 nem um <p> estilizado: a pagina tem um h1 so (Seguranca) e
+         a fita e um bloco irmao do box de Compromisso, que tambem e h2. As tres
+         secoes da fita nao tem titulo proprio — sao listas de itens dentro de
+         uma figura e de um painel — entao este e o unico cabecalho que elas
+         tem, e ele fica um nivel abaixo do h1 da pagina.
+
+         O wrapper repete o bloco do h1 da pagina (flex flex-col items-center
+         text-center gap-4 + separador + heading), e nao e um mb-10 no h2: o
+         items-center centraliza a caixa do tracinho, que e um bloco e nao
+         obedece ao text-center, e o text-center ainda segura a segunda linha
+         caso o titulo quebre. O mb-10 fica no wrapper porque o gap-4 e entre o
+         tracinho e o texto, e o respiro para a fita e de outro tamanho.
+
+         size="2xl" e nao .section-title: aquela utility trava o clamp de 28-40px,
+         que e a escala do h1, e um h2 com cara de h1 briga com o titulo da
+         pagina. O 2xl (24px) fica entre o h1 (40px) e o h2 do box (20px).
+
+         O separador e o mesmo do topo (h-4 rounded-full bg-divider), em w-1/4
+         em vez de w-1/2: no Container md, meia largura daria um tracinho de
+         496px sob um h2 de 24px, que e o dobro do que o h1 de 40px tem de
+         peso e brigaria com ele. h-4, rounded-full e bg-divider resolvem no
+         DS com os mesmos valores; o w-1/4 nao existe la (o DS so traz w-1/2,
+         w-16 e w-20), entao vem da camada do Tailwind. -->
+    <div class="mb-10 flex flex-col items-center text-center gap-4">
+      <div role="separator" aria-hidden="true" class="h-4 w-1/4 rounded-full bg-divider"></div>
+      <Heading as="2" size="2xl">Equipamentos de segurança, Acesso e Controle de Qualidade.</Heading>
+    </div>
+    <div class="flex flex-col gap-0">
+      {destaques.map((destaque) => (
+        <SafetyFeatureSection {...destaque} />
+      ))}
+    </div>
+  </Container>
 </Section>
 
 <script is:inline>
@@ -240,6 +365,15 @@ const compromissos = [
   }
 </style>
 
-  <SiteFooter />
+  <!-- Banner com a assinatura da marca em vez do texto comercial do rodape, e
+       so nesta pagina: o default continua no SiteFooter para as outras 15. O
+       texto da descricao volta a ser o subtitulo da home (AboutSection.astro),
+       agora com ponto final. Sem \n: o banner de 24h quebrava em duas linhas
+       porque o whitespace-pre-line do SiteFooter esta la justamente para isso,
+       e aqui o texto novo cabe em uma so. -->
+  <SiteFooter
+    bannerTitle="Camargo Gallo Engenharia"
+    bannerDescription="Técnica e trabalho renovando construções."
+  />
 
 </BaseLayout>

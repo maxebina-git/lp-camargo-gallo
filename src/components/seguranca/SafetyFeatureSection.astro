@@ -1,0 +1,642 @@
+---
+interface Props {
+  image: { src: string; alt: string }
+  /** Itens da lista que aparece dentro da faixa flutuante. E lista mesmo —
+      sem titulo e sem paragrafo. */
+  items: string[]
+  reverse?: boolean
+  /** Onde a secao esta na fita vertical. 'middle' e o padrao de proposito: a
+      secao do meio nao tem ponta nenhuma, entao esquec-la produz um bloco
+      quadrado — que e o comportamento certo — em vez de um arredondado solto. */
+  position?: 'first' | 'middle' | 'last'
+}
+
+const { image, items, reverse = false, position = 'middle' } = Astro.props
+---
+
+<section
+  class:list={[
+    'seg-dados flex items-stretch',
+    `seg-dados--${position}`,
+    reverse && 'seg-dados--reverse',
+  ]}
+>
+  <!-- Sem border e sem rounded-*: as tres coisas saem do <style> abaixo. O
+       `border` utilitario desenharia as quatro arestas, e o traço da fita e
+       so no perimetro; o raio utilitario do DS e unlayered, entao ninguem
+       manda no canto sem ser o <style>. O `shadow-sm` volta igual ao das
+       imagens de cima da pagina. -->
+  <figure class="seg-dados__foto overflow-hidden bg-surface shadow-sm">
+    <img
+      src={image.src}
+      alt={image.alt}
+      width="640"
+      height="480"
+      loading="lazy"
+      decoding="async"
+      class="aspect-[4/3] h-full w-full object-cover"
+    />
+  </figure>
+
+  <!-- Wrapper sem justify-center nem gap-4: ele ficou com um unico filho, a
+       caixa cinza, que ja e flex-1 e ocupa a coluna inteira. A classe
+       `seg-dados__texto` e o que dá os 60% do desktop a esta coluna — o
+       wrapper do texto, e nao a <section>, que divide a linha.
+       O `relative` e para a ponteira: ela e filha daqui e nao da caixa cinza
+       (ela nao pode ser filha: o overflow-hidden da caixa e o que recorta a
+       faixa na emenda da fita, e a ponteira precisa passar por cima dele para
+       cobrir a foto). O left:0/right:0 desta coluna cai exatamente na costura
+       foto|cinza, que e sem borda dos dois lados. -->
+  <div class="seg-dados__texto relative flex flex-col">
+    <!-- flex-1 para a caixa cinza acompanhar a altura da foto: sem isso ela
+         ficaria na altura do min-height enquanto a foto passa disso, e o painel
+         pararia de ser um retangulo so — sobraria um degrau na emenda. Com o
+         align-items:stretch do pai as duas alturas ficam iguais.
+
+         min-h-[280px], e nao os 400px que eram antes: o piso e de proposito
+         MENOR que a altura natural da foto (397px de largura no max-w-5xl do
+         Container, em 4:3 dao 297,6px), entao quem mede a linha e a foto, e nao
+         o piso — e a foto sai no 4:3 inteiro, sem crop. Com 400px de piso a
+         linha esticava as duas colunas e o object-cover comia ~100px de altura
+         da imagem, ja que h-full + w-full fecham as duas dimensoes e o
+         aspect-[4/3] do img deixava de valer.
+
+         Se subir o piso acima de 297,6px, a linha volta a ser o piso e a foto
+         volta a ser esticada e recortada — sem nenhum aviso. O que o piso
+         garante hoje e o respiro do mobile (a caixa cinza de 400px encolhe
+         para 280px com a lista estatica no fluxo) e o curso da faixa, que
+         sobra em ~110px contra os 213px de antes.
+
+         Tudo que a secao mostra esta dentro da caixa cinza, e nao solto na
+         coluna: enquanto houvesse elemento entre a foto e a caixa, a borda da
+         foto encontraria o fundo da pagina em vez do painel, e a emenda da fita
+         nao fechava. -->
+    <div class="seg-dados__area mouse-track-container relative min-h-[280px] flex-1 overflow-hidden bg-surface-alt shadow-sm">
+      <!-- Faixa de ponta a ponta: e a largura vem do inset-x-0 do absolute, sem
+           classe de largura. O rounded-lg saiu junto — com 100% da largura ele
+           abriria uns entalhes nas laterais contra o fundo da caixa. O
+           max-w-[45ch] fica num wrapper interno, para o bloco continuar solido
+           de ponta a ponta mas com linha de leitura confortavel. -->
+      <div class="mouse-follower absolute inset-x-0 top-0 z-10">
+        <!-- O spot da faixa mora no fundo deste div e nao num ::before: o
+             ::before seria o primeiro filho posicionado do pai e pintaria por
+             cima do texto. Aqui o gradiente entra como background-image por cima
+             do background-color do `bg-deep`, que e so cor
+             (.bg-deep{background-color:var(--color-deep)} no ds-grupo-rkb) e
+             nunca reseta a imagem. -->
+        <div class="mouse-follower__fundo bg-deep p-4 shadow-lg">
+          <div class="max-w-[45ch]">
+            <!-- text-on-deep e nao text-ink: a faixa e bg-deep (#3c405d) e o ink
+                 (#191617) sumiria nela. Branco sobre #3c405d da 10:1 de
+                 contraste.
+
+                 O marcador e um span e nao list-style: um <ul> com display:flex
+                 blockifica os <li> e o bullet some. O padrao do <li> flex
+                 items-start vem do bloco de compromissos em segurca.astro:140,
+                 e o mt-2 de 8px e o que centraliza o ponto de 4px na linha de
+                 ~19px do text-sm. -->
+            <ul class="m-0 flex flex-col gap-2">
+              {items.map((item) => (
+                <li class="flex items-start gap-2 text-sm leading-snug text-on-deep">
+                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent-500" aria-hidden="true"></span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ponteira: um trago de 40px por 2px que sai da faixa em direcao a foto,
+         na altura do cursor. Nasce depois da caixa cinza porque a posicao
+         estatica dela fica abaixo do bloco — e o que importa mesmo e o
+         left/right do <style>, que sao absolutos. O bg-deep e o mesmo da
+         faixa, solido e sem o gradiente: sao 2px de altura, e um halo de luz
+         atravessando um trago de 2px nao se le como continuidade, so como
+         ruido. O aria-hidden e porque e decorativa: ela repete a posicao que
+         a faixa ja passa sozinha. -->
+    <div class="seg-dados__linha bg-deep" aria-hidden="true"></div>
+  </div>
+</section>
+
+<script>
+  function initMouseTracking() {
+    const semHover = !window.matchMedia('(hover: hover)').matches
+    const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    // Nos dois casos titulo e paragrafo ja aparecem estaticos, pelo @media do
+    // <style> abaixo: nao ha nada para ligar e o listener so gastaria ciclo.
+    // Este return e o que impede a secao de sair vazia no celular.
+    if (semHover || semMovimento) return
+
+    // O listener fica na <section> e nao mais na caixa cinza: a faixa tem de
+    // acender e se mover com o cursor sobre a foto tambem. A medida continua
+    // sendo a da caixa cinza, porque e dela que a faixa e recortada — medir a
+    // section so funcionaria por causa da coincidencia de altura entre as duas
+    // colunas, e o codigo nao deve depender disso.
+    document.querySelectorAll<HTMLElement>('.seg-dados').forEach((section) => {
+      const area = section.querySelector<HTMLElement>('.mouse-track-container')
+      const follower = section.querySelector<HTMLElement>('.mouse-follower')
+      if (!area || !follower) return
+
+      // Mede as duas coisas UMA VEZ, no pointerenter, e no handler so escreve a
+      // custom property. getBoundingClientRect ou offsetHeight dentro do
+      // pointermove leriam o layout que a escrita anterior acabou de invalidar —
+      // o par le/escreve a cada evento derruba o frame. E o mesmo motivo do
+      // spotlight de segurca.astro:146.
+      let rect = area.getBoundingClientRect()
+      let meiaAltura = follower.offsetHeight / 2
+
+      const remedir = () => {
+        rect = area.getBoundingClientRect()
+        meiaAltura = follower.offsetHeight / 2
+      }
+
+      section.addEventListener('pointerenter', () => {
+        remedir()
+        // Quem acende a faixa e este atributo, e nao o :hover: quem decide se o
+        // efeito existe e o matchMedia acima, e o hover pointer de verdade.
+        section.setAttribute('data-hover', '')
+      })
+
+      // Quem acompanha o cursor em Y sao dois transforms, e os dois leem o mesmo
+      // --mouse-y: o da faixa (que ocupa a largura inteira da caixa) e o da
+      // ponteira. O -50% em cada um e a metade da propria caixa. O X entra em
+      // outro lugar, dentro do spot do fundo.
+      section.addEventListener('pointermove', (event) => {
+        const y = event.clientY - rect.top
+        // Prende a faixa dentro da caixa. Sem isso, com o cursor perto da borda
+        // de cima ou de baixo, aparecia meia faixa cortada pelo
+        // overflow-hidden. E aritmetica sobre o que ja foi medido no
+        // pointerenter — medir a faixa aqui forcaria layout a cada evento.
+        const limitado = Math.min(Math.max(y, meiaAltura), rect.height - meiaAltura)
+
+        // Na section e nao na caixa: a ponteira e IRMA da .mouse-track-container,
+        // nao filha. Escrita na caixa, a variavel nunca chegava nela, e o
+        // transform dela morria inteiro de "invalid at computed-value time" —
+        // o que nao era so o Y perdido, era o translateX que joga a ponteira
+        // sobre a foto. Quem le a variavel sao os dois: a faixa por heranca
+        // (caixa -> faixa) e a ponteira por heranca direta da section. Mesmo
+        // numero de escritas de antes, so mudou o destino.
+        section.style.setProperty('--mouse-y', `${limitado}px`)
+
+        // As duas abaixo sao o spot da faixa, e vao no .mouse-follower: so ele
+        // le o par --spot-*, e --mouse-y alimenta o transform (mexe na posicao)
+        // enquanto estas so alimentam o radial-gradient do fundo (repintam sem
+        // layout).
+        //
+        // O Y e `y - limitado + meiaAltura`: o gradiente e pintado no filho, cujo
+        // topo e o topo da faixa, entao o valor precisa ser a posicao do cursor
+        // DENTRO da faixa — e nao a posicao da faixa dentro da caixa, que seria
+        // `limitado - meiaAltura` e deixaria o brilho ancorado na borda de cima.
+        // Nos tres casos o valor cai dentro da faixa: no meio da caixa da
+        // meiaAltura (o cursor no meio da faixa), travado em cima da caixa da 0
+        // (o cursor na borda de cima da faixa) e travado embaixo da bandH.
+        follower.style.setProperty('--spot-x', `${event.clientX - rect.left - area.clientLeft}px`)
+        follower.style.setProperty('--spot-y', `${y - limitado + meiaAltura}px`)
+      })
+
+      section.addEventListener('pointerleave', () => {
+        section.removeAttribute('data-hover')
+      })
+
+      // A caixa se desloca com a pagina enquanto o cursor nao: sem remedir no
+      // scroll a faixa ficaria presa na coordenada antiga da tela. passive:
+      // true para nao travar a rolagem.
+      window.addEventListener('resize', remedir)
+      window.addEventListener('scroll', remedir, { passive: true })
+    })
+  }
+
+  initMouseTracking()
+</script>
+
+<style>
+  /* flex-direction, width e gap sao daqui, e nao utilities, pelo mesmo motivo que
+     segurca.astro:76-85 documenta para o grid: o ds-grupo-rkb entrega .flex-col,
+     .w-1\/2 e .gap-8 como regras UNLAYERED, e no CSS cascade unlayered ganha de
+     @layer utilities do Tailwind em qualquer ordem de fonte — media query nao
+     acrescenta especificidade. Entao `flex flex-col md:flex-row`, `md:w-1\/2` e
+     `md:gap-0` seriam vencidos pela base em toda largura, e o zig-zag nunca
+     viraria. Este <style> escopado sai como .seg-dados[data-astro-cid-*],
+     especificidade (0,2,0) contra (0,1,0) do DS. */
+  .seg-dados {
+    flex-direction: column;
+    /* Zero em toda largura, e nao so no desktop: e a fita de tres secoes que
+       se mantem colada nos dois formatos. No mobile encosta foto e caixa cinza
+       dentro de cada secao; no desktop encosta as duas colunas. */
+    gap: 0;
+  }
+
+  /* Largura por classe nomeada, e nao por .seg-dados > *: o combinador de
+     filho tem especificidade (0,3,0) contra (0,2,0) de uma classe sozinha com o
+     [data-astro-cid-*] que o Astro poe nela — e venceria a regra da foto, as
+     duas colunas voltariam a ter a mesma largura. */
+  .seg-dados__foto,
+  .seg-dados__texto {
+    width: 100%;
+  }
+
+  @media (width >= 48rem) {
+    .seg-dados {
+      flex-direction: row;
+    }
+
+    /* 40/60, e nao 50/50: a foto encolhe e a caixa cinza fica com a maior fatia.
+       A soma e 100% porque o gap e 0 — qualquer sobra viraria um vao entre as
+       duas, que e o que a emenda nao pode ter. */
+    .seg-dados__foto {
+      width: 40%;
+    }
+
+    .seg-dados__texto {
+      width: 60%;
+    }
+  }
+
+  /* Depois do bloco acima, e nao antes: mesma especificidade, vence o ultimo.
+     `--reverse` so troca a ordem no desktop — no mobile as duas colunas
+     empilham na mesma ordem (foto, depois texto), que e a leitura natural. */
+  .seg-dados--reverse {
+    flex-direction: column;
+  }
+
+  @media (width >= 48rem) {
+    .seg-dados--reverse {
+      flex-direction: row-reverse;
+    }
+  }
+
+  /* A fita. Os dois elementos nascem com as quatro arestas sem traço e todos os
+     cantos retos: o traço é por aresta porque só o perímetro da fita o recebe,
+     e uma classe utilitaria `border` desenharia as quatro. Este reset é o que
+     dispensa regra nenhuma para a secao do meio — ela ja nasce quadrada.
+
+     Sem box-shadow:none aqui de propósito: o `shadow-sm` precisa vencer, e este
+     reset escopado a (0,2,0) unlayered ganharia do `.shadow-sm` (0,1,0) do
+     Tailwind em qualquer ordem de fonte.
+
+     Longhands de raio, e nao rounded-tl-lg: o DS entrega os utilitarios de raio
+     por canto como unlayered, e eles venceriam qualquer variante. */
+  .seg-dados__foto,
+  .seg-dados__area {
+    border: 0;
+    border-radius: 0;
+  }
+
+  /* --- Traço do perímetro ---
+     Lateral e vertical sao familias separadas porque obedecem a regras
+     diferentes: a lateral depende do zig-zag, a vertical depende da posicao na
+     fita. Nenhuma das duas repete aresta da outra, entao convivem.
+
+     Nenhum shorthand `border:` aparece depois das longhand de baixo — o
+     shorthand reescreveria as arestas que elas acabou de zerar. */
+
+  /* Mobile: a fita e uma coluna de seis caixas de largura total, entao a
+     esquerda e a direita de todas as seis sao perimetro. (0,2,0), depois do
+     reset, entao as laterais vencem sem media query.) */
+  .seg-dados__foto,
+  .seg-dados__area {
+    border-left: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+  }
+
+  /* Topo da fita. No mobile so a foto da 1a esta na borda de cima; no desktop
+     as duas metades dela estao, e a regra da caixa cinza entra no @media
+     abaixo. */
+  .seg-dados--first .seg-dados__foto {
+    border-top: 1px solid var(--color-border);
+    border-bottom: 0;
+  }
+
+  /* Base da fita: espelho do topo. */
+  .seg-dados--last .seg-dados__area {
+    border-top: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (width >= 48rem) {
+    /* No desktop a lateral externa de cada metade depende do zig-zag: sem
+       --reverse a foto fica a esquerda, com --reverse ela vai para a direita.
+       (0,5,0) e (0,6,0) contra (0,2,0) da regra mobile acima, entao substituem
+       as duas laterais em vez de so acrescentar uma. */
+    .seg-dados:not(.seg-dados--reverse) .seg-dados__foto {
+      border-left: 1px solid var(--color-border);
+      border-right: 0;
+    }
+
+    .seg-dados:not(.seg-dados--reverse) .seg-dados__area {
+      border-left: 0;
+      border-right: 1px solid var(--color-border);
+    }
+
+    .seg-dados--reverse .seg-dados__area {
+      border-left: 1px solid var(--color-border);
+      border-right: 0;
+    }
+
+    .seg-dados--reverse .seg-dados__foto {
+      border-left: 0;
+      border-right: 1px solid var(--color-border);
+    }
+
+    /* E as duas metades da ponta ganham a borda vertical, porque em row as duas
+       estao na mesma borda da fita. Estas duas regras sao as unicas do arquivo
+       que so valem no desktop: no mobile o topo da caixa cinza da 1a e a base
+       da foto da 3a sao costura, nao perimetro. */
+    .seg-dados--first .seg-dados__area {
+      border-top: 1px solid var(--color-border);
+      border-bottom: 0;
+    }
+
+    .seg-dados--last .seg-dados__foto {
+      border-top: 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
+
+  /* Mobile: a foto vem em cima e a caixa cinza embaixo, entao a ponta de cima
+     da fita e a foto da 1a, e a de baixo e a caixa cinza da 3a. Os outros dois
+     pares de cantos sao costura — foto|caixa dentro da secao, e secao|secao —
+     e ficam retos. */
+  .seg-dados--first .seg-dados__foto {
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+  }
+
+  .seg-dados--last .seg-dados__area {
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+  }
+
+  @media (width >= 48rem) {
+    /* Em row as DUAS colunas estao na borda de cima da fita, entao as duas
+       arredondam. Qual canto e o externo depende do zig-zag: sem --reverse a
+       foto fica a esquerda, com --reverse ela vai para a direita.
+
+       Os dois cantos de topo sao re-declarados aqui para zerar o que o bloco
+       mobile acima deixou arredondado: sem isso o canto interno da costura
+       foto|cinza arredondaria no desktop. A especificidade (0,5,0) — contando
+       o [data-astro-cid-*] que o Astro poe em cada seletor — contra (0,4,0) do
+       bloco mobile e o que faz este lado vencer. E o `--reverse` aparece porque
+       nao existe seletor CSS para posicao visual: em row-reverse a tela inverte,
+       mas a ordem no DOM continua foto -> caixa. */
+    .seg-dados--first:not(.seg-dados--reverse) .seg-dados__foto {
+      border-top-left-radius: var(--radius-lg);
+      border-top-right-radius: 0;
+    }
+
+    .seg-dados--first:not(.seg-dados--reverse) .seg-dados__area {
+      border-top-left-radius: 0;
+      border-top-right-radius: var(--radius-lg);
+    }
+
+    .seg-dados--first.seg-dados--reverse .seg-dados__foto {
+      border-top-left-radius: 0;
+      border-top-right-radius: var(--radius-lg);
+    }
+
+    .seg-dados--first.seg-dados--reverse .seg-dados__area {
+      border-top-left-radius: var(--radius-lg);
+      border-top-right-radius: 0;
+    }
+
+    /* Base da fita: espelho do topo. */
+    .seg-dados--last:not(.seg-dados--reverse) .seg-dados__foto {
+      border-bottom-left-radius: var(--radius-lg);
+      border-bottom-right-radius: 0;
+    }
+
+    .seg-dados--last:not(.seg-dados--reverse) .seg-dados__area {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: var(--radius-lg);
+    }
+
+    .seg-dados--last.seg-dados--reverse .seg-dados__foto {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: var(--radius-lg);
+    }
+
+    .seg-dados--last.seg-dados--reverse .seg-dados__area {
+      border-bottom-left-radius: var(--radius-lg);
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  /* --mouse-y recebe px do script acima, na <section> — e o fallback fica aqui
+     pelo mesmo motivo: a faixa herda atraves da caixa, mas a ponteira herda
+     direto, entao uma declaracao so na .mouse-track-container nao alcancaria
+     as duas. O fallback em % segura as duas no meio da caixa no primeiro
+     frame, antes do primeiro pointermove. */
+  .seg-dados {
+    --mouse-y: 50%;
+  }
+
+  /* A faixa so se translada: o spotlight dela mora no fundo do filho, mais
+     abaixo. O -50% do calc e a metade da PROPRIA faixa, que e o que centraliza
+     ela no cursor — e nao o da caixa.
+     O transition vai inteiro aqui porque o shorthand sobrescreveria a
+     transition-opacity da utility e a faixa apareceria a seco; e o transform
+     tem a sua propria de 100ms, que e o que da a sensacao de arrasto. */
+  .mouse-follower {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(calc(var(--mouse-y) - 50%));
+    transition:
+      opacity 300ms ease-out,
+      transform 100ms ease-out;
+  }
+
+  /* O atributo vai na <section>, que e quem recebe os pointer events agora — e
+     nao mais na caixa cinza. O seletor e com atributo e nao :hover de proposito:
+     quem acende a faixa e o script, depois da checagem de movimento reduzido. */
+  .seg-dados[data-hover] .mouse-follower {
+    opacity: 1;
+  }
+
+  /* --- Ponteira ---
+     Trago de 40px por 2px que sai da faixa em direcao a foto, na altura do
+     cursor. Fica solido no bg-deep da faixa, sem o gradiente nem a sombra: sao
+     2px de altura, e nenhum dos dois se le nessa escala.
+
+     O Y sai do mesmo --mouse-y da faixa, sem medida e sem escrita nova: como a
+     linha nasce em top:0 da coluna, o -50% do translate (metade dos 2px) a
+     centra em --mouse-y, que ja e o centro da faixa depois do clamp. Entao as
+     duas andam juntas de graca e param juntas nas bordas da caixa. */
+  .seg-dados__linha {
+    --linha-comprimento: 40px;
+    --linha-espessura: 2px;
+    --linha-ponto: 15px;
+    /* None e o padrao: as posicoes so existem no @media do desktop abaixo, e no
+       mobile a linha precisa sumir em vez de ficar no canto estatico da caixa. */
+    display: none;
+    position: absolute;
+    top: 0;
+    width: var(--linha-comprimento);
+    height: var(--linha-espessura);
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 300ms ease-out,
+      transform 100ms ease-out;
+  }
+
+  /* O circulo da ponta livre: um ::after e nao um elemento no template porque
+     assim ele acende, apaga e anda junto com a linha sem nenhum script a mais —
+     a opacity do pai compoe o pseudo-elemento junto. Fica centrado na
+     ponta que NAO encosta na faixa (a outra morde a costura e nao precisa de
+     marca), entao metade do circulo passa dos dois lados dos 2px da linha.
+
+     Cheio, e nao vazado: a mesma cor da borda e da linha, entao o 2px de borda
+     some dentro do preenchimento e o desenho le como um ponto solido. A borda
+     fica declarada mesmo assim porque e ela que mantem o diametro em
+     --linha-ponto: com o border-box do preflight, os 15px ja incluem os 2px,
+     e sem a borda o ponto cresceria outros 2px. E o mesmo --color-deep do
+     bg-deep da linha, entao os dois mudam de tema juntos. */
+  .seg-dados__linha::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: var(--linha-ponto);
+    height: var(--linha-ponto);
+    border: var(--linha-espessura) solid var(--color-deep);
+    border-radius: 50%;
+    background-color: var(--color-deep);
+    transform: translate(-50%, -50%);
+  }
+
+  @media (width >= 48rem) {
+    /* O lado e o do zig-zag: sem --reverse a foto fica a esquerda e a ponteira
+       sai pela esquerda; com --reverse a foto vai para a direita e a ponteira
+       sai pela direita. O -100%/+100% anda exatamente o comprimento da linha
+       para fora da coluna, entao a ponta de dentro encosta na costura.
+       O fallback do var() e proposital: sem ele, um --mouse-y ausente aqui
+       derrubaria o transform INTEIRO e a ponteira viraria um trago dentro da
+       caixa cinza, sem o eixo X que a joga sobre a foto. Com o fallback a
+       falha mexe so na altura. (0,5,0) e (0,4,0) contra (0,2,0) da regra base,
+       contando o [data-astro-cid-*] que o Astro poe em cada seletor. */
+    .seg-dados:not(.seg-dados--reverse) .seg-dados__linha {
+      display: block;
+      left: 0;
+      transform: translate(-100%, calc(var(--mouse-y, 50%) - 50%));
+    }
+
+    .seg-dados--reverse .seg-dados__linha {
+      display: block;
+      right: 0;
+      transform: translate(100%, calc(var(--mouse-y, 50%) - 50%));
+    }
+
+    /* O circulo e na regra do lado, e nao numa regra so dele: a ponta livre e a
+       esquerda na 1a e na 3a e a direita na 2a, porque o -100%/+100% anda a
+       linha para fora da coluna. O translate(-50%, -50%) da regra base e o que
+       recentra o circulo na ponta, e por isso os dois lados posicionam pela
+       MESMA borda do circulo — a que encosta na ponta. E o que impede o
+       almostramento que a 1a versao tinha no --reverse: com `right: 0` a borda
+       direita do circulo encostava na ponta e o -50% a empurrava mais 7,5px
+       para dentro, deixando a ponta da linha 7,5px alem do circulo. Aqui e
+       `left: 100%`, que e a mesma borda (a esquerda) contra a mesma ponta
+       (a direita), entao o -50% recentra em vez de afastar. */
+    .seg-dados:not(.seg-dados--reverse) .seg-dados__linha::after {
+      left: 0;
+    }
+
+    .seg-dados--reverse .seg-dados__linha::after {
+      left: 100%;
+    }
+  }
+
+  /* Acende e apaga com a faixa, pelo mesmo atributo e a mesma transition. */
+  .seg-dados[data-hover] .seg-dados__linha {
+    opacity: 1;
+  }
+
+  /* --- Spotlight da faixa ---
+     Mesma receita do radial-gradient duplo de segurca.astro (nucleo branco em
+     cima, halo largo embaixo), aqui com as duas custom properties no
+     .mouse-follower porque e nele que o script escreve — o filho so herda.
+
+     O fallback em % e o que segura o gradiente antes do primeiro pointermove.
+     A faixa ja entra com opacity 0 e so acende em [data-hover], entao esse
+     estado quase nunca aparece; ele existe para o caso de o script nao rodar. */
+  .mouse-follower {
+    --spot-x: 50%;
+    --spot-y: 50%;
+    --spot-raio: 30rem;
+    --spot-nucleo: 14rem;
+  }
+
+  .mouse-follower__fundo {
+    background-image:
+      radial-gradient(
+        var(--spot-nucleo) circle at var(--spot-x) var(--spot-y),
+        color-mix(in oklab, var(--color-on-deep) 8%, transparent),
+        color-mix(in oklab, var(--color-on-deep) 5%, transparent) 36%,
+        color-mix(in oklab, var(--color-on-deep) 2%, transparent) 68%,
+        transparent 100%
+      ),
+      radial-gradient(
+        var(--spot-raio) circle at var(--spot-x) var(--spot-y),
+        color-mix(in oklab, var(--color-accent-500) 28%, transparent),
+        color-mix(in oklab, var(--color-accent-500) 20%, transparent) 26%,
+        color-mix(in oklab, var(--color-accent-500) 11%, transparent) 50%,
+        color-mix(in oklab, var(--color-accent-500) 4%, transparent) 76%,
+        transparent 100%
+      );
+  }
+
+  /* Os alphas sao bem menores que os do box de segurca.astro (84% e 24%) por
+     causa do texto: aqui a faixa tem 5 ou 6 linhas em ~200px, entao o pico do
+     brilho cai em cima das palavras o tempo todo, e nao de passagem como no box
+     grande. O pior pixel e o centro do nucleo, e ele e oaccent a 28% sobre o
+     #3c405d seguido de 8% de branco por cima — rgb(78,102,148), luminancia
+     0,133, que deixa o texto branco em 5,7:1 (piso AA de 4,5:1 para o text-sm da
+     lista). Subir os dois alphas da o brilho e derruba o texto junto: no dobro
+     deles o pior pixel cai para 3,2:1, que e onde o box de /seguranca ja esta.
+
+     E o raio e 30rem, e nao os 50rem do box: a faixa tem 37rem de largura no
+     desktop (60% dos 992px de conteudo do Container md, em segurca.astro),
+     entao com 50rem o halo nunca chegaria a zero dentro dela e as pontas
+     ficariam iluminadas com o cursor no meio. */
+
+  /* Sem cursor e sem movimento o texto nao pode depender do hover — senao
+     touch e prefers-reduced-motion ficariam com titulo e nenhum paragrafo.
+     Nos dois casos a faixa vira conteudo estatico, no fluxo, e o container
+     dispensa a altura minima. */
+  @media (hover: none), (prefers-reduced-motion: reduce) {
+    .mouse-follower {
+      position: static;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      transition: none;
+    }
+
+    /* O spot morre junto. O script nem chega a rodar nesses dois casos (o
+       return logo no topo dele), entao sem esta regra o gradiente ficaria
+       parado no fallback de 50%/50%, visivel e parado. E a mesma convencao do
+       box de /seguranca, que nunca recebe o data-spotlight: sem movimento
+       nao tem efeito de luz. */
+    .mouse-follower__fundo {
+      background-image: none;
+    }
+
+    /* A ponteira morre junto, e precisa ser escrito com os DOIS seletores do
+       zig-zag: eles empatam em especificidade com as duas regras do @media do
+       desktop ((0,5,0) e (0,4,0)), e quem decide ai e so a ordem de fonte — e
+       este bloco e o ultimo do arquivo. Um .seg-dados__linha solto de (0,2,0)
+       perderia para as duas e a ponteira continuaria aparecendo num desktop com
+       movimento reduzido. Alem disso ela nao tem nem --mouse-y nem data-hover
+       para se apoiar: o script nem roda nesses dois casos. */
+    .seg-dados:not(.seg-dados--reverse) .seg-dados__linha,
+    .seg-dados--reverse .seg-dados__linha {
+      display: none;
+    }
+
+    .mouse-track-container {
+      min-height: 0;
+    }
+  }
+</style>
