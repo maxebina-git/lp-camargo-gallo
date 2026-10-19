@@ -11,7 +11,7 @@ function cg_sanitize_insight_content($value)
         return '';
     }
 
-    $allowedTags = ['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br'];
+    $allowedTags = ['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];
     $allowedMarkup = '<' . implode('><', $allowedTags) . '>';
     $clean = strip_tags($value, $allowedMarkup);
 

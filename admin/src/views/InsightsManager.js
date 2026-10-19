@@ -1,5 +1,5 @@
 const MIN_LOADING_MS = 600;
-const EDITOR_ALLOWED_TAGS = new Set(['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br']);
+const EDITOR_ALLOWED_TAGS = new Set(['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br', 'table', 'thead', 'tbody', 'tr', 'th', 'td']);
 const EDITOR_REMOVED_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button', 'svg', 'math']);
 
 function cleanEditorNode(node) {
@@ -139,8 +139,15 @@ export default {
                                         <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('underline')" title="Sublinhado" aria-label="Aplicar sublinhado" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm text-gray-700 underline hover:bg-gray-200">U</button>
                                         <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('insertUnorderedList')" title="Lista com marcadores" aria-label="Inserir lista com marcadores" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">• Lista</button>
                                         <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('formatBlock', 'blockquote')" title="Citação" aria-label="Aplicar citação" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">❝ Citação</button>
+                                        <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="openTableDialog" title="Inserir tabela" aria-label="Inserir tabela" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">▦ Tabela</button>
                                     </div>
-                                    <div ref="contentEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Conteúdo do insight" @input="syncContent" @paste.prevent="pastePlainText" class="min-h-[180px] whitespace-pre-wrap p-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                                    <div v-if="showTableDialog" class="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-blue-50 p-3">
+                                        <label class="text-xs font-medium text-gray-700">Linhas (inclui cabeçalho)<input ref="tableRowsInput" v-model.number="tableRows" type="number" min="1" max="20" @keydown.enter.prevent="insertTable" @keydown.esc.prevent="cancelTableDialog" class="mt-1 block w-20 rounded border border-gray-300 bg-white p-1.5 text-sm"></label>
+                                        <label class="text-xs font-medium text-gray-700">Colunas<input v-model.number="tableColumns" type="number" min="1" max="10" @keydown.enter.prevent="insertTable" @keydown.esc.prevent="cancelTableDialog" class="mt-1 block w-20 rounded border border-gray-300 bg-white p-1.5 text-sm"></label>
+                                        <button type="button" @click="cancelTableDialog" class="rounded px-3 py-1.5 text-xs text-gray-600 hover:bg-blue-100">Cancelar</button>
+                                        <button type="button" @click="insertTable" class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">Inserir</button>
+                                    </div>
+                                    <div ref="contentEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Conteúdo do insight" @input="syncContent" @paste.prevent="pastePlainText" class="min-h-[180px] overflow-x-auto whitespace-pre-wrap p-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500"></div>
                                 </div>
                                 <p class="mt-1 text-xs text-gray-500">Selecione um trecho e use os botões para formatar o conteúdo.</p>
                             </div>
@@ -184,7 +191,10 @@ export default {
             uploadError: '',
             saving: false,
             form: { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' },
-            savedEditorRange: null
+            savedEditorRange: null,
+            showTableDialog: false,
+            tableRows: 3,
+            tableColumns: 3
         };
     },
     mounted() {
@@ -210,6 +220,7 @@ export default {
             this.uploadError = '';
             this.saving = false;
             this.savedEditorRange = null;
+            this.showTableDialog = false;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
             this.$nextTick(() => this.setEditorContent(''));
@@ -221,6 +232,7 @@ export default {
             this.uploadError = '';
             this.saving = false;
             this.savedEditorRange = null;
+            this.showTableDialog = false;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
             this.$nextTick(() => this.setEditorContent(item.conteudo || ''));
@@ -228,10 +240,15 @@ export default {
         closeModal() {
             window.removeEventListener('keydown', this.onEscKey);
             this.savedEditorRange = null;
+            this.showTableDialog = false;
             this.showModal = false;
         },
         onEscKey(event) {
             if (event.key === 'Escape' && !this.saving) {
+                if (this.showTableDialog) {
+                    this.cancelTableDialog();
+                    return;
+                }
                 this.closeModal();
             }
         },
@@ -240,7 +257,7 @@ export default {
             if (!editor) return;
 
             const raw = String(value || '');
-            const hasMarkup = /<\s*(p|div|span|strong|b|u|ul|li|blockquote|br)\b/i.test(raw);
+            const hasMarkup = /<\s*(p|div|span|strong|b|u|ul|li|blockquote|br|table|thead|tbody|tr|th|td)\b/i.test(raw);
             if (hasMarkup) {
                 editor.innerHTML = sanitizeEditorHtml(raw);
             } else {
@@ -293,6 +310,60 @@ export default {
                 document.execCommand(command, false, value);
             }
             this.syncContent();
+        },
+        openTableDialog() {
+            this.saveEditorSelection();
+            this.tableRows = 3;
+            this.tableColumns = 3;
+            this.showTableDialog = true;
+            this.$nextTick(() => this.$refs.tableRowsInput?.focus());
+        },
+        cancelTableDialog() {
+            this.showTableDialog = false;
+        },
+        insertTable() {
+            const editor = this.$refs.contentEditor;
+            if (!editor) return;
+
+            const rows = Math.min(20, Math.max(1, Number.parseInt(this.tableRows, 10) || 1));
+            const columns = Math.min(10, Math.max(1, Number.parseInt(this.tableColumns, 10) || 1));
+            this.tableRows = rows;
+            this.tableColumns = columns;
+            this.restoreEditorSelection();
+
+            let tableHtml = '<table><thead><tr>';
+            for (let column = 1; column <= columns; column += 1) {
+                tableHtml += `<th>Coluna ${column}</th>`;
+            }
+            tableHtml += '</tr></thead><tbody>';
+            for (let row = 1; row < rows; row += 1) {
+                tableHtml += '<tr>';
+                for (let column = 1; column <= columns; column += 1) {
+                    tableHtml += '<td><br></td>';
+                }
+                tableHtml += '</tr>';
+            }
+            tableHtml += '</tbody></table><p><br></p>';
+
+            const before = editor.innerHTML;
+            const inserted = document.execCommand('insertHTML', false, tableHtml);
+            if (!inserted && editor.innerHTML === before) {
+                const selection = window.getSelection();
+                if (selection && selection.rangeCount) {
+                    const range = selection.getRangeAt(0);
+                    const template = document.createElement('template');
+                    template.innerHTML = tableHtml;
+                    range.deleteContents();
+                    range.insertNode(template.content);
+                    range.collapse(false);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            }
+
+            this.syncContent();
+            this.showTableDialog = false;
+            editor.focus();
         },
         onFileChange(event) {
             const file = event.target.files && event.target.files[0];
