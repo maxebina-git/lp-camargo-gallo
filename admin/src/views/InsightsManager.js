@@ -83,7 +83,7 @@ export default {
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Resumo</label>
-                                <textarea v-model="form.resumo" rows="2" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
+                                <input v-model="form.resumo" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Conteúdo</label>
