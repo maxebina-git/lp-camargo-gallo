@@ -11,6 +11,23 @@
         [v-cloak] { display: none; }
         #boot-fallback { display: none; }
 
+        [contenteditable="true"] ul {
+            list-style: disc;
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+        [contenteditable="true"] li {
+            display: list-item;
+            margin: 0.25rem 0;
+        }
+        [contenteditable="true"] blockquote {
+            margin: 0.75rem 0;
+            border-left: 4px solid #d1d5db;
+            padding-left: 0.75rem;
+            color: #4b5563;
+            font-style: italic;
+        }
+
         .anim-wrap { position: relative; width: 128px; height: 136px; margin: 0; }
         .anim-wrap .scene { position: relative; width: 320px; height: 340px; transform: scale(0.4); transform-origin: top left; }
         .anim-wrap .particles { position: absolute; inset: 0; pointer-events: none; }

@@ -135,10 +135,10 @@ export default {
                                 <label class="block text-sm font-medium text-gray-700">Conteúdo</label>
                                 <div class="mt-1 overflow-hidden rounded-md border border-gray-300 bg-white">
                                     <div class="flex flex-wrap items-center gap-1 border-b border-gray-200 bg-gray-50 p-2">
-                                        <button type="button" @mousedown.prevent="applyFormat('bold')" title="Negrito" aria-label="Aplicar negrito" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm font-bold text-gray-700 hover:bg-gray-200">B</button>
-                                        <button type="button" @mousedown.prevent="applyFormat('underline')" title="Sublinhado" aria-label="Aplicar sublinhado" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm text-gray-700 underline hover:bg-gray-200">U</button>
-                                        <button type="button" @mousedown.prevent="applyFormat('insertUnorderedList')" title="Lista com marcadores" aria-label="Inserir lista com marcadores" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">• Lista</button>
-                                        <button type="button" @mousedown.prevent="applyFormat('formatBlock', '<blockquote>')" title="Citação" aria-label="Aplicar citação" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">❝ Citação</button>
+                                        <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('bold')" title="Negrito" aria-label="Aplicar negrito" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm font-bold text-gray-700 hover:bg-gray-200">B</button>
+                                        <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('underline')" title="Sublinhado" aria-label="Aplicar sublinhado" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm text-gray-700 underline hover:bg-gray-200">U</button>
+                                        <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('insertUnorderedList')" title="Lista com marcadores" aria-label="Inserir lista com marcadores" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">• Lista</button>
+                                        <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('formatBlock', 'blockquote')" title="Citação" aria-label="Aplicar citação" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">❝ Citação</button>
                                     </div>
                                     <div ref="contentEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Conteúdo do insight" @input="syncContent" @paste.prevent="pastePlainText" class="min-h-[180px] whitespace-pre-wrap p-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500"></div>
                                 </div>
@@ -183,7 +183,8 @@ export default {
             uploading: false,
             uploadError: '',
             saving: false,
-            form: { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' }
+            form: { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' },
+            savedEditorRange: null
         };
     },
     mounted() {
@@ -208,6 +209,7 @@ export default {
             this.uploading = false;
             this.uploadError = '';
             this.saving = false;
+            this.savedEditorRange = null;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
             this.$nextTick(() => this.setEditorContent(''));
@@ -218,12 +220,14 @@ export default {
             this.uploading = false;
             this.uploadError = '';
             this.saving = false;
+            this.savedEditorRange = null;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
             this.$nextTick(() => this.setEditorContent(item.conteudo || ''));
         },
         closeModal() {
             window.removeEventListener('keydown', this.onEscKey);
+            this.savedEditorRange = null;
             this.showModal = false;
         },
         onEscKey(event) {
@@ -248,6 +252,27 @@ export default {
             const editor = this.$refs.contentEditor;
             if (editor) this.form.conteudo = editor.innerHTML;
         },
+        saveEditorSelection() {
+            const editor = this.$refs.contentEditor;
+            const selection = window.getSelection();
+            if (!editor || !selection || !selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+            if (editor.contains(range.commonAncestorContainer)) {
+                this.savedEditorRange = range.cloneRange();
+            }
+        },
+        restoreEditorSelection() {
+            const editor = this.$refs.contentEditor;
+            const selection = window.getSelection();
+            if (!editor || !selection) return;
+
+            editor.focus();
+            if (!this.savedEditorRange || !editor.contains(this.savedEditorRange.commonAncestorContainer)) return;
+
+            selection.removeAllRanges();
+            selection.addRange(this.savedEditorRange);
+        },
         pastePlainText(event) {
             const text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
             document.execCommand('insertText', false, text);
@@ -257,8 +282,16 @@ export default {
             const editor = this.$refs.contentEditor;
             if (!editor) return;
 
-            editor.focus();
-            document.execCommand(command, false, value);
+            this.restoreEditorSelection();
+            if (command === 'formatBlock') {
+                const before = editor.innerHTML;
+                const applied = document.execCommand(command, false, value || 'blockquote');
+                if (editor.innerHTML === before && !applied) {
+                    document.execCommand(command, false, '<blockquote>');
+                }
+            } else {
+                document.execCommand(command, false, value);
+            }
             this.syncContent();
         },
         onFileChange(event) {
