@@ -1,6 +1,23 @@
 const MIN_LOADING_MS = 600;
-const EDITOR_ALLOWED_TAGS = new Set(['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br', 'table', 'thead', 'tbody', 'tr', 'th', 'td']);
+const EDITOR_ALLOWED_TAGS = new Set(['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a']);
 const EDITOR_REMOVED_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button', 'svg', 'math']);
+
+function normalizeEditorHref(value) {
+    const href = String(value || '').trim();
+    if (!href || /^\s*(?:javascript|data|vbscript):/i.test(href) || href.startsWith('//')) return '';
+
+    try {
+        const parsed = new URL(href, window.location.origin);
+        if (!['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol)) return '';
+        if (/^(?:https?:)?\/\//i.test(href) || href.startsWith('/') || href.startsWith('#') || href.startsWith('./') || href.startsWith('../') || /^(?:mailto|tel):/i.test(href)) {
+            return href;
+        }
+    } catch (error) {
+        return '';
+    }
+
+    return '';
+}
 
 function cleanEditorNode(node) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -15,6 +32,24 @@ function cleanEditorNode(node) {
     const children = Array.from(node.childNodes)
         .map(cleanEditorNode)
         .filter(Boolean);
+
+    if (tag === 'a') {
+        const href = normalizeEditorHref(node.getAttribute('href'));
+        if (!href) {
+            const fragment = document.createDocumentFragment();
+            children.forEach((child) => fragment.appendChild(child));
+            return fragment;
+        }
+
+        const clean = document.createElement('a');
+        clean.setAttribute('href', href);
+        if (node.getAttribute('target') === '_blank') {
+            clean.target = '_blank';
+            clean.rel = 'noopener noreferrer';
+        }
+        children.forEach((child) => clean.appendChild(child));
+        return clean;
+    }
 
     if (EDITOR_ALLOWED_TAGS.has(tag)) {
         const clean = document.createElement(tag);
@@ -140,12 +175,19 @@ export default {
                                         <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('insertUnorderedList')" title="Lista com marcadores" aria-label="Inserir lista com marcadores" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">• Lista</button>
                                         <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="applyFormat('formatBlock', 'blockquote')" title="Citação" aria-label="Aplicar citação" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">❝ Citação</button>
                                         <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="openTableDialog" title="Inserir tabela" aria-label="Inserir tabela" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">▦ Tabela</button>
+                                        <button type="button" @mousedown.prevent="saveEditorSelection" @click.prevent="openLinkDialog" title="Inserir link" aria-label="Inserir link" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">🔗 Link</button>
                                     </div>
                                     <div v-if="showTableDialog" class="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-blue-50 p-3">
                                         <label class="text-xs font-medium text-gray-700">Linhas (inclui cabeçalho)<input ref="tableRowsInput" v-model.number="tableRows" type="number" min="1" max="20" @keydown.enter.prevent="insertTable" @keydown.esc.prevent="cancelTableDialog" class="mt-1 block w-20 rounded border border-gray-300 bg-white p-1.5 text-sm"></label>
                                         <label class="text-xs font-medium text-gray-700">Colunas<input v-model.number="tableColumns" type="number" min="1" max="10" @keydown.enter.prevent="insertTable" @keydown.esc.prevent="cancelTableDialog" class="mt-1 block w-20 rounded border border-gray-300 bg-white p-1.5 text-sm"></label>
                                         <button type="button" @click="cancelTableDialog" class="rounded px-3 py-1.5 text-xs text-gray-600 hover:bg-blue-100">Cancelar</button>
                                         <button type="button" @click="insertTable" class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">Inserir</button>
+                                    </div>
+                                    <div v-if="showLinkDialog" class="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-blue-50 p-3">
+                                        <label class="min-w-[16rem] flex-1 text-xs font-medium text-gray-700">URL<input ref="linkUrlInput" v-model="linkUrl" type="text" placeholder="https://exemplo.com" @keydown.enter.prevent="applyLink" @keydown.esc.prevent="cancelLinkDialog" class="mt-1 block w-full rounded border border-gray-300 bg-white p-1.5 text-sm"></label>
+                                        <label class="flex items-center gap-2 pb-2 text-xs text-gray-700"><input v-model="linkNewTab" type="checkbox" class="rounded border-gray-300">Abrir em nova aba</label>
+                                        <button type="button" @click="cancelLinkDialog" class="rounded px-3 py-1.5 text-xs text-gray-600 hover:bg-blue-100">Cancelar</button>
+                                        <button type="button" @click="applyLink" class="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">Aplicar</button>
                                     </div>
                                     <div ref="contentEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Conteúdo do insight" @input="syncContent" @paste.prevent="pastePlainText" class="min-h-[180px] overflow-x-auto whitespace-pre-wrap p-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500"></div>
                                 </div>
@@ -194,7 +236,10 @@ export default {
             savedEditorRange: null,
             showTableDialog: false,
             tableRows: 3,
-            tableColumns: 3
+            tableColumns: 3,
+            showLinkDialog: false,
+            linkUrl: '',
+            linkNewTab: false
         };
     },
     mounted() {
@@ -221,6 +266,7 @@ export default {
             this.saving = false;
             this.savedEditorRange = null;
             this.showTableDialog = false;
+            this.showLinkDialog = false;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
             this.$nextTick(() => this.setEditorContent(''));
@@ -233,6 +279,7 @@ export default {
             this.saving = false;
             this.savedEditorRange = null;
             this.showTableDialog = false;
+            this.showLinkDialog = false;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
             this.$nextTick(() => this.setEditorContent(item.conteudo || ''));
@@ -241,12 +288,17 @@ export default {
             window.removeEventListener('keydown', this.onEscKey);
             this.savedEditorRange = null;
             this.showTableDialog = false;
+            this.showLinkDialog = false;
             this.showModal = false;
         },
         onEscKey(event) {
             if (event.key === 'Escape' && !this.saving) {
                 if (this.showTableDialog) {
                     this.cancelTableDialog();
+                    return;
+                }
+                if (this.showLinkDialog) {
+                    this.cancelLinkDialog();
                     return;
                 }
                 this.closeModal();
@@ -257,7 +309,7 @@ export default {
             if (!editor) return;
 
             const raw = String(value || '');
-            const hasMarkup = /<\s*(p|div|span|strong|b|u|ul|li|blockquote|br|table|thead|tbody|tr|th|td)\b/i.test(raw);
+            const hasMarkup = /<\s*(p|div|span|strong|b|u|ul|li|blockquote|br|table|thead|tbody|tr|th|td|a)\b/i.test(raw);
             if (hasMarkup) {
                 editor.innerHTML = sanitizeEditorHtml(raw);
             } else {
@@ -313,6 +365,7 @@ export default {
         },
         openTableDialog() {
             this.saveEditorSelection();
+            this.showLinkDialog = false;
             this.tableRows = 3;
             this.tableColumns = 3;
             this.showTableDialog = true;
@@ -320,6 +373,73 @@ export default {
         },
         cancelTableDialog() {
             this.showTableDialog = false;
+        },
+        getSelectedEditorAnchor() {
+            const editor = this.$refs.contentEditor;
+            const selection = window.getSelection();
+            if (!editor || !selection || !selection.rangeCount) return null;
+
+            let element = selection.anchorNode;
+            if (element && element.nodeType !== Node.ELEMENT_NODE) element = element.parentElement;
+            const anchor = element && element.closest ? element.closest('a') : null;
+            return anchor && editor.contains(anchor) ? anchor : null;
+        },
+        openLinkDialog() {
+            const editor = this.$refs.contentEditor;
+            const selection = window.getSelection();
+            if (!editor || !selection || !selection.rangeCount || !editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+                alert('Selecione uma palavra ou frase para inserir o link');
+                return;
+            }
+
+            this.saveEditorSelection();
+            const anchor = this.getSelectedEditorAnchor();
+            this.showTableDialog = false;
+            this.linkUrl = anchor ? anchor.getAttribute('href') || '' : '';
+            this.linkNewTab = anchor ? anchor.getAttribute('target') === '_blank' : false;
+            this.showLinkDialog = true;
+            this.$nextTick(() => this.$refs.linkUrlInput?.focus());
+        },
+        cancelLinkDialog() {
+            this.showLinkDialog = false;
+            this.linkUrl = '';
+            this.linkNewTab = false;
+        },
+        applyLink() {
+            const editor = this.$refs.contentEditor;
+            const href = normalizeEditorHref(this.linkUrl);
+            if (!editor || !href) {
+                alert('Informe uma URL válida. Use http://, https://, um caminho interno, mailto: ou tel:');
+                return;
+            }
+
+            this.restoreEditorSelection();
+            const selection = window.getSelection();
+            const anchor = this.getSelectedEditorAnchor();
+            if (anchor) {
+                anchor.setAttribute('href', href);
+            } else {
+                if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+                    alert('Selecione uma palavra ou frase para inserir o link');
+                    return;
+                }
+                document.execCommand('createLink', false, href);
+            }
+
+            const appliedAnchor = this.getSelectedEditorAnchor();
+            if (appliedAnchor) {
+                if (this.linkNewTab) {
+                    appliedAnchor.setAttribute('target', '_blank');
+                    appliedAnchor.setAttribute('rel', 'noopener noreferrer');
+                } else {
+                    appliedAnchor.removeAttribute('target');
+                    appliedAnchor.removeAttribute('rel');
+                }
+            }
+
+            this.syncContent();
+            this.cancelLinkDialog();
+            editor.focus();
         },
         insertTable() {
             const editor = this.$refs.contentEditor;
@@ -363,6 +483,7 @@ export default {
 
             this.syncContent();
             this.showTableDialog = false;
+            this.showLinkDialog = false;
             editor.focus();
         },
         onFileChange(event) {
