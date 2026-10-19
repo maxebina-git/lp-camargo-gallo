@@ -1,4 +1,50 @@
 const MIN_LOADING_MS = 600;
+const EDITOR_ALLOWED_TAGS = new Set(['p', 'div', 'span', 'strong', 'b', 'u', 'ul', 'li', 'blockquote', 'br']);
+const EDITOR_REMOVED_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button', 'svg', 'math']);
+
+function cleanEditorNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        return document.createTextNode(node.nodeValue || '');
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) return null;
+
+    const tag = node.tagName.toLowerCase();
+    if (EDITOR_REMOVED_TAGS.has(tag)) return null;
+
+    const children = Array.from(node.childNodes)
+        .map(cleanEditorNode)
+        .filter(Boolean);
+
+    if (EDITOR_ALLOWED_TAGS.has(tag)) {
+        const clean = document.createElement(tag);
+        children.forEach((child) => clean.appendChild(child));
+        return clean;
+    }
+
+    const fragment = document.createDocumentFragment();
+    children.forEach((child) => fragment.appendChild(child));
+    return fragment;
+}
+
+function sanitizeEditorHtml(value) {
+    const template = document.createElement('template');
+    template.innerHTML = String(value || '');
+
+    const clean = document.createElement('div');
+    Array.from(template.content.childNodes)
+        .map(cleanEditorNode)
+        .filter(Boolean)
+        .forEach((child) => clean.appendChild(child));
+
+    return clean.innerHTML.trim();
+}
+
+function hasEditorText(value) {
+    const container = document.createElement('div');
+    container.innerHTML = String(value || '');
+    return (container.textContent || '').replace(/\u00a0/g, ' ').trim() !== '';
+}
 
 function ensureMinDuration(startedAt, ms) {
     const remaining = ms - (Date.now() - startedAt);
@@ -87,7 +133,16 @@ export default {
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Conteúdo</label>
-                                <textarea v-model="form.conteudo" rows="6" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
+                                <div class="mt-1 overflow-hidden rounded-md border border-gray-300 bg-white">
+                                    <div class="flex flex-wrap items-center gap-1 border-b border-gray-200 bg-gray-50 p-2">
+                                        <button type="button" @mousedown.prevent="applyFormat('bold')" title="Negrito" aria-label="Aplicar negrito" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm font-bold text-gray-700 hover:bg-gray-200">B</button>
+                                        <button type="button" @mousedown.prevent="applyFormat('underline')" title="Sublinhado" aria-label="Aplicar sublinhado" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm text-gray-700 underline hover:bg-gray-200">U</button>
+                                        <button type="button" @mousedown.prevent="applyFormat('insertUnorderedList')" title="Lista com marcadores" aria-label="Inserir lista com marcadores" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">• Lista</button>
+                                        <button type="button" @mousedown.prevent="applyFormat('formatBlock', '<blockquote>')" title="Citação" aria-label="Aplicar citação" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">❝ Citação</button>
+                                    </div>
+                                    <div ref="contentEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Conteúdo do insight" @input="syncContent" @paste.prevent="pastePlainText" class="min-h-[180px] whitespace-pre-wrap p-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Selecione um trecho e use os botões para formatar o conteúdo.</p>
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Imagem</label>
@@ -155,6 +210,7 @@ export default {
             this.saving = false;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
+            this.$nextTick(() => this.setEditorContent(''));
         },
         editItem(item) {
             this.editingId = item.id;
@@ -164,6 +220,7 @@ export default {
             this.saving = false;
             this.showModal = true;
             window.addEventListener('keydown', this.onEscKey);
+            this.$nextTick(() => this.setEditorContent(item.conteudo || ''));
         },
         closeModal() {
             window.removeEventListener('keydown', this.onEscKey);
@@ -173,6 +230,36 @@ export default {
             if (event.key === 'Escape' && !this.saving) {
                 this.closeModal();
             }
+        },
+        setEditorContent(value) {
+            const editor = this.$refs.contentEditor;
+            if (!editor) return;
+
+            const raw = String(value || '');
+            const hasMarkup = /<\s*(p|div|span|strong|b|u|ul|li|blockquote|br)\b/i.test(raw);
+            if (hasMarkup) {
+                editor.innerHTML = sanitizeEditorHtml(raw);
+            } else {
+                editor.textContent = raw;
+            }
+            this.syncContent();
+        },
+        syncContent() {
+            const editor = this.$refs.contentEditor;
+            if (editor) this.form.conteudo = editor.innerHTML;
+        },
+        pastePlainText(event) {
+            const text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
+            document.execCommand('insertText', false, text);
+            this.syncContent();
+        },
+        applyFormat(command, value = null) {
+            const editor = this.$refs.contentEditor;
+            if (!editor) return;
+
+            editor.focus();
+            document.execCommand(command, false, value);
+            this.syncContent();
         },
         onFileChange(event) {
             const file = event.target.files && event.target.files[0];
@@ -207,6 +294,12 @@ export default {
         async saveItem() {
             const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
             const endpoint = this.editingId ? `${apiBase}/insights/update.php` : `${apiBase}/insights/insert.php`;
+            this.syncContent();
+            this.form.conteudo = sanitizeEditorHtml(this.form.conteudo);
+            if (!hasEditorText(this.form.conteudo)) {
+                alert('Informe o conteúdo do artigo');
+                return;
+            }
             this.saving = true;
             const startedAt = Date.now();
             let saved = false;

@@ -1,5 +1,6 @@
 <?php
 require_once '../db_config.php';
+require_once __DIR__ . '/../insights/content_sanitizer.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -24,6 +25,7 @@ try {
         exit;
     }
 
+    $item['conteudo'] = cg_sanitize_insight_content($item['conteudo']);
     echo json_encode($item);
 } catch (Exception $e) {
     http_response_code(500);

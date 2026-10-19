@@ -2,6 +2,7 @@
 session_start();
 require_once '../db_config.php';
 require_once '../slug.php';
+require_once __DIR__ . '/content_sanitizer.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -37,6 +38,13 @@ if (!isset($input['id'], $input['titulo'], $input['resumo'], $input['conteudo'],
     exit;
 }
 
+$conteudo = cg_sanitize_insight_content($input['conteudo']);
+if (cg_insight_content_is_empty($conteudo)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Content cannot be empty']);
+    exit;
+}
+
 try {
     $db = Database::getInstance();
     $slug = cg_unique_slug($db, 'insights', $input['slug'] ?? $input['titulo'], (int) $input['id']);
@@ -47,7 +55,7 @@ try {
         'titulo'    => $input['titulo'],
         'slug'      => $slug,
         'resumo'    => $input['resumo'],
-        'conteudo'  => $input['conteudo'],
+        'conteudo'  => $conteudo,
         'data'      => $input['data'],
         'categoria' => $input['categoria'] ?? null,
         'imagem'    => $input['imagem'] ?? null,

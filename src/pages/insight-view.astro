@@ -28,7 +28,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
         <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body">
           <h2 id="insight-resumo" class="text-xl text-deep/80 italic mb-8 border-l-4 border-[var(--color-divider)] pl-6"></h2>
-          <div id="insight-conteudo" class="whitespace-pre-wrap text-lg"></div>
+          <div id="insight-conteudo" class="whitespace-pre-wrap text-lg leading-relaxed"></div>
         </div>
 
         <div class="mt-16 pt-8 border-t border-[var(--color-divider)] flex justify-between items-center">
@@ -79,7 +79,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           document.getElementById('insight-titulo').textContent = item.titulo;
           document.getElementById('insight-data').textContent = 'Publicado em ' + formatDateBR(item.data);
           document.getElementById('insight-resumo').textContent = item.resumo;
-          document.getElementById('insight-conteudo').textContent = item.conteudo;
+          document.getElementById('insight-conteudo').innerHTML = item.conteudo || '';
 
           var img = document.getElementById('insight-imagem');
           if (item.imagem) {
@@ -101,6 +101,41 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         });
     })();
   </script>
+
+  <style>
+    #insight-conteudo p {
+      margin: 0 0 1rem;
+    }
+
+    #insight-conteudo ul {
+      list-style: disc;
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    #insight-conteudo li {
+      margin: 0.35rem 0;
+    }
+
+    #insight-conteudo blockquote {
+      margin: 1.25rem 0;
+      border-left: 4px solid var(--color-divider);
+      padding-left: 1rem;
+      color: var(--color-deep);
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    #insight-conteudo strong,
+    #insight-conteudo b {
+      font-weight: 700;
+    }
+
+    #insight-conteudo u {
+      text-decoration-line: underline;
+      text-underline-offset: 0.15em;
+    }
+  </style>
 
   <SiteFooter surface="warm" />
 </BaseLayout>
