@@ -106,7 +106,7 @@ export default {
 
         <main class="flex-1 p-8">
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800">Insights & Conhecimento</h1>
+                <h1 ref="insightsHeading" tabindex="-1" class="text-3xl font-bold text-gray-800">Insights & Conhecimento</h1>
                 <button @click="openModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">+ Novo Artigo</button>
             </div>
 
@@ -130,7 +130,7 @@ export default {
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
                                     Editar
                                 </button>
-                                <button @click="deleteItem(item.id)" class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
+                                <button @click="openDeleteModal(item, $event)" class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                     Excluir
                                 </button>
@@ -221,6 +221,43 @@ export default {
                     </form>
                 </div>
             </div>
+
+            <div
+                v-if="showDeleteModal"
+                class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50 p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-modal-title"
+                aria-describedby="delete-modal-description"
+                @click.self="closeDeleteModal"
+            >
+                <div ref="deleteDialog" class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                    <button type="button" @click="closeDeleteModal" :disabled="deleting" aria-label="Fechar" class="absolute right-4 top-4 text-2xl leading-none text-gray-400 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50">&times;</button>
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" aria-hidden="true">
+                                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                                <path d="M12 9v4" />
+                                <path d="M12 17h.01" />
+                            </svg>
+                        </div>
+                        <div class="pr-6">
+                            <h2 id="delete-modal-title" class="text-xl font-bold text-gray-800">Excluir artigo?</h2>
+                            <p id="delete-modal-description" class="mt-2 text-sm leading-6 text-gray-600">
+                                O artigo <strong class="text-gray-800">“{{ deleteTarget ? deleteTarget.titulo : '' }}”</strong> será excluído permanentemente.
+                            </p>
+                        </div>
+                    </div>
+                    <p v-if="deleteError" role="alert" class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ deleteError }}</p>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button ref="deleteCancelButton" type="button" @click="closeDeleteModal" :disabled="deleting" class="rounded-md px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
+                        <button type="button" @click="deleteItem" :disabled="deleting || !deleteTarget" class="inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+                            <svg v-if="deleting" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 animate-spin" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+                            <span>{{ deleting ? 'Excluindo...' : 'Excluir definitivamente' }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     `,
@@ -232,6 +269,11 @@ export default {
             uploading: false,
             uploadError: '',
             saving: false,
+            showDeleteModal: false,
+            deleteTarget: null,
+            deleting: false,
+            deleteError: '',
+            deleteReturnFocus: null,
             form: { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' },
             savedEditorRange: null,
             showTableDialog: false,
@@ -292,7 +334,14 @@ export default {
             this.showModal = false;
         },
         onEscKey(event) {
-            if (event.key === 'Escape' && !this.saving) {
+            if (event.key !== 'Escape') return;
+
+            if (this.showDeleteModal) {
+                if (!this.deleting) this.closeDeleteModal();
+                return;
+            }
+
+            if (this.showModal && !this.saving) {
                 if (this.showTableDialog) {
                     this.cancelTableDialog();
                     return;
@@ -303,6 +352,47 @@ export default {
                 }
                 this.closeModal();
             }
+        },
+        openDeleteModal(item, event) {
+            if (this.deleting) return;
+
+            const trigger = event && event.currentTarget;
+            this.deleteReturnFocus = trigger && typeof trigger.focus === 'function' ? trigger : null;
+            this.deleteTarget = item;
+            this.deleteError = '';
+            this.deleting = false;
+            this.showDeleteModal = true;
+            window.addEventListener('keydown', this.onEscKey);
+            this.$nextTick(() => {
+                const cancelButton = this.$refs.deleteCancelButton;
+                if (this.showDeleteModal && cancelButton && typeof cancelButton.focus === 'function') {
+                    cancelButton.focus();
+                }
+            });
+        },
+        restoreDeleteFocus(target, fallback = true) {
+            this.$nextTick(() => {
+                if (target && typeof target.focus === 'function' && document.contains(target)) {
+                    target.focus();
+                    return;
+                }
+
+                if (fallback) {
+                    const heading = this.$refs.insightsHeading;
+                    if (heading && typeof heading.focus === 'function') heading.focus();
+                }
+            });
+        },
+        closeDeleteModal(restoreFocus = true) {
+            if (this.deleting) return;
+
+            const returnFocus = this.deleteReturnFocus;
+            window.removeEventListener('keydown', this.onEscKey);
+            this.showDeleteModal = false;
+            this.deleteTarget = null;
+            this.deleteError = '';
+            this.deleteReturnFocus = null;
+            if (restoreFocus) this.restoreDeleteFocus(returnFocus);
         },
         setEditorContent(value) {
             const editor = this.$refs.contentEditor;
@@ -556,18 +646,53 @@ export default {
                 this.fetchItems();
             }
         },
-        async deleteItem(id) {
-            if (!confirm('Tem certeza que deseja excluir este artigo?')) return;
+        async deleteItem() {
+            if (this.deleting || !this.deleteTarget) return;
+
+            const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+            const id = this.deleteTarget.id;
+            let deleted = false;
+            let failure = '';
+            this.deleting = true;
+            this.deleteError = '';
+
             try {
-                const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
-                await fetch(`${apiBase}/insights/delete.php`, {
+                const response = await fetch(`${apiBase}/insights/delete.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ id }).toString()
                 });
-                this.fetchItems();
+                let data = null;
+
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    failure = 'Resposta inválida do servidor ao excluir artigo';
+                }
+
+                if (!failure && !response.ok) {
+                    failure = data && data.error ? data.error : 'Erro ao excluir artigo';
+                } else if (!failure && (!data || Array.isArray(data) || typeof data !== 'object' || data.success !== true)) {
+                    failure = data && data.error ? data.error : 'Resposta inválida do servidor ao excluir artigo';
+                } else if (!failure) {
+                    deleted = true;
+                }
             } catch (e) {
-                alert('Erro ao excluir artigo');
+                failure = 'Erro ao excluir artigo';
+            } finally {
+                this.deleting = false;
+            }
+
+            if (failure) {
+                this.deleteError = failure;
+                return;
+            }
+
+            if (deleted) {
+                const returnFocus = this.deleteReturnFocus;
+                this.closeDeleteModal(false);
+                await this.fetchItems();
+                this.restoreDeleteFocus(returnFocus);
             }
         },
         async handleLogout() {
