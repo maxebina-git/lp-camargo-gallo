@@ -1,131 +1,71 @@
 <?php
 // Galeria multiplas-imagens do portfolio.
-// Suporte a legenda por imagem: agora cada item e {url, legenda} em vez de apenas string.
-// Formato antigo (apenas strings): ["image1.jpg", "image2.jpg"]
-// Formato novo (url + legenda): [{"url": "image1.jpg", "legenda": "Legenda 1"}, ...]
+// A coluna `imagens` guarda um JSON array de paths, ex.:
+//   ["/assets/uploads/a.webp", "/assets/uploads/b.webp"]
+// A primeira posicao e a capa (coluna `imagem`), que e o que os cards da
+// home e das listagens usam — as listagens continuam lendo so `imagem`.
 
 // Define a qtd maxima de imagens.
 define('CG_MAX_IMAGENS', 22);
 
-// Tenta ler 'imagens' do input (pode ser array, string JSON ou vazio).
-// Retorna array de itens: [['url' => '...', 'legenda' => '...'], ...]
-// Mantém compatibilidade com formato antigo (apenas strings): ['...', '...']
+// Monta a galeria a partir do input do admin. Aceita `imagens` como string
+// JSON (form-urlencoded) ou array (JSON body); se ausente, cai para `imagem`
+// (obra antiga vira galeria de 1 item). Devolve array PHP limpo, no maximo
+// CG_MAX_IMAGENS entradas, so strings nao vazias; [] quando nao ha imagem.
+
 function cg_parse_imagens($input) {
     $raw = isset($input['imagens']) ? $input['imagens'] : null;
-    $itens = [];
+    $list = null;
 
     if (is_array($raw)) {
-        // Novo formato: [{url: '...', legenda: '...'}, ...]
-        // Ou formato antigo: ['...', '...']
-        foreach ($raw as $item) {
-            if (is_array($item) && isset($item['url'])) {
-                $itens[] = [
-                    'url' => trim($item['url']),
-                    'legenda' => isset($item['legenda']) ? trim($item['legenda']) : ''
-                ];
-            } elseif (is_string($item)) {
-                $itens[] = [
-                    'url' => trim($item),
-                    'legenda' => ''
-                ];
-            }
-        }
+        $list = $raw;
     } elseif (is_string($raw) && trim($raw) !== '') {
         $decoded = json_decode($raw, true);
         if (is_array($decoded)) {
-            foreach ($decoded as $item) {
-                if (is_array($item) && isset($item['url'])) {
-                    $itens[] = [
-                        'url' => trim($item['url']),
-                        'legenda' => isset($item['legenda']) ? trim($item['legenda']) : ''
-                    ];
-                } elseif (is_string($item)) {
-                    $itens[] = [
-                        'url' => trim($item),
-                        'legenda' => ''
-                    ];
-                }
-            }
+            $list = $decoded;
         }
     }
 
-    // Se nao teve itens, usa a capa isolada (fallback obra antiga)
-    if (empty($itens)) {
+    if ($list === null) {
         $capa = (isset($input['imagem']) && is_string($input['imagem'])) ? trim($input['imagem']) : '';
-        $itens = $capa !== '' ? [['url' => $capa, 'legenda' => '']] : [];
+        $list = ($capa !== '') ? [$capa] : array();
     }
 
-    // Limite de imagens
-    $itens = array_slice($itens, 0, CG_MAX_IMAGENS);
-
-    return $itens;
+    $clean = array();
+    foreach ($list as $path) {
+        if (is_string($path) && trim($path) !== '') {
+            $clean[] = trim($path);
+        }
+        if (count($clean) >= CG_MAX_IMAGENS) {
+            break;
+        }
+    }
+    return $clean;
 }
 
-// Le uma linha vinda do banco e devolve a galeria como array de urls + legendas.
+// Le uma linha vinda do banco e devolve a galeria como array PHP.
 // Fallback para as obras antigas: imagens NULL -> [imagem]; sem nada -> [].
-// Retorna ['urls' => [...], 'legendas' => [...]]
 function cg_imagens_list($row) {
     $raw = isset($row['imagens']) ? $row['imagens'] : null;
 
-    $urls = [];
-    $legendas = [];
-
     if (is_array($raw)) {
-        // Novo formato: [{url: '...', legenda: '...'}, ...]
-        foreach ($raw as $item) {
-            if (is_array($item) && isset($item['url'])) {
-                $urls[] = trim($item['url']);
-                $legendas[] = isset($item['legenda']) ? trim($item['legenda']) : '';
-            } elseif (is_string($item)) {
-                $urls[] = trim($item);
-                $legendas[] = '';
-            }
-        }
-    } elseif (is_string($raw) && trim($raw) !== '') {
+        return array_values(array_filter($raw, 'is_string'));
+    }
+    if (is_string($raw) && trim($raw) !== '') {
         $decoded = json_decode($raw, true);
         if (is_array($decoded)) {
-            foreach ($decoded as $item) {
-                if (is_array($item) && isset($item['url'])) {
-                    $urls[] = trim($item['url']);
-                    $legendas[] = isset($item['legenda']) ? trim($item['legenda']) : '';
-                } elseif (is_string($item)) {
-                    $urls[] = trim($item);
-                    $legendas[] = '';
-                }
-            }
+            return array_values(array_filter($decoded, 'is_string'));
         }
     }
 
-    // Fallback para coluna imagem (obras antigas que ainda usam a coluna imagem)
     $capa = isset($row['imagem']) ? $row['imagem'] : null;
-    if (is_string($capa) && $capa !== '' && empty($urls)) {
-        $urls = [$capa];
-        $legendas = [''];
-    }
-
-    return ['urls' => array_values($urls), 'legendas' => array_values($legendas)];
+    return (is_string($capa) && $capa !== '') ? array($capa) : array();
 }
 
-// Serializa a galeria para a coluna TEXT.
-// Agora guarda o formato enriquecido: [{"url": "...", "legenda": "..."}, ...]
+// Serializa a galeria para a coluna TEXT (null quando vazia).
 function cg_imagens_json($galeria) {
     if (!is_array($galeria) || !$galeria) {
         return null;
     }
-
-    $itens = [];
-    foreach ($galeria as $idx => $url) {
-        // $url pode ser string (legacy) ou array ['url' => '...', 'legenda' => '...']
-        $legenda = '';
-        $urlStr = (string) $url;
-
-        if (is_array($url)) {
-            $legenda = isset($galeria[$idx]['legenda'] ?? '') ? $galeria[$idx]['legenda'] : '';
-            $urlStr = $url['url'] ?? $url[0] ?? '';
-        }
-
-        $itens[] = ['url' => $urlStr, 'legenda' => $legenda];
-    }
-
-    return json_encode($itens, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    return json_encode(array_values($galeria), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 }
