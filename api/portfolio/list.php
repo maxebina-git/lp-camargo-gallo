@@ -19,8 +19,11 @@ try {
     $items = $stmt->fetchAll();
     foreach ($items as &$item) {
         $item['descricao'] = cg_sanitize_rich_content($item['descricao']);
-        $item['imagens'] = cg_imagens_list($item);
-        $item['legendas'] = cg_imagens_legendas($item);
+        // Calcula a galeria em uma unica passagem: se 'imagens' fosse
+        // sobrescrito antes de ler as legendas, a legenda voltaria vazia.
+        $galeria = cg_galeria_linha($item);
+        $item['imagens'] = $galeria['urls'];
+        $item['legendas'] = $galeria['legendas'];
     }
     unset($item);
     echo json_encode($items);

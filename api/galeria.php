@@ -117,22 +117,31 @@ function cg_itens_linha($row) {
     return array();
 }
 
-// URLs da galeria vindas do banco (contrato antigo, so strings).
-function cg_imagens_list($row) {
+// Galeria completa de uma linha do banco: urls + legendas.
+// Use esta funcao nos endpoints que devolvem a galeria. O motivo: se voce
+// chama cg_imagens_list() e depois cg_imagens_legendas() na mesma linha,
+// a primeira chamada sobrescreve $row['imagens'] pelo array de URLs e a
+// segunda ja nao encontra o JSON original — a legenda volta vazia.
+function cg_galeria_linha($row) {
     $urls = array();
+    $legendas = array();
     foreach (cg_itens_linha($row) as $item) {
         $urls[] = $item['url'];
+        $legendas[] = $item['legenda'];
     }
-    return $urls;
+    return array('urls' => $urls, 'legendas' => $legendas);
+}
+
+// URLs da galeria vindas do banco (contrato antigo, so strings).
+function cg_imagens_list($row) {
+    $galeria = cg_galeria_linha($row);
+    return $galeria['urls'];
 }
 
 // Legendas da galeria vindas do banco, na mesma ordem das URLs.
 function cg_imagens_legendas($row) {
-    $legendas = array();
-    foreach (cg_itens_linha($row) as $item) {
-        $legendas[] = $item['legenda'];
-    }
-    return $legendas;
+    $galeria = cg_galeria_linha($row);
+    return $galeria['legendas'];
 }
 
 // Serializa a galeria para a coluna TEXT no formato enriquecido:
