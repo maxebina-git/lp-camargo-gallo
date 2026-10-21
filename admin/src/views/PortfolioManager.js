@@ -159,7 +159,7 @@ export default {
                                 <div v-if="form.imagens.length" class="mt-2 grid grid-cols-4 gap-2">
                                     <div
                                         v-for="(img, i) in form.imagens"
-                                        :key="img + '-' + i"
+                                        :key="img.url + '-' + i"
                                         draggable="true"
                                         @dragstart="onImgDragStart(i, $event)"
                                         @dragover.prevent="onImgDragOver(i)"
@@ -168,7 +168,7 @@ export default {
                                         class="relative aspect-square rounded-md border border-gray-300 bg-gray-50 overflow-hidden cursor-grab active:cursor-grabbing"
                                         :class="[imgDragIndex === i ? 'opacity-40' : '', imgDragOverIndex === i && imgDragIndex !== i ? 'ring-2 ring-blue-400' : '']"
                                     >
-                                        <img :src="img" :alt="'Imagem ' + (i + 1)" class="w-full h-full object-cover" draggable="false">
+                                        <img :src="img.url" :alt="'Imagem ' + (i + 1)" class="w-full h-full object-cover" draggable="false">
                                         <span v-if="i === 0" class="absolute top-1 left-1 px-1.5 py-0.5 text-[10px] font-semibold leading-none bg-blue-600 text-white rounded">Capa</span>
                                         <button
                                             type="button"
@@ -177,6 +177,13 @@ export default {
                                             aria-label="Remover imagem"
                                             class="absolute top-1 right-1 w-5 h-5 inline-flex items-center justify-center rounded-full bg-black/60 text-white text-xs leading-none hover:bg-black/80 disabled:opacity-50"
                                         >&times;</button>
+                                        <input
+                                            v-model="img.legenda"
+                                            type="text"
+                                            placeholder="Legenda"
+                                            class="absolute bottom-1 left-1 right-1 text-xs text-gray-300 p-1 bg-white/80 rounded backdrop-blur-sm"
+                                            :disabled="uploading"
+                                        >
                                     </div>
                                 </div>
                                 <div v-else class="mt-2 border border-dashed border-gray-300 rounded-md p-4 text-center text-xs text-gray-400">
@@ -382,11 +389,23 @@ export default {
                 }
             });
         },
-        editItem(item) {
+editItem(item) {
             this.editingId = item.id;
-            const galeria = Array.isArray(item.imagens)
-                ? item.imagens.slice()
-                : (item.imagem ? [item.imagem] : []);
+            // Novo formato API: cg_imagens_list retorna {urls: [...], legendas: [...]}
+            // Converter para array de {url, legenda} objetos
+            let galeria = [];
+            if (item.imagens && typeof item.imagens === 'object' && !Array.isArray(item.imagens) && item.imagens.urls) {
+                // Formato novo: {urls: [...], legendas: [...]}
+                const urls = item.imagens.urls;
+                const legendas = item.imagens.legendas;
+                galeria = urls.map((url, i) => ({ url, legenda: legendas[i] || '' }));
+            } else if (Array.isArray(item.imagens)) {
+                // Formato antigo: ['url1', 'url2', ...] - converter para novo formato
+                galeria = item.imagens.map((url) => ({ url, legenda: '' }));
+            } else if (item.imagem) {
+                // Fallback obra antiga: apenas a capa
+                galeria = [{ url: item.imagem, legenda: '' }];
+            }
             this.form = { ...item, imagens: galeria };
             this.uploading = false;
             this.uploadError = '';
@@ -397,7 +416,7 @@ export default {
              this.showModal = true;
              window.addEventListener('keydown', this.onEscKey);
              this.$nextTick(() => this.setDescriptionContent(item.descricao || ''));
-         },
+        },
          closeModal() {
              window.removeEventListener('keydown', this.onEscKey);
              this.savedDescriptionRange = null;
@@ -579,7 +598,7 @@ export default {
             for (let i = 0; i < queue.length; i++) {
                 this.uploadIndex = i + 1;
                 const path = await this.uploadImage(queue[i]);
-                if (path) this.form.imagens.push(path);
+                if (path) this.form.imagens.push({ url: path, legenda: '' });
                 else if (queue[i] && queue[i].name) failed.push(queue[i].name);
             }
 
@@ -619,7 +638,7 @@ export default {
                 this.uploadError = 'Limite de ' + MAX_IMAGENS + ' imagens atingido.';
                 return;
             }
-            this.form.imagens.push(url);
+            this.form.imagens.push({ url, legenda: '' });
             this.urlDraft = '';
         },
         onImgDragStart(index, event) {
@@ -665,7 +684,7 @@ export default {
                     body: new URLSearchParams({
                         ...this.form,
                         imagens: JSON.stringify(this.form.imagens),
-                        imagem: this.form.imagens[0] || '',
+                        imagem: this.form.imagens[0]?.url || '',
                         id: this.editingId
                     }).toString()
                 });
