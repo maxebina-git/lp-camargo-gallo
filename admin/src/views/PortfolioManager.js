@@ -159,7 +159,7 @@ export default {
                                 <div v-if="form.imagens.length" class="mt-2 grid grid-cols-4 gap-2">
                                     <div
                                         v-for="(img, i) in form.imagens"
-                                        :key="img.url + '-' + i"
+                                        :key="img.img ? img.url + '-' + i : img + '-' + i"
                                         draggable="true"
                                         @dragstart="onImgDragStart(i, $event)"
                                         @dragover.prevent="onImgDragOver(i)"
@@ -673,10 +673,15 @@ editItem(item) {
                  return;
              }
 
-             this.saving = true;
-             const startedAt = Date.now();
+this.saving = true;
+            const startedAt = Date.now();
             let saved = false;
             let failure = '';
+            // Converter imagens para formato de strings (compatível com galeria.php)
+            // Se vierem como {url, legenda}, extrair apenas as URLs
+            if (this.form.imagens && this.form.imagens[0] && typeof this.form.imagens[0] === 'object') {
+                this.form.imagens = this.form.imagens.map(img => img.url || '');
+            }
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
