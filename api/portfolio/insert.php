@@ -52,6 +52,7 @@ try {
     $ordem = (int) $db->query("SELECT COALESCE(MAX(ordem), 0) + 1 FROM portfolio")->fetchColumn();
 
     $galeria = cg_parse_imagens($input);
+    $legendas = cg_parse_legendas($input);
 
     $video = (isset($input['video_youtube']) && is_string($input['video_youtube'])) ? trim($input['video_youtube']) : '';
     if (strlen($video) > 500) {
@@ -70,7 +71,7 @@ try {
         'data_obra' => $input['data_obra'] ?? null,
         'status'    => $input['status'] ?? 'concluido',
         'imagem'    => $galeria ? $galeria[0] : null,
-        'imagens'   => cg_imagens_json($galeria),
+        'imagens'   => cg_imagens_json($galeria, $legendas),
         'video_youtube' => ($video !== '' ? $video : null),
         'ordem'     => $ordem,
         'user_id'   => $_SESSION['user_id']

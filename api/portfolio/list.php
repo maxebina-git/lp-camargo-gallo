@@ -20,6 +20,7 @@ try {
     foreach ($items as &$item) {
         $item['descricao'] = cg_sanitize_rich_content($item['descricao']);
         $item['imagens'] = cg_imagens_list($item);
+        $item['legendas'] = cg_imagens_legendas($item);
     }
     unset($item);
     echo json_encode($items);

@@ -28,6 +28,7 @@ try {
 
     $item['descricao'] = cg_sanitize_rich_content($item['descricao']);
     $item['imagens'] = cg_imagens_list($item);
+    $item['legendas'] = cg_imagens_legendas($item);
     echo json_encode($item);
 } catch (Exception $e) {
     http_response_code(500);

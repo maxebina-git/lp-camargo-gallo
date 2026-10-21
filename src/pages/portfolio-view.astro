@@ -40,6 +40,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
 
         <div class="mb-12" id="portfolio-imagem-wrap">
           <img id="portfolio-imagem" src="" alt="" class="w-full aspect-[3/2] object-cover rounded-2xl shadow-lg cursor-zoom-in" />
+          <p id="portfolio-legenda" class="mt-3 text-center text-sm text-deep/70 font-body" hidden></p>
           <div id="portfolio-thumbs-wrap" class="thumbs-wrap" hidden>
             <button id="thumbs-prev" type="button" class="thumbs-nav prev" aria-label="Ver miniaturas anteriores">&lsaquo;</button>
             <div id="portfolio-thumbs" class="gallery-thumbs">
@@ -62,6 +63,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
     <figure class="lb-stage">
       <img id="lb-img" src="" alt="" />
       <figcaption id="lb-count" class="lb-count"></figcaption>
+      <figcaption id="lb-legenda" class="lb-legenda" hidden></figcaption>
     </figure>
     <button id="lb-next" type="button" class="lb-btn lb-next" aria-label="Próxima imagem">&rsaquo;</button>
   </div>
@@ -75,11 +77,13 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       var article = document.getElementById('portfolio-article');
 
       var galeria = [];
+      var legendas = [];
       var heroIndex = 0;
       var obraTitulo = '';
       var lightbox = document.getElementById('portfolio-lightbox');
       var lbImg = document.getElementById('lb-img');
       var lbCount = document.getElementById('lb-count');
+      var lbLegenda = document.getElementById('lb-legenda');
       var lbIndex = 0;
       var lbLastFocus = null;
       var lbOpen = false;
@@ -113,6 +117,14 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         return m ? m[1] : '';
       }
 
+      /* Legenda da imagem: esconde o elemento quando o item nao tem legenda. */
+      function aplicarLegenda(el, index) {
+        if (!el) return;
+        var texto = String(legendas[index] || '').trim();
+        el.textContent = texto;
+        el.hidden = !texto;
+      }
+
       /* Troca a imagem principal e o thumb ativo. E o unico ponto que
          define heroIndex: clique no thumb e navegacao do lightbox passam
          por aqui, entao principal, faixa e lightbox nunca divergem. */
@@ -122,6 +134,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         var hero = document.getElementById('portfolio-imagem');
         hero.src = galeria[heroIndex];
         hero.alt = obraTitulo || ('Imagem ' + (heroIndex + 1) + ' de ' + galeria.length);
+        aplicarLegenda(document.getElementById('portfolio-legenda'), heroIndex);
         var thumbs = document.getElementById('portfolio-thumbs-track').querySelectorAll('.gallery-thumb');
         for (var i = 0; i < thumbs.length; i++) {
           var active = i === heroIndex;
@@ -135,6 +148,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         lbImg.src = galeria[lbIndex];
         lbImg.alt = 'Imagem ' + (lbIndex + 1) + ' de ' + galeria.length;
         lbCount.textContent = (lbIndex + 1) + ' / ' + galeria.length;
+        aplicarLegenda(lbLegenda, lbIndex);
         showHero(lbIndex);
       }
 
@@ -261,6 +275,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           galeria = (Array.isArray(item.imagens) && item.imagens.length)
             ? item.imagens.slice()
             : (item.imagem ? [item.imagem] : []);
+          legendas = Array.isArray(item.legendas) ? item.legendas.slice() : [];
 
           if (galeria.length) {
             img.addEventListener('error', function () {
@@ -544,6 +559,12 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
       margin-top: 0.75rem;
       font-size: 0.875rem;
       color: rgba(255, 255, 255, 0.75);
+    }
+
+    .lb-legenda {
+      margin-top: 0.25rem;
+      font-size: 0.9375rem;
+      color: rgba(255, 255, 255, 0.92);
     }
 
     .lb-btn {

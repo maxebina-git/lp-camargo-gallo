@@ -181,7 +181,7 @@ export default {
                                             v-model="img.legenda"
                                             type="text"
                                             placeholder="Legenda"
-                                            class="absolute bottom-1 left-1 right-1 text-xs text-gray-300 p-1 bg-white/80 rounded backdrop-blur-sm"
+                                            class="absolute bottom-1 left-1 right-1 text-xs text-gray-900 p-1 bg-white/90 rounded backdrop-blur-sm"
                                             :disabled="uploading"
                                         >
                                     </div>
@@ -389,24 +389,20 @@ export default {
                 }
             });
         },
-editItem(item) {
+        editItem(item) {
             this.editingId = item.id;
-            // Novo formato API: cg_imagens_list retorna {urls: [...], legendas: [...]}
-            // Converter para array de {url, legenda} objetos
-            let galeria = [];
-            if (item.imagens && typeof item.imagens === 'object' && !Array.isArray(item.imagens) && item.imagens.urls) {
-                // Formato novo: {urls: [...], legendas: [...]}
-                const urls = item.imagens.urls;
-                const legendas = item.imagens.legendas;
-                galeria = urls.map((url, i) => ({ url, legenda: legendas[i] || '' }));
-            } else if (Array.isArray(item.imagens)) {
-                // Formato antigo: ['url1', 'url2', ...] - converter para novo formato
-                galeria = item.imagens.map((url) => ({ url, legenda: '' }));
-            } else if (item.imagem) {
+            // A API devolve `imagens` como array de URLs e `legendas` como
+            // array paralelo (mesma ordem). O form usa objetos {url, legenda}.
+            const urls = Array.isArray(item.imagens) ? item.imagens : [];
+            const legendas = Array.isArray(item.legendas) ? item.legendas : [];
+            let galeria = urls.map((url, i) => ({ url, legenda: legendas[i] || '' }));
+            if (!galeria.length && item.imagem) {
                 // Fallback obra antiga: apenas a capa
                 galeria = [{ url: item.imagem, legenda: '' }];
             }
-            this.form = { ...item, imagens: galeria };
+            const form = { ...item, imagens: galeria };
+            delete form.legendas;
+            this.form = form;
             this.uploading = false;
             this.uploadError = '';
              this.urlDraft = '';
