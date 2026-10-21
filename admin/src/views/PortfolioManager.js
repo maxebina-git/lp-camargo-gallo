@@ -1,4 +1,5 @@
 import { hasRichTextContent, normalizeRichTextHref, sanitizeRichTextHtml } from '../utils/richText.js';
+import { slugify } from '../utils/slug.js';
 
 const MIN_LOADING_MS = 600;
 const MAX_IMAGENS = 20;
@@ -102,7 +103,16 @@ export default {
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Título</label>
-                                <input v-model="form.titulo" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                <input v-model="form.titulo" @input="onTituloInput" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Endereço (slug)</label>
+                                <input v-model="form.slug" @input="slugManual = true" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="gerado-a-partir-do-titulo">
+                                <p class="mt-1 text-xs text-gray-500">
+                                    <span v-if="slugManual">Editado à mão: o título não muda mais este endereço.</span>
+                                    <span v-else>Gerado a partir do título. Editar aqui é permitido.</span>
+                                </p>
+                                <p v-if="form.slug" class="mt-1 text-xs text-gray-400 break-all">{{ siteBase() }}/portfolio/{{ form.slug }}/</p>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Categoria</label>
@@ -298,7 +308,9 @@ export default {
              showDescriptionLinkDialog: false,
              descriptionLinkUrl: '',
              descriptionLinkNewTab: false,
-             form: { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
+             form: { titulo: '', slug: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' },
+             // O slug acompanha o titulo enquanto o editor nao mexer nele.
+             slugManual: false,
          };
     },
     mounted() {
@@ -310,6 +322,12 @@ export default {
     methods: {
         apiBase() {
             return window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+        },
+        /* Titulo novo, slug novo. Se o editor mexeu no slug na mao, o
+           endereco fica como ele deixou. */
+        onTituloInput() {
+            if (this.slugManual) return;
+            this.form.slug = slugify(this.form.titulo);
         },
         /* Imagens ficam sob a raiz do site (/assets/uploads/...). No staging
            (que vive em /staging/) precisam do prefixo do deploy. */
@@ -375,7 +393,9 @@ export default {
         },
          openModal() {
              this.editingId = null;
-             this.form = { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+             this.form = { titulo: '', slug: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+            // Item novo: o slug nasce do titulo.
+            this.slugManual = false;
             this.uploading = false;
             this.uploadError = '';
              this.urlDraft = '';
@@ -415,6 +435,9 @@ export default {
             const form = { ...item, imagens: galeria };
             delete form.legendas;
             this.form = form;
+            // Slug gravado que nao veio do titulo foi editado a mao: o
+            // titulo pode mudar sem mexer no endereco.
+            this.slugManual = !!(item.slug && item.slug !== slugify(item.titulo));
             this.uploading = false;
             this.uploadError = '';
              this.urlDraft = '';

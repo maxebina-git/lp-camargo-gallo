@@ -48,8 +48,15 @@ if (cg_rich_content_is_empty($descricao)) {
 
 try {
     $db = Database::getInstance();
-    $slug = cg_unique_slug($db, 'portfolio', $input['slug'] ?? $input['titulo'], (int) $input['id']);
 
+    // Slug que estava gravado: se mudar, o endereco antigo vira redirect
+    // para o novo, para o link publicado nao quebrar.
+    $atual = $db->prepare("SELECT slug FROM portfolio WHERE id = :id LIMIT 1");
+    $atual->execute([':id' => (int) $input['id']]);
+    $slugAtual = $atual->fetch();
+    $slugAtual = ($slugAtual && !empty($slugAtual['slug'])) ? (string) $slugAtual['slug'] : null;
+
+    $slug = cg_resolver_slug($db, 'portfolio', cg_slug_input($input), (string) $input['titulo'], (int) $input['id'], $slugAtual);
     $galeria = cg_parse_imagens($input);
     $legendas = cg_parse_legendas($input);
 

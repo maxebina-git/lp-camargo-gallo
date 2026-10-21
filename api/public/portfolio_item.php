@@ -2,6 +2,7 @@
 require_once '../db_config.php';
 require_once '../galeria.php';
 require_once '../content_sanitizer.php';
+require_once '../redirects.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -21,6 +22,15 @@ try {
     $item = $stmt->fetch();
 
     if (!$item) {
+        // O slug pode ter mudado depois que a obra foi publicada. Nesse
+        // caso devolvemos para onde foi, e o front troca a URL.
+        $novoSlug = cg_redirect_buscar($db, 'portfolio', $slug);
+
+        if ($novoSlug !== null) {
+            echo json_encode(['redirect' => $novoSlug]);
+            exit;
+        }
+
         http_response_code(404);
         echo json_encode(['error' => 'Not found']);
         exit;

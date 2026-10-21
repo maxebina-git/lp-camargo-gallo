@@ -259,8 +259,16 @@ import { siteBase, apiBase } from '../lib/paths';
       fetch(apiBase + '/public/portfolio_item.php?slug=' + encodeURIComponent(slug))
         .then(function (response) {
           if (response.status === 404) {
-            fail('Obra não encontrada.');
-            return null;
+            // Slug antigo: a API diz para onde a obra foi. Troca a URL
+            // em vez de mostrar "nao encontrada".
+            return response.json().then(function (data) {
+              if (data && data.redirect) {
+                window.location.replace(siteBase + '/portfolio/' + data.redirect + '/');
+                return null;
+              }
+              fail('Obra não encontrada.');
+              return null;
+            });
           }
           if (!response.ok) throw new Error('HTTP ' + response.status);
           return response.json();

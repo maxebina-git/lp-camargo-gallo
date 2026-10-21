@@ -1,4 +1,5 @@
 import { hasRichTextContent, normalizeRichTextHref, sanitizeRichTextHtml } from '../utils/richText.js';
+import { slugify } from '../utils/slug.js';
 
 const MIN_LOADING_MS = 600;
 
@@ -85,7 +86,16 @@ export default {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Título</label>
-                                <input v-model="form.titulo" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                <input v-model="form.titulo" @input="onTituloInput" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Endereço (slug)</label>
+                                <input v-model="form.slug" @input="slugManual = true" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="gerado-a-partir-do-titulo">
+                                <p class="mt-1 text-xs text-gray-500">
+                                    <span v-if="slugManual">Editado à mão: o título não muda mais este endereço.</span>
+                                    <span v-else>Gerado a partir do título. Editar aqui é permitido.</span>
+                                </p>
+                                <p v-if="form.slug" class="mt-1 text-xs text-gray-400 break-all">{{ siteBase() }}/insights/{{ form.slug }}/</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Data</label>
@@ -207,7 +217,9 @@ export default {
             deleting: false,
             deleteError: '',
             deleteReturnFocus: null,
-            form: { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' },
+            form: { titulo: '', slug: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' },
+            // O slug acompanha o titulo enquanto o editor nao mexer nele.
+            slugManual: false,
             savedEditorRange: null,
             showTableDialog: false,
             tableRows: 3,
@@ -224,6 +236,12 @@ export default {
         window.removeEventListener('keydown', this.onEscKey);
     },
     methods: {
+        /* Titulo novo, slug novo. Se o editor mexeu no slug na mao, o
+           endereco fica como ele deixou. */
+        onTituloInput() {
+            if (this.slugManual) return;
+            this.form.slug = slugify(this.form.titulo);
+        },
         /* Imagens ficam sob a raiz do site (/assets/uploads/...). No staging
            (que vive em /staging/) precisam do prefixo do deploy. */
         siteBase() {
@@ -247,7 +265,9 @@ export default {
         },
         openModal() {
             this.editingId = null;
-            this.form = { titulo: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' };
+            this.form = { titulo: '', slug: '', resumo: '', conteudo: '', data: '', categoria: '', imagem: '' };
+            // Item novo: o slug nasce do titulo.
+            this.slugManual = false;
             this.uploading = false;
             this.uploadError = '';
             this.saving = false;
@@ -261,6 +281,9 @@ export default {
         editItem(item) {
             this.editingId = item.id;
             this.form = { ...item };
+            // Slug gravado que nao veio do titulo foi editado a mao: o
+            // titulo pode mudar sem mexer no endereco.
+            this.slugManual = !!(item.slug && item.slug !== slugify(item.titulo));
             this.uploading = false;
             this.uploadError = '';
             this.saving = false;

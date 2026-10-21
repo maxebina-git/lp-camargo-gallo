@@ -48,7 +48,8 @@ if (cg_rich_content_is_empty($descricao)) {
 
 try {
     $db = Database::getInstance();
-    $slug = cg_unique_slug($db, 'portfolio', $input['slug'] ?? $input['titulo']);
+    // Slug em branco no formulario: vem do titulo.
+    $slug = cg_resolver_slug($db, 'portfolio', cg_slug_input($input), (string) $input['titulo'], null);
     $ordem = (int) $db->query("SELECT COALESCE(MAX(ordem), 0) + 1 FROM portfolio")->fetchColumn();
 
     $galeria = cg_parse_imagens($input);

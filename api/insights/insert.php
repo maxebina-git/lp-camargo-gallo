@@ -47,7 +47,8 @@ if (cg_insight_content_is_empty($conteudo)) {
 
 try {
     $db = Database::getInstance();
-    $slug = cg_unique_slug($db, 'insights', $input['slug'] ?? $input['titulo']);
+    // Slug em branco no formulario: vem do titulo.
+    $slug = cg_resolver_slug($db, 'insights', cg_slug_input($input), (string) $input['titulo'], null);
 
     $stmt = $db->prepare("INSERT INTO insights (titulo, slug, resumo, conteudo, data, categoria, imagem, user_id) VALUES (:titulo, :slug, :resumo, :conteudo, :data, :categoria, :imagem, :user_id)");
     

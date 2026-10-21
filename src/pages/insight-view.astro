@@ -76,8 +76,16 @@ import { siteBase, apiBase } from '../lib/paths';
       fetch(apiBase + '/public/insight.php?slug=' + encodeURIComponent(slug))
         .then(function (response) {
           if (response.status === 404) {
-            fail('Artigo não encontrado.');
-            return null;
+            // Slug antigo: a API diz para onde o artigo foi. Troca a URL
+            // em vez de mostrar "nao encontrado".
+            return response.json().then(function (data) {
+              if (data && data.redirect) {
+                window.location.replace(siteBase + '/insights/' + data.redirect + '/');
+                return null;
+              }
+              fail('Artigo não encontrado.');
+              return null;
+            });
           }
           if (!response.ok) throw new Error('HTTP ' + response.status);
           return response.json();
