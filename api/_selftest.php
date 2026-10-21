@@ -1,6 +1,8 @@
 <?php
-// Self-test temporario: valida a logica da galeria no PHP real do servidor
-// e identifica qual sintaxe da versao anterior quebrava o include (500).
+// Self-test temporario: valida a logica da galeria no PHP real do servidor.
+// Sem eval() (bloqueado no host) e sem construcoes que o servidor nao aceita.
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 require_once __DIR__ . '/galeria.php';
 header('Content-Type: application/json');
 
@@ -38,21 +40,5 @@ $out['db_null'] = array('urls' => cg_imagens_list($row), 'legendas' => cg_imagen
 // 5) Le do banco: '[]' -> galeria vazia (sem fallback).
 $row = array('imagens' => '[]', 'imagem' => '/x/capa.jpg');
 $out['db_vazio'] = array('urls' => cg_imagens_list($row), 'legendas' => cg_imagens_legendas($row));
-
-// 6) Qual sintaxe da versao anterior causava o erro fatal de include?
-$suspeitas = array(
-    'isset_coalesce' => '$a = array("x" => 1); $v = isset($a["x"] ?? "");',
-    'chain_coalesce' => '$a = array("x" => 1); $v = $a["x"] ?? $a[0] ?? "";',
-    'string_cast' => '$a = array("x" => 1); $v = (string) $a;',
-);
-$out['sintaxe'] = array();
-foreach ($suspeitas as $nome => $codigo) {
-    try {
-        eval($codigo);
-        $out['sintaxe'][$nome] = 'OK';
-    } catch (Throwable $e) {
-        $out['sintaxe'][$nome] = get_class($e) . ': ' . $e->getMessage();
-    }
-}
 
 echo json_encode($out, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
