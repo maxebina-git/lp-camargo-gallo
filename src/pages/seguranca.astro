@@ -5,6 +5,7 @@ import { Check } from '@lucide/vue'
 import SiteHeader from '../components/layout/SiteHeader.astro'
 import SiteFooter from '../components/layout/SiteFooter.astro'
 import SafetyFeatureSection from '../components/seguranca/SafetyFeatureSection.astro'
+import { assetUrl } from '../lib/paths'
 
 /* As fotos vivem em public/assets/seguranca, entao passam pelo servidor como
    arquivo estatico e nao pelo pipeline de imagem do Astro. Por isso o width e o
@@ -15,11 +16,11 @@ import SafetyFeatureSection from '../components/seguranca/SafetyFeatureSection.a
    de texto com efeito de lanterna, entao nao tem foto nenhuma. */
 const fotosEsquerda = [
   {
-    src: '/assets/seguranca/seguranca-de-trabalho-1.webp',
+    src: assetUrl('/assets/seguranca/seguranca-de-trabalho-1.webp'),
     alt: 'Colaborador de obra com barreiras de isolamento, ao fundo um profissional em corda na fachada',
   },
   {
-    src: '/assets/seguranca/seguranca-de-trabalho-2.webp',
+    src: assetUrl('/assets/seguranca/seguranca-de-trabalho-2.webp'),
     alt: 'Dois colaboradores executando serviço em altura com cordas ancoradas na fachada',
   },
 ]
@@ -48,7 +49,7 @@ const compromissos = [
 const destaques = [
   {
     image: {
-      src: '/assets/seguranca/seguranca-de-trabalho-3.webp',
+      src: assetUrl('/assets/seguranca/seguranca-de-trabalho-3.webp'),
       alt: 'Técnico de segurança do trabalho conferindo a montagem de equipamento de proteção individual em obra',
     },
     items: [
@@ -64,7 +65,7 @@ const destaques = [
   },
   {
     image: {
-      src: '/assets/seguranca/seguranca-de-trabalho-4.webp',
+      src: assetUrl('/assets/seguranca/seguranca-de-trabalho-4.webp'),
       alt: 'Colaboradores com equipamentos de proteção individual e coletiva durante serviço em altura',
     },
     items: [
@@ -79,7 +80,7 @@ const destaques = [
   },
   {
     image: {
-      src: '/assets/seguranca/seguranca-de-trabalho-5.webp',
+      src: assetUrl('/assets/seguranca/seguranca-de-trabalho-5.webp'),
       alt: 'Profissional analisando documentação técnica de obra junto ao canteiro',
     },
     items: [

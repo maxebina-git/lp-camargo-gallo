@@ -3,6 +3,7 @@ import { Container, Heading, Section, Text } from 'ds-grupo-rkb'
 import AboutBadges from './AboutBadges.vue'
 import ImageCarousel from './ImageCarousel.astro'
 import { diferenciais } from '../../data/diferenciais'
+import { assetUrl } from '../../lib/paths'
 ---
 
 <Section tone="warm" size="lg" class="py-16 about-static about-wrapper">
@@ -48,9 +49,9 @@ import { diferenciais } from '../../data/diferenciais'
       </div>
       <ImageCarousel
         images={[
-          { src: '/about-image-1.png', alt: 'Equipe da Camargo Gallo executando recuperação de fachada' },
-          { src: '/about-image-2.png', alt: 'Equipe da Camargo Gallo em obra' },
-          { src: '/about-image-3.png', alt: 'Equipe da Camargo Gallo finalizando projeto' },
+          { src: assetUrl('/about-image-1.png'), alt: 'Equipe da Camargo Gallo executando recuperação de fachada' },
+          { src: assetUrl('/about-image-2.png'), alt: 'Equipe da Camargo Gallo em obra' },
+          { src: assetUrl('/about-image-3.png'), alt: 'Equipe da Camargo Gallo finalizando projeto' },
         ]}
       />
     </div>

@@ -14,7 +14,9 @@
 # servidor. Sao negados aqui ate que sejam apagados via FTP.
 # register.php permitia criar uma conta 'editor' sem autenticacao.
 # _diag/_selftest/_t1.._t3 sao probes temporarios de deploy e sintaxe.
-<FilesMatch "^(register|debug|debug2|test_db|_diag|_selftest|_t1|_t2|_t3)\.php$">
+# _itest/_gen sao probes de integracao da galeria (davam acesso aos dados
+# do banco sem autenticacao) e nao podem ficar acessiveis.
+<FilesMatch "^(register|debug|debug2|test_db|_diag|_selftest|_t1|_t2|_t3|_itest|_gen)\.php$">
     Require all denied
 </FilesMatch>
 

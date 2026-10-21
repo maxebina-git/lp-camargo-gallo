@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css'
 import '../styles/lp.css'
+import { siteBase, withBase } from '../lib/paths'
 
 interface Props {
   title: string
@@ -11,9 +12,12 @@ interface Props {
 }
 
 const { title, description, canonical, ogImage, structuredData } = Astro.props
-const siteUrl = Astro.site ?? new URL('https://staging.camargogallo.com.br')
+const siteUrl = Astro.site ?? new URL('https://camargogallo.com.br')
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href
-const socialImage = ogImage ? new URL(ogImage, siteUrl).href : new URL('/og-image.jpg', siteUrl).href
+// ogImage pode vir como path interno (ex: /assets/servicos/...). No staging e
+// na producao o front vive num subdiretorio, entao o path precisa do prefixo.
+const socialImagePath = ogImage ? withBase(ogImage) : siteBase + '/og-image.jpg'
+const socialImage = new URL(socialImagePath, siteUrl).href
 ---
 
 <!doctype html>
@@ -40,8 +44,8 @@ const socialImage = ogImage ? new URL(ogImage, siteUrl).href : new URL('/og-imag
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={socialImage} />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href={siteBase + '/favicon.ico'} type="image/x-icon" />
+    <link rel="sitemap" href={siteBase + '/sitemap-index.xml'} />
     {structuredData && <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
     <noscript>
       <style>

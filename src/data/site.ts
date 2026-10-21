@@ -1,3 +1,5 @@
+import { siteBase, assetUrl } from '../lib/paths'
+
 export interface SiteContact {
   label: string
   href: string
@@ -58,16 +60,16 @@ export const footerCompany: FooterCompany = {
 }
 
 export const headerNavSite: NavLink[] = [
-  { label: 'EMPRESA', href: '/empresa' },
-  { label: 'SERVIÇOS', href: '/servicos' },
-  { label: 'SEGURANÇA', href: '/seguranca' },
-  { label: 'PORTFÓLIO', href: '/portfolio' },
-  { label: 'INSIGHTS', href: '/insights' },
-  { label: 'CONTATO', href: '/contato' },
+  { label: 'EMPRESA', href: siteBase + '/empresa' },
+  { label: 'SERVIÇOS', href: siteBase + '/servicos' },
+  { label: 'SEGURANÇA', href: siteBase + '/seguranca' },
+  { label: 'PORTFÓLIO', href: siteBase + '/portfolio' },
+  { label: 'INSIGHTS', href: siteBase + '/insights' },
+  { label: 'CONTATO', href: siteBase + '/contato' },
 ]
 
 export const bannerProps = {
-  bannerImage: '/assets/logo-camargo-gallo.png',
+  bannerImage: assetUrl('/assets/logo-camargo-gallo.png'),
   bannerImageAlt: 'Logo Camargo Gallo',
   bannerTitle: 'Pronto para começar?',
   bannerDescription: 'Recuperação e impermeabilização de fachadas\ncom retorno em até 24h.',

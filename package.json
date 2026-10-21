@@ -23,6 +23,7 @@
     "vue": "^3.5.40"
   },
   "devDependencies": {
+    "@icetee/ftp": "^1.0.8",
     "ftp-deploy": "^2.4.7"
   }
 }

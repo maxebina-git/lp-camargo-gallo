@@ -159,7 +159,7 @@ export default {
                                 <div v-if="form.imagens.length" class="mt-2 grid grid-cols-4 gap-2">
                                     <div
                                         v-for="(img, i) in form.imagens"
-                                        :key="img.img ? img.url + '-' + i : img + '-' + i"
+                                        :key="(img.url || img) + '-' + i"
                                         draggable="true"
                                         @dragstart="onImgDragStart(i, $event)"
                                         @dragover.prevent="onImgDragOver(i)"
@@ -168,7 +168,7 @@ export default {
                                         class="relative aspect-square rounded-md border border-gray-300 bg-gray-50 overflow-hidden cursor-grab active:cursor-grabbing"
                                         :class="[imgDragIndex === i ? 'opacity-40' : '', imgDragOverIndex === i && imgDragIndex !== i ? 'ring-2 ring-blue-400' : '']"
                                     >
-                                        <img :src="img.url" :alt="'Imagem ' + (i + 1)" class="w-full h-full object-cover" draggable="false">
+                                        <img :src="assetUrl(img.url)" :alt="'Imagem ' + (i + 1)" class="w-full h-full object-cover" draggable="false">
                                         <span v-if="i === 0" class="absolute top-1 left-1 px-1.5 py-0.5 text-[10px] font-semibold leading-none bg-blue-600 text-white rounded">Capa</span>
                                         <button
                                             type="button"
@@ -310,6 +310,18 @@ export default {
     methods: {
         apiBase() {
             return window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';
+        },
+        /* Imagens ficam sob a raiz do site (/assets/uploads/...). No staging
+           (que vive em /staging/) precisam do prefixo do deploy. */
+        siteBase() {
+            return window.location.pathname.includes('/staging/') ? '/staging' : '';
+        },
+        assetUrl(path) {
+            if (!path) return '';
+            const value = String(path);
+            if (/^(https?:)?\/\//i.test(value)) return value;
+            if (value.charAt(0) !== '/') return value;
+            return this.siteBase() + value;
         },
         async fetchItems() {
             try {

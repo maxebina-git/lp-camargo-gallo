@@ -2,6 +2,7 @@
 import { Button, Container, Heading, Section, Text } from 'ds-grupo-rkb'
 import { ChevronRight } from '@lucide/vue'
 import AboutBadges from './AboutBadges.vue'
+import { siteBase } from '../../lib/paths'
 ---
 
 <script>
@@ -199,7 +200,7 @@ import AboutBadges from './AboutBadges.vue'
       <div data-parallax class="relative aspect-[1201/718] overflow-hidden rounded-xl">
         <img
           data-parallax-img
-          src="/about-image.png"
+          src={siteBase + '/about-image.png'}
           alt="Equipe da Camargo Gallo executando recuperação de fachada"
           width="1201"
           height="718"
@@ -215,7 +216,7 @@ import AboutBadges from './AboutBadges.vue'
           prediais, com foco nas anomalias e patologias construtivas e possui elevada capacitação técnica
           para a correta intervenção e manutenção do seu empreendimento.
         </Text>
-        <Button as="a" href="/empresa" variant="primary" trailingIcon={ChevronRight} class="self-end font-body">Saiba mais</Button>
+        <Button as="a" href={siteBase + '/empresa'} variant="primary" trailingIcon={ChevronRight} class="self-end font-body">Saiba mais</Button>
       </div>
     </div>
 

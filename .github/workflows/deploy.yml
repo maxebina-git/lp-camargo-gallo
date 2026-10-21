@@ -24,6 +24,10 @@ jobs:
 
       - name: Build Astro
         run: npm run build
+        env:
+          BASE_PATH: /lp-camargo-gallo/
+          SITE_URL: https://camargogallo.com.br/lp-camargo-gallo
+          PUBLIC_API_BASE: /api
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.3

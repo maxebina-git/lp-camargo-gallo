@@ -1,8 +1,11 @@
 ---
 import { Button, Container, FeatureCard, Heading, Section } from 'ds-grupo-rkb'
+import { siteBase } from '../../lib/paths'
 ---
 
 <script>
+  import { apiBase, siteBase, assetUrl } from '../../lib/paths'
+
   // Duas leituras da mesma lista, escolhidas por gsap.matchMedia() para que a
   // troca de layout acompanhe resize e rotacao (o if/else avaliado uma unica vez
   // no load deixava a pagina travada no modo anterior ao virar o celular).
@@ -234,9 +237,9 @@ import { Button, Container, FeatureCard, Heading, Section } from 'ds-grupo-rkb'
   }
 
   function itemHTML(obra) {
-    const href = '/portfolio/' + encodeURIComponent(obra.slug || obra.id)
+    const href = siteBase + '/portfolio/' + encodeURIComponent(obra.slug || obra.id)
     const foto = obra.imagem
-      ? '<img src="' + esc(obra.imagem) + '" alt="' + esc(obra.titulo) + '" width="600" height="600" class="h-full w-full object-cover" loading="lazy" decoding="async" />'
+      ? '<img src="' + esc(assetUrl(obra.imagem)) + '" alt="' + esc(obra.titulo) + '" width="600" height="600" class="h-full w-full object-cover" loading="lazy" decoding="async" />'
       : ''
 
     return '' +
@@ -266,7 +269,7 @@ import { Button, Container, FeatureCard, Heading, Section } from 'ds-grupo-rkb'
   const lista = document.querySelector('[data-portfolio-lista]')
   const status = document.getElementById('portfolio-home-status')
 
-  fetch('/api/public/portfolio.php')
+  fetch(apiBase + '/public/portfolio.php')
     .then((response) => {
       if (!response.ok) throw new Error('HTTP ' + response.status)
       return response.json()
@@ -315,7 +318,7 @@ import { Button, Container, FeatureCard, Heading, Section } from 'ds-grupo-rkb'
               <p>Projetos selecionados de recuperação, modernização e manutenção de fachadas.</p>
             </Fragment>
             <Fragment slot="actions">
-              <Button as="a" href="/portfolio" variant="secondary" aria-label="Veja mais cases">
+              <Button as="a" href={siteBase + '/portfolio'} variant="secondary" aria-label="Veja mais cases">
                 Veja + cases
               </Button>
             </Fragment>
@@ -329,7 +332,7 @@ import { Button, Container, FeatureCard, Heading, Section } from 'ds-grupo-rkb'
   <!-- Botao flutuante de portfolio: aparece apenas durante o pin -->
   <Button
     as="a"
-    href="/portfolio"
+    href={siteBase + '/portfolio'}
     variant="primary"
     size="md"
     id="portfolio-cases-btn"

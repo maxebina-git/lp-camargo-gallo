@@ -1,3 +1,5 @@
+import { assetUrl } from '../lib/paths'
+
 export interface HeroFoto {
   src: string
   alt: string
@@ -5,7 +7,7 @@ export interface HeroFoto {
   href: string
 }
 
-export const heroFotos: HeroFoto[] = [
+const heroFotosBase: HeroFoto[] = [
   {
     src: '/assets/hero-slide/trat-patologias-revestimentos-ceramicos.webp',
     alt: 'Exemplo de tratamento de patologias em revestimentos cerâmicos',
@@ -19,3 +21,10 @@ export const heroFotos: HeroFoto[] = [
     href: '#servicos',
   },
 ]
+
+/* As fotos do hero vivem sob a raiz do site; no staging precisam do
+   prefixo do deploy para nao cair na copia de producao. */
+export const heroFotos: HeroFoto[] = heroFotosBase.map((foto) => ({
+  ...foto,
+  src: assetUrl(foto.src),
+}))

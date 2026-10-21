@@ -1,3 +1,5 @@
+import { siteBase, assetUrl } from '../lib/paths'
+
 export interface Servico {
   titulo: string
   descricao: string
@@ -6,7 +8,7 @@ export interface Servico {
   href: string
 }
 
-export const servicos: Servico[] = [
+const servicosBase: Servico[] = [
   {
     titulo: 'Recuperação de fachadas com pintura ou revestimento texturizado acrílico',
     descricao: 'Tratamento de fissuras, trincas, falhas de aderência e demais manifestações patológicas, incluindo recuperação e regularização das bases. Conforme as necessidades da edificação, podem ser utilizados fundos preparadores, fundos flexíveis, membranas de proteção e impermeabilizantes, com acabamento em pintura ou textura acrílica de alto desempenho.',
@@ -85,3 +87,11 @@ export const servicos: Servico[] = [
     href: '/servicos/impermeabilizacao-lajes-reservatorios/',
   },
 ]
+
+/* Imagens e links vivem sob a raiz do site. No staging (que fica em
+   /staging/) precisam do prefixo do deploy para nao cair na producao. */
+export const servicos: Servico[] = servicosBase.map((servico) => ({
+  ...servico,
+  imagem: assetUrl(servico.imagem),
+  href: siteBase + servico.href,
+}))

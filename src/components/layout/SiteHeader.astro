@@ -24,6 +24,8 @@ const glass = spacer
 ---
 
 <script>
+  import { siteBase } from '../../lib/paths'
+
   const header = document.querySelector('.site-header[data-glass]')
   if (header) {
     const sync = () => header.toggleAttribute('data-scrolled', window.scrollY > 10)
@@ -107,6 +109,22 @@ const glass = spacer
       // For Astro 3.0+ with view transitions - would need to listen to navigation events
       // This is a simplified approach for traditional MPAs
     }
+  }
+
+  /* O logo do Header do design system aponta para "/" (raiz do dominio). No
+     staging o front vive em /staging/, entao o logo cairia na producao.
+     O Header e um island Vue: o link so existe depois que ele monta, por isso
+     a correcao roda junto com o resto e observa o header. */
+  function corrigirLogo() {
+    const logo = document.querySelector('.site-header a[href="/"]')
+    if (logo) logo.setAttribute('href', siteBase + '/')
+  }
+
+  if (siteBase) {
+    corrigirLogo()
+    const logoObserver = new MutationObserver(() => corrigirLogo())
+    const headerEl = document.querySelector('.site-header')
+    if (headerEl) logoObserver.observe(headerEl, { childList: true, subtree: true })
   }
 </script>
 

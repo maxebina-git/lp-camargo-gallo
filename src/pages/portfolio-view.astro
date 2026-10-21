@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { Container, Heading, Section, Button } from 'ds-grupo-rkb';
 import SiteHeader from '../components/layout/SiteHeader.astro';
 import SiteFooter from '../components/layout/SiteFooter.astro';
+import { siteBase, apiBase } from '../lib/paths';
 ---
 
 <BaseLayout title="Obra | Camargo Gallo Engenharia" description="Detalhes da obra do portfólio da Camargo Gallo Engenharia.">
@@ -51,7 +52,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         </div>
 
         <div class="mt-16 pt-8 border-t border-[var(--color-divider)] flex justify-between items-center">
-          <Button as="a" href="/portfolio" variant="secondary" class="font-body">← Voltar ao Portfólio</Button>
+          <Button as="a" href={siteBase + '/portfolio'} variant="secondary" class="font-body">← Voltar ao Portfólio</Button>
         </div>
       </article>
     </Container>
@@ -68,10 +69,20 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
     <button id="lb-next" type="button" class="lb-btn lb-next" aria-label="Próxima imagem">&rsaquo;</button>
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ apiBase, siteBase }}>
     (function () {
       var parts = window.location.pathname.replace(/\/+$/, '').split('/');
       var slug = decodeURIComponent(parts[parts.length - 1] || '');
+
+      /* Caminhos de imagem vindos do banco sao relativos a raiz do site
+         (/assets/uploads/...). No staging precisam do prefixo do deploy. */
+      function asset(path) {
+        if (!path) return '';
+        var value = String(path);
+        if (/^(https?:)?\/\//i.test(value)) return value;
+        if (value.charAt(0) !== '/') return value;
+        return siteBase + value;
+      }
 
       var statusEl = document.getElementById('portfolio-status');
       var article = document.getElementById('portfolio-article');
@@ -245,7 +256,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
         return;
       }
 
-      fetch('/api/public/portfolio_item.php?slug=' + encodeURIComponent(slug))
+      fetch(apiBase + '/public/portfolio_item.php?slug=' + encodeURIComponent(slug))
         .then(function (response) {
           if (response.status === 404) {
             fail('Obra não encontrada.');
@@ -258,6 +269,14 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           if (!item) return;
 
           document.title = item.titulo + ' | Camargo Gallo Engenharia';
+          /* A pagina e servida em /portfolio/<slug>/ (via rewrite no
+             .htaccess), mas o build so conhece /portfolio-view/. O canonical
+             e o og:url precisam apontar para a URL real. */
+          var urlReal = siteBase + '/portfolio/' + slug + '/';
+          var canonicalEl = document.querySelector('link[rel="canonical"]');
+          if (canonicalEl) canonicalEl.setAttribute('href', urlReal);
+          var ogUrlEl = document.querySelector('meta[property="og:url"]');
+          if (ogUrlEl) ogUrlEl.setAttribute('content', urlReal);
           obraTitulo = item.titulo;
           document.getElementById('portfolio-titulo').textContent = item.titulo;
           document.getElementById('portfolio-meta').textContent = meta(item);
@@ -273,8 +292,8 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           var wrap = document.getElementById('portfolio-imagem-wrap');
           var img = document.getElementById('portfolio-imagem');
           galeria = (Array.isArray(item.imagens) && item.imagens.length)
-            ? item.imagens.slice()
-            : (item.imagem ? [item.imagem] : []);
+            ? item.imagens.map(asset)
+            : (item.imagem ? [asset(item.imagem)] : []);
           legendas = Array.isArray(item.legendas) ? item.legendas.slice() : [];
 
           if (galeria.length) {

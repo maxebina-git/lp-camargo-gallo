@@ -2,6 +2,7 @@
 import { FooterBanner } from 'ds-grupo-rkb'
 import LegalDrawer from '../legal/LegalDrawer.vue'
 import { footerCompany, surfaceColor, type Surface } from '../../data/site'
+import { siteBase, assetUrl } from '../../lib/paths'
 
 interface Props {
   surface?: Surface
@@ -27,11 +28,11 @@ const color = surfaceColor(surface)
   class="site-footer whitespace-pre-line"
   data-surface={surface}
   style={`--page-surface: ${color}`}
-  bannerImage="/assets/logo-camargo-gallo.png"
+  bannerImage={assetUrl('/assets/logo-camargo-gallo.png')}
   bannerImageAlt="Logo Camargo Gallo"
   bannerTitle={bannerTitle}
   bannerDescription={bannerDescription}
-  bannerCta={{ label: 'Solicite um orçamento', href: '/contato' }}
+  bannerCta={{ label: 'Solicite um orçamento', href: siteBase + '/contato' }}
   companyDescription="Recuperação de fachadas, impermeabilização e engenharia diagnóstica em São Paulo."
   contacts={footerCompany.contacts}
   legalLinks={footerCompany.legalLinks}
@@ -44,7 +45,8 @@ const color = surfaceColor(surface)
 
 <style is:global>
   @media (min-width: 640px) {
-    .site-footer a[href="/contato"] {
+    /* O href ganha o prefixo do deploy no staging (/staging/contato). */
+    .site-footer a[href$="/contato"] {
       margin-left: auto;
     }
   }

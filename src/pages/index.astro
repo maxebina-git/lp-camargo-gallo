@@ -19,6 +19,7 @@ import PortfolioSection from '../components/portfolio/PortfolioSection.astro'
 import ServiceCard from '../components/services/ServiceCard.vue'
 import FaqSection from '../components/faq/FaqSection.vue'
 import { servicos } from '../data/servicos'
+import { siteBase, apiBase } from '../lib/paths'
 import lucide from '@lucide/vue'
 const { ChevronUp } = lucide
 ---
@@ -93,7 +94,7 @@ const { ChevronUp } = lucide
         </button>
       </div>
       <div class="flex justify-center mt-12">
-        <Button as="a" href="/servicos" variant="secondary" size="lg">Ver + Serviços</Button>
+        <Button as="a" href={siteBase + '/servicos'} variant="secondary" size="lg">Ver + Serviços</Button>
       </div>
     </Container>
   </Section>
@@ -131,13 +132,23 @@ const { ChevronUp } = lucide
         </button>
       </div>
       <div class="flex justify-center mt-12">
-        <Button as="a" href="/insights" variant="primary" size="lg">Ver + Insights</Button>
+        <Button as="a" href={siteBase + '/insights'} variant="primary" size="lg">Ver + Insights</Button>
       </div>
     </Container>
   </Section>
 
-  <script is:inline>
+  <script is:inline define:vars={{ apiBase, siteBase }}>
     (function () {
+      /* Caminhos de imagem vindos do banco sao relativos a raiz do site
+         (/assets/...). No staging precisam do prefixo do deploy. */
+      function asset(path) {
+        if (!path) return '';
+        var value = String(path);
+        if (/^(https?:)?\/\//i.test(value)) return value;
+        if (value.charAt(0) !== '/') return value;
+        return siteBase + value;
+      }
+
       function esc(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -151,9 +162,9 @@ const { ChevronUp } = lucide
       }
 
       function createInsightHTML(item) {
-        var href = '/insights/' + encodeURIComponent(item.slug || item.id);
+        var href = siteBase + '/insights/' + encodeURIComponent(item.slug || item.id);
         var thumb = item.imagem
-          ? '<img src="' + esc(item.imagem) + '" alt="' + esc(item.titulo) + '" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />'
+          ? '<img src="' + esc(asset(item.imagem)) + '" alt="' + esc(item.titulo) + '" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />'
           : '<div class="flex h-full w-full items-center justify-center bg-deep/5 text-deep/40" aria-hidden="true">' +
             '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>' +
             '</div>';
@@ -182,7 +193,7 @@ const { ChevronUp } = lucide
         if (!track) return;
 
         try {
-          var response = await fetch('/api/public/insights.php');
+          var response = await fetch(apiBase + '/public/insights.php');
           if (!response.ok) throw new Error('HTTP ' + response.status);
           var data = await response.json();
           if (!Array.isArray(data)) throw new Error('resposta inesperada da API');

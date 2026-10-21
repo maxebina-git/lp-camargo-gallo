@@ -23,6 +23,10 @@ jobs:
 
       - name: Build Astro
         run: npm run build
+        env:
+          BASE_PATH: /staging/
+          SITE_URL: https://camargogallo.com.br/staging
+          PUBLIC_API_BASE: /staging/api
 
       - name: Deploy Admin Panel to Staging
         run: node deploy-ftp.cjs admin staging/admin
@@ -32,3 +36,8 @@ jobs:
 
       - name: Deploy Frontend to Staging
         run: node deploy-ftp.cjs dist staging
+
+      # O deploy sobe arquivos e nao apaga os que ficaram de versoes
+      # anteriores. Esses probes nao devem continuar no servidor.
+      - name: Remove stale files from Staging API
+        run: node deploy-ftp-clean.cjs staging/api _itest.php _gen.php _diag.php _selftest.php _t1.php _t2.php _t3.php register.php debug.php debug2.php test_db.php

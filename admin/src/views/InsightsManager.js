@@ -130,7 +130,7 @@ export default {
                                 <label class="block text-sm font-medium text-gray-700">Imagem</label>
                                 <div class="mt-1 flex items-start gap-4">
                                     <div class="w-28 h-28 flex-shrink-0 rounded-md border border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center">
-                                        <img v-if="form.imagem" :src="form.imagem" alt="Prévia" class="w-full h-full object-cover">
+                                        <img v-if="form.imagem" :src="assetUrl(form.imagem)" alt="Prévia" class="w-full h-full object-cover">
                                         <span v-else class="text-xs text-gray-400">Sem imagem</span>
                                     </div>
                                     <div class="flex-1 space-y-2">
@@ -224,6 +224,18 @@ export default {
         window.removeEventListener('keydown', this.onEscKey);
     },
     methods: {
+        /* Imagens ficam sob a raiz do site (/assets/uploads/...). No staging
+           (que vive em /staging/) precisam do prefixo do deploy. */
+        siteBase() {
+            return window.location.pathname.includes('/staging/') ? '/staging' : '';
+        },
+        assetUrl(path) {
+            if (!path) return '';
+            const value = String(path);
+            if (/^(https?:)?\/\//i.test(value)) return value;
+            if (value.charAt(0) !== '/') return value;
+            return this.siteBase() + value;
+        },
         async fetchItems() {
             try {
                 const apiBase = window.location.pathname.includes('/staging/') ? '/staging/api' : '/api';

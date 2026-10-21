@@ -12,6 +12,7 @@ import {
 import { ChevronLeft, ChevronRight, Plus } from '@lucide/vue'
 import { diferenciais } from '../../data/diferenciais'
 import { heroFotos } from '../../data/hero-fotos'
+import { assetUrl } from '../../lib/paths'
 import HeroTextColumn from './HeroTextColumn.vue'
 import HeroSlideIndicator from './HeroSlideIndicator.vue'
 
@@ -143,7 +144,7 @@ const slideClass =
             class="order-1 max-lg:order-3 flex w-4/12 max-lg:w-full flex-col items-center justify-center gap-12 px-4"
           >
             <img
-              src="/assets/logo-camargo-gallo.png"
+              :src="assetUrl('/assets/logo-camargo-gallo.png')"
               alt="Camargo Gallo"
               width="166"
               height="232"
@@ -192,7 +193,7 @@ const slideClass =
             class="order-1 max-lg:order-3 max-lg:mt-8 flex w-4/12 max-lg:w-full flex-col items-center justify-center gap-8 px-4"
           >
             <img
-              src="/assets/logo-camargo-gallo.png"
+              :src="assetUrl('/assets/logo-camargo-gallo.png')"
               alt="Camargo Gallo"
               width="166"
               height="232"

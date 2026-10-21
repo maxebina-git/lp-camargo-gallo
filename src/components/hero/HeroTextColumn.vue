@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onUnmounted, ref, useId, watch } from 'vue'
 import { Button, Heading, Text } from 'ds-grupo-rkb'
+import { assetUrl } from '../../lib/paths'
 
 const props = withDefaults(defineProps<{ ativo?: boolean }>(), { ativo: true })
 
@@ -53,7 +54,7 @@ function trackScrollToForm() {
   >
     <div class="hero-content flex w-full flex-col items-center">
       <img
-        src="/assets/logo-camargo-gallo.png"
+        :src="assetUrl('/assets/logo-camargo-gallo.png')"
         alt="Camargo Gallo"
         width="166"
         height="232"
