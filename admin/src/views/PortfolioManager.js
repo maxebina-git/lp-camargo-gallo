@@ -1,3 +1,5 @@
+import { hasRichTextContent, normalizeRichTextHref, sanitizeRichTextHtml } from '../utils/richText.js';
+
 const MIN_LOADING_MS = 600;
 const MAX_IMAGENS = 20;
 
@@ -129,11 +131,27 @@ export default {
                                 <label class="block text-sm font-medium text-gray-700">Vídeo do YouTube</label>
                                 <input v-model="form.video_youtube" type="text" placeholder="https://youtu.be/YxwwEqbQLzw?si=5uiP6DduWKKs7Z5g" class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
                                 <p class="mt-0.5 text-xs text-gray-500">Aparece antes da descrição na página da obra. Deixe vazio para não exibir.</p>
-                            </div>
-                            <div class="md:col-span-6">
-                                <label class="block text-sm font-medium text-gray-700">Descrição</label>
-                                <textarea v-model="form.descricao" rows="4" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
-                            </div>
+                             </div>
+                             <div class="md:col-span-6">
+                                 <label class="block text-sm font-medium text-gray-700">Descrição</label>
+                                 <div class="mt-1 overflow-hidden rounded-md border border-gray-300 bg-white">
+                                     <div class="flex flex-wrap items-center gap-1 border-b border-gray-200 bg-gray-50 p-2">
+                                         <button type="button" @mousedown.prevent="saveDescriptionSelection" @click.prevent="applyDescriptionFormat('bold')" title="Negrito" aria-label="Aplicar negrito" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm font-bold text-gray-700 hover:bg-gray-200">B</button>
+                                         <button type="button" @mousedown.prevent="saveDescriptionSelection" @click.prevent="applyDescriptionFormat('underline')" title="Sublinhado" aria-label="Aplicar sublinhado" class="inline-flex h-8 min-w-8 items-center justify-center rounded px-2 text-sm text-gray-700 underline hover:bg-gray-200">U</button>
+                                         <button type="button" @mousedown.prevent="saveDescriptionSelection" @click.prevent="applyDescriptionFormat('insertUnorderedList')" title="Lista com marcadores" aria-label="Inserir lista com marcadores" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">• Lista</button>
+                                         <button type="button" @mousedown.prevent="saveDescriptionSelection" @click.prevent="applyDescriptionFormat('formatBlock', 'blockquote')" title="Citação" aria-label="Aplicar citação" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">❝ Citação</button>
+                                         <button type="button" @mousedown.prevent="saveDescriptionSelection" @click.prevent="openDescriptionLinkDialog" title="Inserir link" aria-label="Inserir link" class="inline-flex h-8 items-center justify-center rounded px-2 text-sm text-gray-700 hover:bg-gray-200">🔗 Link</button>
+                                     </div>
+                                     <div v-if="showDescriptionLinkDialog" class="flex flex-wrap items-end gap-3 border-b border-gray-200 bg-green-50 p-3">
+                                         <label class="min-w-[16rem] flex-1 text-xs font-medium text-gray-700">URL<input ref="descriptionLinkUrlInput" v-model="descriptionLinkUrl" type="text" placeholder="https://exemplo.com" @keydown.enter.prevent="applyDescriptionLink" @keydown.esc.prevent="cancelDescriptionLinkDialog" class="mt-1 block w-full rounded border border-gray-300 bg-white p-1.5 text-sm"></label>
+                                         <label class="flex items-center gap-2 pb-2 text-xs text-gray-700"><input v-model="descriptionLinkNewTab" type="checkbox" class="rounded border-gray-300">Abrir em nova aba</label>
+                                         <button type="button" @click="cancelDescriptionLinkDialog" class="rounded px-3 py-1.5 text-xs text-gray-600 hover:bg-green-100">Cancelar</button>
+                                         <button type="button" @click="applyDescriptionLink" class="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700">Aplicar</button>
+                                     </div>
+                                     <div ref="descriptionEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrição da obra" @input="syncDescription" @paste.prevent="pasteDescriptionPlainText" class="min-h-[180px] overflow-x-auto whitespace-pre-wrap p-3 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-green-500"></div>
+                                 </div>
+                                 <p class="mt-1 text-xs text-gray-500">Selecione um trecho e use os botões para formatar a descrição.</p>
+                             </div>
                             <div class="md:col-span-6">
                                 <label class="block text-sm font-medium text-gray-700">Galeria de imagens</label>
                                 <p class="mt-0.5 text-xs text-gray-500">A primeira imagem é a capa usada nos cards. Arraste para reordenar.</p>
@@ -265,12 +283,16 @@ export default {
             deleteError: '',
             deleteTriggerElement: null,
             uploadIndex: 0,
-            uploadTotal: 0,
-            urlDraft: '',
-            imgDragIndex: null,
-            imgDragOverIndex: null,
-            form: { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
-        };
+             uploadTotal: 0,
+             urlDraft: '',
+             imgDragIndex: null,
+             imgDragOverIndex: null,
+             savedDescriptionRange: null,
+             showDescriptionLinkDialog: false,
+             descriptionLinkUrl: '',
+             descriptionLinkNewTab: false,
+             form: { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' }
+         };
     },
     mounted() {
         this.fetchItems();
@@ -332,15 +354,18 @@ export default {
                 this.savingOrder = false;
             }
         },
-        openModal() {
-            this.editingId = null;
-            this.form = { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+         openModal() {
+             this.editingId = null;
+             this.form = { titulo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
             this.uploading = false;
             this.uploadError = '';
-            this.urlDraft = '';
-            this.saving = false;
-            this.showModal = true;
-            window.addEventListener('keydown', this.onEscKey);
+             this.urlDraft = '';
+             this.saving = false;
+             this.savedDescriptionRange = null;
+             this.cancelDescriptionLinkDialog();
+             this.showModal = true;
+             window.addEventListener('keydown', this.onEscKey);
+             this.$nextTick(() => this.setDescriptionContent(''));
         },
         openDeleteModal(item, event) {
             if (this.deleting) return;
@@ -365,14 +390,19 @@ export default {
             this.form = { ...item, imagens: galeria };
             this.uploading = false;
             this.uploadError = '';
-            this.urlDraft = '';
-            this.saving = false;
-            this.showModal = true;
-            window.addEventListener('keydown', this.onEscKey);
-        },
-        closeModal() {
-            window.removeEventListener('keydown', this.onEscKey);
-            this.showModal = false;
+             this.urlDraft = '';
+             this.saving = false;
+             this.savedDescriptionRange = null;
+             this.cancelDescriptionLinkDialog();
+             this.showModal = true;
+             window.addEventListener('keydown', this.onEscKey);
+             this.$nextTick(() => this.setDescriptionContent(item.descricao || ''));
+         },
+         closeModal() {
+             window.removeEventListener('keydown', this.onEscKey);
+             this.savedDescriptionRange = null;
+             this.cancelDescriptionLinkDialog();
+             this.showModal = false;
         },
         closeDeleteModal() {
             if (this.deleting) return;
@@ -388,18 +418,147 @@ export default {
                 });
             }
         },
-        onEscKey(event) {
-            if (event.key !== 'Escape') return;
-            if (this.showDeleteModal) {
-                if (!this.deleting) this.closeDeleteModal();
-                return;
+         onEscKey(event) {
+             if (event.key !== 'Escape') return;
+             if (this.showDeleteModal) {
+                 if (!this.deleting) this.closeDeleteModal();
+                 return;
             }
-            if (this.showModal && !this.saving) {
-                this.closeModal();
-            }
-        },
-        onFileChange(event) {
-            const files = Array.prototype.slice.call(event.target.files || []);
+             if (this.showModal && !this.saving) {
+                 if (this.showDescriptionLinkDialog) {
+                     this.cancelDescriptionLinkDialog();
+                     return;
+                 }
+                 this.closeModal();
+             }
+         },
+         setDescriptionContent(value) {
+             const editor = this.$refs.descriptionEditor;
+             if (!editor) return;
+
+             const raw = String(value || '');
+             const hasMarkup = /<\s*(p|div|span|strong|b|u|ul|li|blockquote|br|a)\b/i.test(raw);
+             if (hasMarkup) {
+                 editor.innerHTML = sanitizeRichTextHtml(raw);
+             } else {
+                 editor.textContent = raw;
+             }
+             this.syncDescription();
+         },
+         syncDescription() {
+             const editor = this.$refs.descriptionEditor;
+             if (editor) this.form.descricao = editor.innerHTML;
+         },
+         saveDescriptionSelection() {
+             const editor = this.$refs.descriptionEditor;
+             const selection = window.getSelection();
+             if (!editor || !selection || !selection.rangeCount) return;
+
+             const range = selection.getRangeAt(0);
+             if (editor.contains(range.commonAncestorContainer)) {
+                 this.savedDescriptionRange = range.cloneRange();
+             }
+         },
+         restoreDescriptionSelection() {
+             const editor = this.$refs.descriptionEditor;
+             const selection = window.getSelection();
+             if (!editor || !selection) return;
+
+             editor.focus();
+             if (!this.savedDescriptionRange || !editor.contains(this.savedDescriptionRange.commonAncestorContainer)) return;
+
+             selection.removeAllRanges();
+             selection.addRange(this.savedDescriptionRange);
+         },
+         pasteDescriptionPlainText(event) {
+             const text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
+             document.execCommand('insertText', false, text);
+             this.syncDescription();
+         },
+         applyDescriptionFormat(command, value = null) {
+             const editor = this.$refs.descriptionEditor;
+             if (!editor) return;
+
+             this.restoreDescriptionSelection();
+             if (command === 'formatBlock') {
+                 const before = editor.innerHTML;
+                 const applied = document.execCommand(command, false, value || 'blockquote');
+                 if (editor.innerHTML === before && !applied) {
+                     document.execCommand(command, false, '<blockquote>');
+                 }
+             } else {
+                 document.execCommand(command, false, value);
+             }
+             this.syncDescription();
+         },
+         getSelectedDescriptionAnchor() {
+             const editor = this.$refs.descriptionEditor;
+             const selection = window.getSelection();
+             if (!editor || !selection || !selection.rangeCount) return null;
+
+             let element = selection.anchorNode;
+             if (element && element.nodeType !== Node.ELEMENT_NODE) element = element.parentElement;
+             const anchor = element && element.closest ? element.closest('a') : null;
+             return anchor && editor.contains(anchor) ? anchor : null;
+         },
+         openDescriptionLinkDialog() {
+             const editor = this.$refs.descriptionEditor;
+             const selection = window.getSelection();
+             if (!editor || !selection || !selection.rangeCount || !editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+                 alert('Selecione uma palavra ou frase para inserir o link');
+                 return;
+             }
+
+             this.saveDescriptionSelection();
+             const anchor = this.getSelectedDescriptionAnchor();
+             this.descriptionLinkUrl = anchor ? anchor.getAttribute('href') || '' : '';
+             this.descriptionLinkNewTab = anchor ? anchor.getAttribute('target') === '_blank' : false;
+             this.showDescriptionLinkDialog = true;
+             this.$nextTick(() => this.$refs.descriptionLinkUrlInput?.focus());
+         },
+         cancelDescriptionLinkDialog() {
+             this.showDescriptionLinkDialog = false;
+             this.descriptionLinkUrl = '';
+             this.descriptionLinkNewTab = false;
+         },
+         applyDescriptionLink() {
+             const editor = this.$refs.descriptionEditor;
+             const href = normalizeRichTextHref(this.descriptionLinkUrl);
+             if (!editor || !href) {
+                 alert('Informe uma URL válida. Use http://, https://, um caminho interno, mailto: ou tel:');
+                 return;
+             }
+
+             this.restoreDescriptionSelection();
+             const selection = window.getSelection();
+             const anchor = this.getSelectedDescriptionAnchor();
+             if (anchor) {
+                 anchor.setAttribute('href', href);
+             } else {
+                 if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+                     alert('Selecione uma palavra ou frase para inserir o link');
+                     return;
+                 }
+                 document.execCommand('createLink', false, href);
+             }
+
+             const appliedAnchor = this.getSelectedDescriptionAnchor();
+             if (appliedAnchor) {
+                 if (this.descriptionLinkNewTab) {
+                     appliedAnchor.setAttribute('target', '_blank');
+                     appliedAnchor.setAttribute('rel', 'noopener noreferrer');
+                 } else {
+                     appliedAnchor.removeAttribute('target');
+                     appliedAnchor.removeAttribute('rel');
+                 }
+             }
+
+             this.syncDescription();
+             this.cancelDescriptionLinkDialog();
+             editor.focus();
+         },
+         onFileChange(event) {
+             const files = Array.prototype.slice.call(event.target.files || []);
             event.target.value = '';
             if (files.length) this.uploadQueue(files);
         },
@@ -485,11 +644,18 @@ export default {
             if (from === null || from === index || from < 0 || from >= this.form.imagens.length) return;
             const moved = this.form.imagens.splice(from, 1)[0];
             this.form.imagens.splice(index, 0, moved);
-        },
-        async saveItem() {
-            const endpoint = this.editingId ? `${this.apiBase()}/portfolio/update.php` : `${this.apiBase()}/portfolio/insert.php`;
-            this.saving = true;
-            const startedAt = Date.now();
+         },
+         async saveItem() {
+             const endpoint = this.editingId ? `${this.apiBase()}/portfolio/update.php` : `${this.apiBase()}/portfolio/insert.php`;
+             this.syncDescription();
+             this.form.descricao = sanitizeRichTextHtml(this.form.descricao);
+             if (!hasRichTextContent(this.form.descricao)) {
+                 alert('Informe a descrição da obra');
+                 return;
+             }
+
+             this.saving = true;
+             const startedAt = Date.now();
             let saved = false;
             let failure = '';
             try {

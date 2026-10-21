@@ -3,6 +3,7 @@ session_start();
 require_once '../db_config.php';
 require_once '../slug.php';
 require_once '../galeria.php';
+require_once '../content_sanitizer.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -38,6 +39,13 @@ if (!isset($input['id'], $input['titulo'], $input['descricao'])) {
     exit;
 }
 
+$descricao = cg_sanitize_rich_content($input['descricao']);
+if (cg_rich_content_is_empty($descricao)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Description cannot be empty']);
+    exit;
+}
+
 try {
     $db = Database::getInstance();
     $slug = cg_unique_slug($db, 'portfolio', $input['slug'] ?? $input['titulo'], (int) $input['id']);
@@ -54,7 +62,7 @@ try {
     $stmt->execute([
         'titulo'    => $input['titulo'],
         'slug'      => $slug,
-        'descricao' => $input['descricao'],
+        'descricao' => $descricao,
         'cidade'    => $input['cidade'] ?? null,
         'ano'       => $input['ano'] ?? null,
         'categoria' => $input['categoria'] ?? null,

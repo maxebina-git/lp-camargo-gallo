@@ -2,6 +2,7 @@
 session_start();
 require_once '../db_config.php';
 require_once '../galeria.php';
+require_once '../content_sanitizer.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -17,6 +18,7 @@ try {
     $stmt = $db->query("SELECT id, titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem, imagens, video_youtube, ordem FROM portfolio ORDER BY ordem ASC, id ASC");
     $items = $stmt->fetchAll();
     foreach ($items as &$item) {
+        $item['descricao'] = cg_sanitize_rich_content($item['descricao']);
         $item['imagens'] = cg_imagens_list($item);
     }
     unset($item);

@@ -1,6 +1,7 @@
 <?php
 require_once '../db_config.php';
 require_once '../galeria.php';
+require_once '../content_sanitizer.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -25,6 +26,7 @@ try {
         exit;
     }
 
+    $item['descricao'] = cg_sanitize_rich_content($item['descricao']);
     $item['imagens'] = cg_imagens_list($item);
     echo json_encode($item);
 } catch (Exception $e) {

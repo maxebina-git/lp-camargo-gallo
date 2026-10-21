@@ -34,8 +34,8 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           </div>
         </div>
 
-        <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body mb-12">
-          <div id="portfolio-descricao" class="whitespace-pre-wrap text-lg"></div>
+         <div class="prose prose-lg max-w-none text-ink leading-relaxed font-body mb-12">
+           <div id="portfolio-descricao" class="text-lg"></div>
         </div>
 
         <div class="mb-12" id="portfolio-imagem-wrap">
@@ -247,7 +247,7 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
           obraTitulo = item.titulo;
           document.getElementById('portfolio-titulo').textContent = item.titulo;
           document.getElementById('portfolio-meta').textContent = meta(item);
-          document.getElementById('portfolio-descricao').textContent = item.descricao || '';
+           document.getElementById('portfolio-descricao').innerHTML = item.descricao || '';
 
           var videoId = youtubeId(item.video_youtube);
           if (videoId) {
@@ -286,6 +286,53 @@ import SiteFooter from '../components/layout/SiteFooter.astro';
   <SiteFooter surface="warm" />
 
   <style>
+    #portfolio-descricao {
+      overflow-x: auto;
+    }
+
+    :global(#portfolio-descricao p) {
+      margin: 0 0 1rem;
+    }
+
+    :global(#portfolio-descricao ul) {
+      list-style: disc;
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    :global(#portfolio-descricao li) {
+      margin: 0.35rem 0;
+    }
+
+    :global(#portfolio-descricao blockquote) {
+      margin: 1.25rem 0;
+      border-left: 4px solid var(--color-divider);
+      padding-left: 1rem;
+      color: var(--color-deep);
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    :global(#portfolio-descricao strong),
+    :global(#portfolio-descricao b) {
+      font-weight: 700;
+    }
+
+    :global(#portfolio-descricao u) {
+      text-decoration-line: underline;
+      text-underline-offset: 0.15em;
+    }
+
+    :global(#portfolio-descricao a) {
+      color: var(--color-deep);
+      text-decoration-line: underline;
+      text-underline-offset: 0.15em;
+    }
+
+    :global(#portfolio-descricao a:hover) {
+      opacity: 0.75;
+    }
+
     /* Faixa de miniaturas: scroll container horizontal, mesmo contrato do
        .servicos-slider da home. overflow-y: hidden e obrigatorio: com
        overflow-x:auto o eixo Y seria auto, e qualquer overflow vertical
