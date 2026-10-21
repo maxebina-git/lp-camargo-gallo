@@ -63,12 +63,12 @@ function cg_parse_imagens($input) {
 
 // Le uma linha vinda do banco e devolve a galeria como array de urls + legendas.
 // Fallback para as obras antigas: imagens NULL -> [imagem]; sem nada -> [].
-// Retorna ['urls' => [...], 'legendas' => [...]]
+// RETORNA SEMPRE UM ARRAY VALIDO - nunca causa exception.
 function cg_imagens_list($row) {
-    $raw = isset($row['imagens']) ? $row['imagens'] : null;
-
     $urls = [];
     $legendas = [];
+
+    $raw = isset($row['imagens']) ? $row['imagens'] : null;
 
     if (is_array($raw)) {
         // Novo formato: [{url: '...', legenda: '...'}, ...]
@@ -97,12 +97,14 @@ function cg_imagens_list($row) {
     }
 
     // Fallback para coluna imagem (obras antigas que ainda usam a coluna imagem)
+    // SEMPRE garante pelo menos um resultado se houver dado
     $capa = isset($row['imagem']) ? $row['imagem'] : null;
     if (is_string($capa) && $capa !== '' && empty($urls)) {
         $urls = [$capa];
         $legendas = [''];
     }
 
+    // RETORNO SEMPRE ARRAY - mesmo que vazio
     return ['urls' => array_values($urls), 'legendas' => array_values($legendas)];
 }
 
