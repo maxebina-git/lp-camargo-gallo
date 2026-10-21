@@ -24,9 +24,14 @@ jobs:
       - name: Build Astro
         run: npm run build
         env:
-          BASE_PATH: /staging/
-          SITE_URL: https://camargogallo.com.br/staging
-          PUBLIC_API_BASE: /staging/api
+          # O subdominio staging.camargogallo.com.br tem como raiz o
+          # diretorio do deploy (/public_html/staging/), entao o build usa
+          # base '/' (assets em /_astro, links /portfolio) e a API fica em
+          # /api. Com base '/staging/' os assets caem em /staging/_astro
+          # (404) e os links ficam com o prefixo duplicado.
+          BASE_PATH: /
+          SITE_URL: http://staging.camargogallo.com.br
+          PUBLIC_API_BASE: /api
 
       - name: Deploy Admin Panel to Staging
         run: node deploy-ftp.cjs admin staging/admin

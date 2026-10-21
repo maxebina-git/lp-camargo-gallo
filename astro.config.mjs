@@ -7,10 +7,17 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  // O front de producao vive em /lp-camargo-gallo/ e o de staging em
-  // /staging/. Sem o base correto, os assets buildados (_astro/*) e os links
-  // internos apontam para a raiz do dominio e caem na versao errada.
-  // SITE_URL/BASE_PATH sao definidos em cada workflow de deploy.
+  // O base e o site variam por ambiente, e cada workflow de deploy define:
+  //
+  //   producao: base '/lp-camargo-gallo/'  -> o front fica em
+  //             camargogallo.com.br/lp-camargo-gallo/
+  //   staging : base '/'                   -> o subdominio
+  //             staging.camargogallo.com.br tem como raiz o diretorio do
+  //             deploy (/public_html/staging/), entao os assets ficam em
+  //             /_astro/* e nao em /staging/_astro/*
+  //
+  // base errado quebra o front inteiro: os assets nao carregam (page sem
+  // CSS) e os links internos ganham um prefixo duplicado.
   site: process.env.SITE_URL || 'https://camargogallo.com.br',
   base: process.env.BASE_PATH || '/',
   integrations: [vue(), sitemap()],
