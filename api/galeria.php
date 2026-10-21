@@ -5,11 +5,14 @@
 //   Novo:   [{"url": "/assets/uploads/a.webp", "legenda": "Fachada"}, ...]
 // A primeira posicao e a capa (coluna `imagem`).
 //
-// IMPORTANTE: este arquivo roda em PHP 7.4 no servidor. Use apenas
-// sintaxe basica (sem `??`, sem `isset(expr)`, sem cast de array para
-// string). A versao anterior usava esses recursos e quebrava o include
-// com erro 500, derrubando list.php, portfolio_item.php, insert.php,
-// update.php, a contagem do dashboard e a listagem do admin.
+// IMPORTANTE: este arquivo roda em PHP 7.4 no servidor.
+// NUNCA escreva isset($algo ?? ''): o isset() nao aceita o operador ?? como
+// argumento no PHP 7 e isso vira erro de parse. Como o erro de parse quebra
+// o arquivo inteiro, o require_once falhava com HTTP 500 em list.php,
+// portfolio_item.php, insert.php e update.php — o que zerava a contagem do
+// dashboard, a listagem do admin e a pagina da obra no front.
+// Use o operador ?? normalmente (fora do isset) ou o padrao abaixo:
+//   $v = (isset($a['x']) && $a['x'] !== '') ? $a['x'] : '';
 
 // Define a qtd maxima de imagens.
 define('CG_MAX_IMAGENS', 22);
