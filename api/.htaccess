@@ -13,7 +13,8 @@
 # arquivos remotos (deleteRemote esta desligado), entao ainda existem no
 # servidor. Sao negados aqui ate que sejam apagados via FTP.
 # register.php permitia criar uma conta 'editor' sem autenticacao.
-<FilesMatch "^(register|debug|debug2|test_db)\.php$">
+# _diag/_selftest/_t1.._t3 sao probes temporarios de deploy e sintaxe.
+<FilesMatch "^(register|debug|debug2|test_db|_diag|_selftest|_t1|_t2|_t3)\.php$">
     Require all denied
 </FilesMatch>
 
