@@ -101,11 +101,11 @@ export default {
                     <h2 class="text-2xl font-bold mb-6">{{ editingId ? 'Editar Obra' : 'Nova Obra' }}</h2>
                         <form @submit.prevent="saveItem" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div class="md:col-span-3">
+            <div class="md:col-span-4">
                 <label class="block text-sm font-medium text-gray-700">Título</label>
                 <input v-model="form.titulo" @input="onTituloInput" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
             </div>
-            <div class="md:col-span-1">
+            <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Endereço (slug)</label>
                 <input v-model="form.slug" @input="slugManual = true" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="gerado-a-partir-do-titulo">
                 <p class="mt-1 text-xs text-gray-500">
@@ -118,7 +118,7 @@ export default {
                 <label class="block text-sm font-medium text-gray-700">Categoria</label>
                 <input v-model="form.categoria" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
             </div>
-            <div class="md:col-span-6">
+            <div class="md:col-span-4">
                 <label class="block text-sm font-medium text-gray-700">Resumo</label>
                 <input v-model="form.resumo" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="Resumo curto da obra">
                 <p class="mt-1 text-xs text-gray-500">Pequena síntese exibida no destaque da obra.</p>
