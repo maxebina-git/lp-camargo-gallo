@@ -463,12 +463,16 @@ import { siteBase } from '../../lib/paths'
       filter: blur(3px);
     }
 
-    /* A descricao e o bloco mais alto dos tres; fechar em 50% da altura evita
-        que a faixa de texto saia cortada no meio de uma linha. */
+    /* A descricao e o bloco mais alto dos tres; no estado fechado mostra
+        apenas uma linha do resumo, sem desfoco, para o leitor entender de
+        qual obra se trata sem abrir o acordeao. */
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] {
-      filter: blur(4px);
-      max-height: 50%;
+      filter: none;
+      opacity: 1;
+      max-height: 1.2rem;
       overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     /* none nao interpola: sem um valor no estado ativo o max-height pulava de
