@@ -457,10 +457,21 @@ import { siteBase } from '../../lib/paths'
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-titulo] {
       opacity: 0.25;
+      /* min-width:0 deixa a coluna 1fr encolher abaixo do conteudo; sem isso
+         o nowrap do h3 esticaria a coluna do grid e o ellipsis nunca
+         dispararia. */
+      min-width: 0;
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-titulo] h3 {
       filter: blur(6px);
+      /* Uma linha com reticencias no card fechado; o blur permanece. O
+         max-width:100% prende o h3 a largura da coluna (em flex-col com
+         items-end ele nasce com a largura do conteudo e transbordaria). */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-foto] img {
