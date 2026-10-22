@@ -254,7 +254,7 @@ import { siteBase } from '../../lib/paths'
           '</div>' +
         '</div>' +
           '<div class="flex flex-col gap-3" data-portfolio-texto>' +
-          '<p class="font-body text-base leading-normal font-normal text-text-secondary" style="display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden">' + esc(obra.resumo || obra.descricao) + '</p>' +
+          '<p class="font-body text-base leading-normal font-normal text-text-secondary">' + esc(obra.resumo || obra.descricao) + '</p>' +
           '<a href="' + href + '" class="cta-portfolio self-start mt-2 inline-flex items-center justify-center gap-2 select-none rounded-md font-medium transition duration-500 ease-out cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 bg-primary-500 text-on-primary hover:bg-primary-700 active:bg-primary-700 h-8 px-3 text-sm">Ver detalhes <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>' +
         '</div>' +
       '</li>'
@@ -463,16 +463,32 @@ import { siteBase } from '../../lib/paths'
       filter: blur(3px);
     }
 
-    /* A descricao e o bloco mais alto dos tres; no estado fechado mostra
-        apenas uma linha do resumo, sem desfoco, para o leitor entender de
-        qual obra se trata sem abrir o acordeao. */
+    /* Descricao com no maximo 3 linhas no desktop (o mobile tem a mesma
+       regra la embaixo). O p nao pode ter estilo inline de line-clamp: ele
+       venceria estas regras e impediria a troca 3 -> 1 no card fechado. */
+    [data-portfolio] [data-portfolio-texto] p:first-child {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+    }
+
+    /* No estado fechado o resumo aparece em 1 linha, sem desfoco, para o
+       leitor identificar a obra; o botao sai de verdade (display:none, nao
+       so opacity) porque no flex-col ele ainda ocuparia espaco e empurraria
+       o p para fora da altura visivel do item. */
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] {
       filter: none;
       opacity: 1;
-      max-height: 1.2rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      gap: 0;
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] p:first-child {
+      -webkit-line-clamp: 1;
+    }
+
+    [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida .cta-portfolio {
+      display: none;
     }
 
     /* none nao interpola: sem um valor no estado ativo o max-height pulava de
