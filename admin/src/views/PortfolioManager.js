@@ -114,6 +114,11 @@ export default {
                                 </p>
                                 <p v-if="form.slug" class="mt-1 text-xs text-gray-400 break-all">{{ siteBase() }}/portfolio/{{ form.slug }}/</p>
                             </div>
+                            <div class="col-span-2 md:col-span-4">
+                                <label class="block text-sm font-medium text-gray-700">Resumo</label>
+                                <input v-model="form.resumo" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="Resumo curto da obra">
+                                <p class="mt-1 text-xs text-gray-500">Pequena síntese exibida no destaque da obra.</p>
+                            </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">Categoria</label>
                                 <input v-model="form.categoria" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
@@ -308,7 +313,7 @@ export default {
              showDescriptionLinkDialog: false,
              descriptionLinkUrl: '',
              descriptionLinkNewTab: false,
-             form: { titulo: '', slug: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' },
+              form: { titulo: '', slug: '', resumo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' },
              // O slug acompanha o titulo enquanto o editor nao mexer nele.
              slugManual: false,
          };
@@ -393,7 +398,7 @@ export default {
         },
          openModal() {
              this.editingId = null;
-             this.form = { titulo: '', slug: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
+             this.form = { titulo: '', slug: '', resumo: '', descricao: '', imagem: '', imagens: [], video_youtube: '', categoria: '', data_obra: '', status: 'concluido', cidade: '', ano: '' };
             // Item novo: o slug nasce do titulo.
             this.slugManual = false;
             this.uploading = false;

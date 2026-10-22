@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `portfolio` (
   `titulo` varchar(255) NOT NULL,
   `slug` varchar(191) DEFAULT NULL,
   `descricao` text NOT NULL,
+  `resumo` text NOT NULL DEFAULT '',
   `cidade` varchar(120) DEFAULT NULL,
   `ano` varchar(4) DEFAULT NULL,
   `imagem` varchar(255) DEFAULT NULL,

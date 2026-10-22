@@ -22,6 +22,8 @@ import { siteBase, apiBase } from '../lib/paths';
           </div>
         </div>
 
+        <h2 id="portfolio-resumo" class="text-xl text-deep/80 italic mb-8 border-l-4 border-[var(--color-divider)] pl-6"></h2>
+
         <div id="portfolio-video-wrap" class="mb-12" hidden>
           <div class="video-embed">
             <iframe
@@ -326,6 +328,7 @@ import { siteBase, apiBase } from '../lib/paths';
           obraTitulo = item.titulo;
           document.getElementById('portfolio-titulo').textContent = item.titulo;
           document.getElementById('portfolio-meta').textContent = meta(item);
+          document.getElementById('portfolio-resumo').textContent = item.resumo || '';
            document.getElementById('portfolio-descricao').innerHTML = item.descricao || '';
 
           var videoId = youtubeId(item.video_youtube);

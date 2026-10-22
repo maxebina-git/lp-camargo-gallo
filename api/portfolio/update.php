@@ -64,13 +64,15 @@ try {
     if (strlen($video) > 500) {
         $video = substr($video, 0, 500);
     }
+    $resumo = (isset($input['resumo']) && is_string($input['resumo'])) ? trim($input['resumo']) : '';
 
-    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem, imagens = :imagens, video_youtube = :video_youtube WHERE id = :id");
+    $stmt = $db->prepare("UPDATE portfolio SET titulo = :titulo, slug = :slug, descricao = :descricao, resumo = :resumo, cidade = :cidade, ano = :ano, categoria = :categoria, data_obra = :data_obra, status = :status, imagem = :imagem, imagens = :imagens, video_youtube = :video_youtube WHERE id = :id");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
         'slug'      => $slug,
         'descricao' => $descricao,
+        'resumo'    => $resumo,
         'cidade'    => $input['cidade'] ?? null,
         'ano'       => $input['ano'] ?? null,
         'categoria' => $input['categoria'] ?? null,

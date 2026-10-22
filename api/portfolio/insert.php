@@ -59,13 +59,15 @@ try {
     if (strlen($video) > 500) {
         $video = substr($video, 0, 500);
     }
+    $resumo = (isset($input['resumo']) && is_string($input['resumo'])) ? trim($input['resumo']) : '';
 
-    $stmt = $db->prepare("INSERT INTO portfolio (titulo, slug, descricao, cidade, ano, categoria, data_obra, status, imagem, imagens, video_youtube, ordem, user_id) VALUES (:titulo, :slug, :descricao, :cidade, :ano, :categoria, :data_obra, :status, :imagem, :imagens, :video_youtube, :ordem, :user_id)");
+    $stmt = $db->prepare("INSERT INTO portfolio (titulo, slug, descricao, resumo, cidade, ano, categoria, data_obra, status, imagem, imagens, video_youtube, ordem, user_id) VALUES (:titulo, :slug, :descricao, :resumo, :cidade, :ano, :categoria, :data_obra, :status, :imagem, :imagens, :video_youtube, :ordem, :user_id)");
     
     $stmt->execute([
         'titulo'    => $input['titulo'],
         'slug'      => $slug,
         'descricao' => $descricao,
+        'resumo'    => $resumo,
         'cidade'    => $input['cidade'] ?? null,
         'ano'       => $input['ano'] ?? null,
         'categoria' => $input['categoria'] ?? null,
