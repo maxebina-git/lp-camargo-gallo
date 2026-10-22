@@ -96,52 +96,52 @@ export default {
 
             <!-- Modal -->
             <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div class="relative bg-white rounded-lg max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+                <div class="relative bg-white rounded-lg max-w-7xl w-full p-8 max-h-[90vh] overflow-y-auto">
                     <button type="button" @click="closeModal" :disabled="saving" aria-label="Fechar" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none cursor-pointer disabled:opacity-50">&times;</button>
                     <h2 class="text-2xl font-bold mb-6">{{ editingId ? 'Editar Obra' : 'Nova Obra' }}</h2>
                         <form @submit.prevent="saveItem" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Título</label>
-                                <input v-model="form.titulo" @input="onTituloInput" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Endereço (slug)</label>
-                                <input v-model="form.slug" @input="slugManual = true" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="gerado-a-partir-do-titulo">
-                                <p class="mt-1 text-xs text-gray-500">
-                                    <span v-if="slugManual">Editado à mão: o título não muda mais este endereço.</span>
-                                    <span v-else>Gerado a partir do título. Editar aqui é permitido.</span>
-                                </p>
-                                <p v-if="form.slug" class="mt-1 text-xs text-gray-400 break-all">{{ siteBase() }}/portfolio/{{ form.slug }}/</p>
-                            </div>
-                            <div class="col-span-2 md:col-span-4">
-                                <label class="block text-sm font-medium text-gray-700">Resumo</label>
-                                <input v-model="form.resumo" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="Resumo curto da obra">
-                                <p class="mt-1 text-xs text-gray-500">Pequena síntese exibida no destaque da obra.</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Categoria</label>
-                                <input v-model="form.categoria" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Data da Obra</label>
-                                <input v-model="form.data_obra" type="date" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Cidade</label>
-                                <input v-model="form.cidade" type="text" placeholder="Ex.: São Paulo, SP" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Ano</label>
-                                <input v-model="form.ano" type="text" inputmode="numeric" maxlength="4" placeholder="Ex.: 2024" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Status</label>
-                                <select v-model="form.status" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                                    <option value="concluido">Concluído</option>
-                                    <option value="em_andamento">Em Andamento</option>
-                                </select>
-                            </div>
+            <div class="md:col-span-3">
+                <label class="block text-sm font-medium text-gray-700">Título</label>
+                <input v-model="form.titulo" @input="onTituloInput" type="text" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+            </div>
+            <div class="md:col-span-1">
+                <label class="block text-sm font-medium text-gray-700">Endereço (slug)</label>
+                <input v-model="form.slug" @input="slugManual = true" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="gerado-a-partir-do-titulo">
+                <p class="mt-1 text-xs text-gray-500">
+                    <span v-if="slugManual">Editado à mão: o título não muda mais este endereço.</span>
+                    <span v-else>Gerado a partir do título. Editar aqui é permitido.</span>
+                </p>
+                <p v-if="form.slug" class="mt-1 text-xs text-gray-400 break-all">{{ siteBase() }}/portfolio/{{ form.slug }}/</p>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Categoria</label>
+                <input v-model="form.categoria" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+            </div>
+            <div class="md:col-span-6">
+                <label class="block text-sm font-medium text-gray-700">Resumo</label>
+                <input v-model="form.resumo" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="Resumo curto da obra">
+                <p class="mt-1 text-xs text-gray-500">Pequena síntese exibida no destaque da obra.</p>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Data da Obra</label>
+                <input v-model="form.data_obra" type="date" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Cidade</label>
+                <input v-model="form.cidade" type="text" placeholder="Ex.: São Paulo, SP" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+            </div>
+            <div class="md:col-span-1">
+                <label class="block text-sm font-medium text-gray-700">Ano</label>
+                <input v-model="form.ano" type="text" inputmode="numeric" maxlength="4" placeholder="Ex.: 2024" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+            </div>
+            <div class="md:col-span-1">
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select v-model="form.status" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                    <option value="concluido">Concluído</option>
+                    <option value="em_andamento">Em Andamento</option>
+                </select>
+            </div>
                             <div class="md:col-span-6">
                                 <label class="block text-sm font-medium text-gray-700">Vídeo do YouTube</label>
                                 <input v-model="form.video_youtube" type="text" placeholder="https://youtu.be/YxwwEqbQLzw?si=5uiP6DduWKKs7Z5g" class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
