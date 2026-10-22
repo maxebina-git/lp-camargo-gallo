@@ -373,11 +373,15 @@ import { siteBase } from '../../lib/paths'
       filter 400ms ease-out;
   }
 
-  /* A altura da descricao fecha junto com o item, nao de um golpe. */
+  /* A altura da descricao fecha junto com o item, nao de um golpe. O gap
+     tambem anima: no estado fechado ele e 0 (o botao some com display:none)
+     e, ao abrir, o espaco entre resumo e botao cresce junto com o blur que
+     some e o max-height que aumenta. */
   [data-portfolio-item] [data-portfolio-texto] {
     transition:
       opacity 400ms ease-out,
       filter 400ms ease-out,
+      gap 600ms cubic-bezier(0.22, 1, 0.36, 1),
       max-height 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -473,14 +477,16 @@ import { siteBase } from '../../lib/paths'
       overflow: hidden;
     }
 
-    /* No estado fechado o resumo aparece em 1 linha, sem desfoco, para o
-       leitor identificar a obra; o botao sai de verdade (display:none, nao
-       so opacity) porque no flex-col ele ainda ocuparia espaco e empurraria
-       o p para fora da altura visivel do item. */
+    /* No estado fechado o resumo aparece em 1 linha, desfocado (mesmo
+       tratamento recuado do titulo e da foto); o botao sai de verdade
+       (display:none, nao so opacity) porque no flex-col ele ainda ocuparia
+       espaco e empurraria o p para fora da altura visivel do item. */
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] {
-      filter: none;
-      opacity: 1;
+      filter: blur(4px);
+      opacity: 0.5;
       gap: 0;
+      max-height: 1.2rem;
+      overflow: hidden;
     }
 
     [data-portfolio].is-acordeao [data-portfolio-item].is-recolhida [data-portfolio-texto] p:first-child {
